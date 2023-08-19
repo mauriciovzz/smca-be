@@ -1,0 +1,11 @@
+POST http://localhost:3001/api/node_locations
+Content-Type: application/json
+
+{
+     "node_type": "INDOOR",
+     "node_id": "001",
+     "lat": "8.2945",
+     "long": "-62.7199",
+     "start_date": "2023-08-19",
+     "start_time": "14:33:23"
+}

@@ -1,0 +1,6 @@
+POST http://localhost:3001/api/nodes
+Content-Type: application/json
+
+{
+    "node_type": "INDOOR"
+}

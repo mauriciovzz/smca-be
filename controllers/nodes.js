@@ -1,23 +1,25 @@
 const nodesRouter = require('express').Router()
-
-let node_locations = [
-	{
-	  type: "OUTDOOR",
-	  id: "001",
-	  lat: 8.2973,
-	  long: -62.7114
-	},
-	{
-	  type: "INDOOR",
-	  id: "001",
-	  lat: 8.2945,
-	  long: -62.7199
-	}
-  ]
+const pool = require('../database/db')
   
 /* Get all nodes */
-nodesRouter.get('/', (req, res) => {
-	res.json(node_locations)
+nodesRouter.get('/', async (req, res, next) => {
+	const response = await pool.query('SELECT * FROM node')
+
+	res.send(response.rows)
+});
+
+/* Add node*/ 
+nodesRouter.post('/', async (req, res, next) => {
+	const { node_type } = req.body;
+
+	if (node_type === "INDOOR") {
+		const response = await pool.query('INSERT INTO node (node_type, node_id) VALUES ($1, nextval(\'indoor_nodes\')) RETURNING *', [node_type]);
+		res.send(response.rows);
+	} else if (node_type === "OUTDOOR") {		
+		const response = await pool.query('INSERT INTO node (node_type, node_id) VALUES ($1, nextval(\'outdoor_nodes\')) RETURNING *', [node_type]);
+		res.send(response.rows)
+	} 
 });
 
 module.exports = nodesRouter
+
