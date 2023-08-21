@@ -13,10 +13,14 @@ nodesRouter.post('/', async (req, res, next) => {
 	const { node_type } = req.body;
 
 	if (node_type === "INDOOR") {
-		const response = await pool.query('INSERT INTO node (node_type, node_id) VALUES ($1, nextval(\'indoor_nodes\')) RETURNING *', [node_type]);
+		const response = await pool.query(`	INSERT INTO node (node_type, node_id) 
+											VALUES ($1, nextval(\'indoor_nodes\'))
+											RETURNING *`, [node_type]);
 		res.send(response.rows);
 	} else if (node_type === "OUTDOOR") {		
-		const response = await pool.query('INSERT INTO node (node_type, node_id) VALUES ($1, nextval(\'outdoor_nodes\')) RETURNING *', [node_type]);
+		const response = await pool.query(`	INSERT INTO node (node_type, node_id) 
+											VALUES ($1, nextval(\'outdoor_nodes\'))
+											RETURNING *`, [node_type]);
 		res.send(response.rows)
 	} 
 });
