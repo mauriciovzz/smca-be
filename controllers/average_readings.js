@@ -7,7 +7,7 @@ let values = [
     21, 22, 23, 24
   ]
 
-/* Get all values of a node */
+/* Get all average readings of a node variable on a specific day */
 averageReadingsRouter.get('/:node_type/:node_id/:variable_id/:date', async (req, res, next) => {
   const { node_type, node_id, variable_id, date } = req.body
   
@@ -19,7 +19,6 @@ averageReadingsRouter.get('/:node_type/:node_id/:variable_id/:date', async (req,
                                         AND date        = $4 `, [node_type, node_id, variable_id, date]);
 
   res.send(response.rows);
-  //res.json(values)
 });
 
 module.exports = averageReadingsRouter

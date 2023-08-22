@@ -2,6 +2,7 @@ const config    = require('./utils/config')
 const express   = require('express')
 const app       = express()
 const cors      = require('cors')
+const schedule  = require('node-schedule');
 
 const nodesRouter               = require('./controllers/nodes')
 const locationsRouter           = require('./controllers/locations')
@@ -14,6 +15,8 @@ const averageReadingsRouter     = require('./controllers/average_readings')
 const readingsRouter            = require('./controllers/readings')
 
 const middleware = require('./utils/middleware')
+const UAR = require('./database/update_averageReadings')
+
 
 const mqtt = require('mqtt')
 const client = mqtt.connect()
@@ -27,6 +30,10 @@ var options = {
 client.subscribe('#')
 client.on('message', (topic, message) => {
     console.log('Received message:', topic, message.toString());
+});
+
+const job = schedule.scheduleJob('* * * * *',  function(fireDate){
+    UAR.updateAverageReadings(fireDate);
 });
 
 app.use(cors())
