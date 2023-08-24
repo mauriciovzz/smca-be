@@ -15,11 +15,9 @@ const averageReadingsRouter     = require('./controllers/average_readings')
 const readingsRouter            = require('./controllers/readings')
 
 const middleware = require('./utils/middleware')
-const UAR = require('./database/update_averageReadings')
-
+const updater = require('./database/recurringQuerys')
 
 const mqtt = require('mqtt')
-const client = mqtt.connect()
 var options = {
     host: config.MQTT_HOST,
     port: config.MQTT_PORT,
@@ -27,13 +25,17 @@ var options = {
     username: config.MQTT_USERNAME,
     password: config.MQTT_PASSWORD
 }
-client.subscribe('#')
+
+var client = mqtt.connect(options);
+client.subscribe('/reading')
 client.on('message', (topic, message) => {
-    console.log('Received message:', topic, message.toString());
+    //console.log('Received message:', topic, message.toString());
+    updater.insertReading(JSON.parse(message));
 });
 
-const job = schedule.scheduleJob('* * * * *',  function(fireDate){
-    UAR.updateAverageReadings(fireDate);
+//00 * * * *
+const job = schedule.scheduleJob('0/5 * * * *',  function(fireDate){
+    updater.createAverageReadings(fireDate);
 });
 
 app.use(cors())
