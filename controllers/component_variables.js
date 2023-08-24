@@ -1,15 +1,15 @@
-const componentVariablesRouter = require('express').Router()
-const pool = require('../database/db')
+const componentVariablesRouter = require('express').Router();
+const pool = require('../database/db');
 
-/* Add component variable*/ 
-componentVariablesRouter.post('/', async (req, res, next) => {
+/* Add component variable*/
+componentVariablesRouter.post('/', async (req, res) => {
   const { component_id, variable_id } = req.body;
   const sql = ` INSERT INTO component_variable 
                 VALUES ($1, $2)
-                RETURNING *`
+                RETURNING *`;
 
-  const response = await pool.query(sql, [component_id, variable_id]);  
+  const response = await pool.query(sql, [component_id, variable_id]);
   res.send(response.rows);
 });
 
-module.exports = componentVariablesRouter
+module.exports = componentVariablesRouter;

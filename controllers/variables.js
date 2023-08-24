@@ -1,9 +1,8 @@
-const variablesRouter = require('express').Router()
-const pool = require('../database/db')
-
+const variablesRouter = require('express').Router();
+const pool = require('../database/db');
 
 /* Get all variables of a node */
-variablesRouter.get('/:node_type/:node_id', async (req, res, next) => {
+variablesRouter.get('/:node_type/:node_id', async (req, res) => {
   const { node_type, node_id } = req.params;
   const sql = ` SELECT 
                   *
@@ -19,14 +18,14 @@ variablesRouter.get('/:node_type/:node_id', async (req, res, next) => {
                   component_variable.component_id = node_component.component_id
                 WHERE 	
                   node_component.node_type    = $1
-                  AND node_component.node_id  = $2`
+                  AND node_component.node_id  = $2`;
 
-  const response = await pool.query(sql, [node_type, node_id])
+  const response = await pool.query(sql, [node_type, node_id]);
   res.send(response.rows);
 });
 
-/* Add variable*/ 
-variablesRouter.post('/', async (req, res, next) => {
+/* Add variable*/
+variablesRouter.post('/', async (req, res) => {
   const { variable_type, variable_name, variable_unit } = req.body;
   const sql = `	INSERT INTO variable (
                   variable_type, 
@@ -34,10 +33,10 @@ variablesRouter.post('/', async (req, res, next) => {
                   variable_unit
                 ) 
                 VALUES ($1, $2, $3)
-                RETURNING *`
+                RETURNING *`;
 
   const response = await pool.query(sql , [variable_type, variable_name, variable_unit]);
   res.send(response.rows);
 });
 
-module.exports = variablesRouter
+module.exports = variablesRouter;

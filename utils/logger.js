@@ -1,12 +1,12 @@
 const info = (...params) => {
-  console.log(...params)
-}
-  
+  console.log(...params);
+};
+
 const error = (...params) => {
-  console.error(...params)
-  console.log(`---`)
-}
+  console.error(...params);
+  console.log('---');
+};
 
 module.exports = {
   info, error
-}
+};
