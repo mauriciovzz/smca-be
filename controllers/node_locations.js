@@ -23,8 +23,13 @@ nodeLocationsRouter.get('/', async (req, res) => {
 });
 
 /* Get a node location */
-nodeLocationsRouter.get('/:lat/:long/:node_type/:node_id', async (req, res) => {
-  const { lat, long, node_type, node_id } = req.params;
+nodeLocationsRouter.get('/:lat/:long/:nodeType/:nodeId', async (req, res) => {
+  const {
+    lat,
+    long,
+    nodeType,
+    nodeId,
+  } = req.params;
   const sql = ` SELECT 
                   node_type, 
                   node_id, 
@@ -43,14 +48,21 @@ nodeLocationsRouter.get('/:lat/:long/:node_type/:node_id', async (req, res) => {
                   AND node_location.node_type = $3
                   AND node_location.node_id   = $4`;
 
-  const response = await pool.query(sql , [lat, long, node_type, node_id]);
+  const response = await pool.query(sql, [lat, long, nodeType, nodeId]);
   res.send(response.rows);
 });
 
 /* Add node location */
 nodeLocationsRouter.post('/', async (req, res) => {
-  const { node_type, node_id, lat, long, start_date, start_time } = req.body;
-  const is_current_location = true;
+  const {
+    nodeType,
+    nodeId,
+    lat,
+    long,
+    startDate,
+    startTime,
+  } = req.body;
+  const isCurrentLocation = true;
   const sql = ` INSERT INTO node_location (
                   node_type, 
                   node_id, 
@@ -63,7 +75,11 @@ nodeLocationsRouter.post('/', async (req, res) => {
                 VALUES ($1, $2, $3, $4, $5, $6, $7)
                 RETURNING *`;
 
-  const response = pool.query(sql, [node_type, node_id, lat, long, start_date, start_time, is_current_location]);
+  const response = pool.query(
+    sql,
+    [nodeType, nodeId, lat, long, startDate, startTime, isCurrentLocation],
+  );
+
   res.send(response.rows);
 });
 

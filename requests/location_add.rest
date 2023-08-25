@@ -4,6 +4,6 @@ Content-Type: application/json
   {
     "lat": 8.2945,
     "long": -62.7199,
-    "location_name": "ARIVANA",
-    "location_address": "Altavista Norte Puerto Ordaz, Edo Bolivar"
+    "locationName": "ARIVANA",
+    "locationAddress": "Altavista Norte Puerto Ordaz, Edo Bolivar"
   }

@@ -1,12 +1,12 @@
+const { Pool } = require('pg');
 const config = require('../utils/config');
 const logger = require('../utils/logger');
-const { Pool } = require('pg');
 
 const pool = new Pool({
   connectionString: config.DB_URL,
   ssl: {
-    rejectUnauthorized: false
-  }
+    rejectUnauthorized: false,
+  },
 });
 
 const query = async (text, params) => {
@@ -21,5 +21,5 @@ const query = async (text, params) => {
 };
 
 module.exports = {
-  query
+  query,
 };

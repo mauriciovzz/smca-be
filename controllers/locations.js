@@ -24,18 +24,26 @@ locationsRouter.get('/:lat/:long', async (req, res) => {
                   location.lat      = $1
                   AND location.long = $2`;
 
-  const response = await pool.query(sql, [lat,long]);
+  const response = await pool.query(sql, [lat, long]);
   res.send(response.rows);
 });
 
-/* Add location*/
+/* Add location */
 locationsRouter.post('/', async (req, res) => {
-  const { lat, long, location_name, location_address } = req.body;
+  const {
+    lat,
+    long,
+    locationName,
+    locationAddress,
+  } = req.body;
+
+  console.log(lat, long, locationName, locationAddress);
+
   const sql = ` INSERT INTO location 
                 VALUES ($1, $2, $3, $4)
                 RETURNING *`;
 
-  const response = pool.query(sql, [lat, long, location_name, location_address]);
+  const response = pool.query(sql, [lat, long, locationName, locationAddress]);
   res.send(response.rows);
 });
 

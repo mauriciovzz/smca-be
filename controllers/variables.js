@@ -3,7 +3,7 @@ const pool = require('../database/db');
 
 /* Get all variables of a node */
 variablesRouter.get('/:node_type/:node_id', async (req, res) => {
-  const { node_type, node_id } = req.params;
+  const { nodeType, nodeId } = req.params;
   const sql = ` SELECT 
                   *
                 FROM 
@@ -16,18 +16,18 @@ variablesRouter.get('/:node_type/:node_id', async (req, res) => {
                   node_component
                 ON 
                   component_variable.component_id = node_component.component_id
-                WHERE 	
+                WHERE
                   node_component.node_type    = $1
                   AND node_component.node_id  = $2`;
 
-  const response = await pool.query(sql, [node_type, node_id]);
+  const response = await pool.query(sql, [nodeType, nodeId]);
   res.send(response.rows);
 });
 
-/* Add variable*/
+/* Add variable */
 variablesRouter.post('/', async (req, res) => {
-  const { variable_type, variable_name, variable_unit } = req.body;
-  const sql = `	INSERT INTO variable (
+  const { variableType, variableName, variableUnit } = req.body;
+  const sql = ` INSERT INTO variable (
                   variable_type, 
                   variable_name, 
                   variable_unit
@@ -35,7 +35,7 @@ variablesRouter.post('/', async (req, res) => {
                 VALUES ($1, $2, $3)
                 RETURNING *`;
 
-  const response = await pool.query(sql , [variable_type, variable_name, variable_unit]);
+  const response = await pool.query(sql, [variableType, variableName, variableUnit]);
   res.send(response.rows);
 });
 
