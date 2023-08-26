@@ -1,31 +1,18 @@
 const pool = require('./db');
 
-const getVariableId = async (variableName) => {
-  const sql = ` SELECT 
-                  variable_id 
-                FROM 
-                  variable
-                WHERE variable_name = $1`;
-
-  const response = await pool.query(sql, [variableName]);
-  return response.rows[0].variable_id;
-};
-
 const insertReading = async (reading) => {
-  // console.log(reading);
-  // console.log('---');
-  const {
-    nodeType,
-    nodeId,
-    readingDate,
-    readingTime,
-    variableName,
-    readingValue,
-  } = reading;
+  try {
+    const {
+      nodeType,
+      nodeId,
+      readingDate,
+      readingTime,
+      variableId,
+      readingValue,
+    } = reading;
 
-  const variableId = getVariableId(variableName).then(async (vId) => {
     const sql = ` INSERT INTO
-                  reading (
+                    reading (
                     node_type, 
                     node_id, 
                     variable_id,  
@@ -36,11 +23,37 @@ const insertReading = async (reading) => {
                   VALUES ($1, $2, $3, $4, $5, $6)
                   RETURNING *`;
 
-    const response = await pool.query(
+    await pool.query(
       sql,
-      [nodeType, nodeId, vId, readingDate, readingTime, readingValue],
-    );
-  });
+      [nodeType, nodeId, variableId, readingDate, readingTime, readingValue],
+    )
+      .then((response) => {
+        console.log(response.rows);
+      });
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+const insertAverageReading = async (averageReading, fullDate, endHour) => {
+  const {
+    nodetype,
+    nodeid,
+    variableid,
+    averagevalue,
+  } = averageReading;
+
+  const sql = ` INSERT INTO average_reading
+                VALUES ($1, $2, $3, $4, $5, $6)
+                RETURNING *`;
+
+  await pool.query(
+    sql,
+    [nodetype, nodeid, variableid, fullDate, `${endHour}:00:00`, averagevalue],
+  )
+    .then((response) => {
+      console.log(response.rows);
+    });
 };
 
 const calculateAverageReadings = async (date) => {
@@ -50,9 +63,9 @@ const calculateAverageReadings = async (date) => {
 
   const sql = ` SELECT 
                   node_type AS nodeType, 
-                  node_id AS nodeId, 
-                  variable_id AS variableId,                   
-                  AVG(reading_value) AS averageValue
+                  node_id AS nodeId,
+                  variable_id AS variableId,             
+                  ROUND(AVG(reading.reading_value)::numeric,2) AS averageValue
                 FROM 
                   reading
                 WHERE 
@@ -64,29 +77,10 @@ const calculateAverageReadings = async (date) => {
                   node_id,
                   variable_id`;
 
-  const response = await pool.query(sql, [fullDate, `${startTime}:00:00`, `${startTime}:59:59`]);
-
-  // response.rows.forEach((averageReading) => {
-  //   console.log(insertAverageReading(averageReading, fullDate, `${endTime}:00:00`))
-  // })
-};
-
-const insertAverageReading = async (averageReading, fullDate, endHour) => {
-  const {
-    nodeType,
-    nodeId,
-    variableId,
-    averageValue,
-  } = averageReading;
-  const sql = ` INSERT INTO average_reading 
-                VALUES ($1, $2, $3, $4, $5, $6)
-                RETURNING *`;
-
-  const response = await pool.query(
-    sql,
-    [nodeType, nodeId, variableId, fullDate, endHour, averageValue],
-  );
-  return response.rows;
+  await pool.query(sql, [fullDate, `${startTime}:00:00`, `${startTime}:59:59`])
+    .then((response) => {
+      response.rows.forEach((row) => insertAverageReading(row, fullDate, endTime));
+    });
 };
 
 module.exports = {

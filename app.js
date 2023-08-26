@@ -27,13 +27,12 @@ const options = {
 };
 const client = mqtt.connect(options);
 
-client.subscribe('/reading');
+client.subscribe('/node_readings');
 client.on('message', (topic, message) => {
   readingsHelper.insertReading(JSON.parse(message));
 });
 
-// 00 * * * *
-const job = schedule.scheduleJob('0/5 * * * *', (fireDate) => {
+schedule.scheduleJob('00 * * * *', (fireDate) => {
   readingsHelper.calculateAverageReadings(fireDate);
 });
 

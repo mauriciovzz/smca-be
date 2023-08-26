@@ -3,7 +3,7 @@ const config = require('../utils/config');
 const logger = require('../utils/logger');
 
 const pool = new Pool({
-  connectionString: config.DB_URL,
+  connectionString: config.DB_LOCAL_URL,
   ssl: {
     rejectUnauthorized: false,
   },
