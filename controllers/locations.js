@@ -37,8 +37,6 @@ locationsRouter.post('/', async (req, res) => {
     locationAddress,
   } = req.body;
 
-  console.log(lat, long, locationName, locationAddress);
-
   const sql = ` INSERT INTO location 
                 VALUES ($1, $2, $3, $4)
                 RETURNING *`;

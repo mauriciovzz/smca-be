@@ -1,3 +1,4 @@
+const logger = require('../utils/logger');
 const pool = require('./db');
 
 const insertReading = async (reading) => {
@@ -28,10 +29,10 @@ const insertReading = async (reading) => {
       [nodeType, nodeId, variableId, readingDate, readingTime, readingValue],
     )
       .then((response) => {
-        console.log(response.rows);
+        logger.info(response.rows);
       });
   } catch (error) {
-    console.error(error);
+    logger.error(error);
   }
 };
 
@@ -52,7 +53,7 @@ const insertAverageReading = async (averageReading, fullDate, endHour) => {
     [nodetype, nodeid, variableid, fullDate, `${endHour}:00:00`, averagevalue],
   )
     .then((response) => {
-      console.log(response.rows);
+      logger.info(response.rows);
     });
 };
 

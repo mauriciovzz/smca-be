@@ -2,7 +2,7 @@ const variablesRouter = require('express').Router();
 const pool = require('../database/db');
 
 /* Get all variables of a node */
-variablesRouter.get('/:node_type/:node_id', async (req, res) => {
+variablesRouter.get('/:nodeType/:nodeId', async (req, res) => {
   const { nodeType, nodeId } = req.params;
   const sql = ` SELECT 
                   *
