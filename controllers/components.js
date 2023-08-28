@@ -1,5 +1,5 @@
 const componentsRouter = require('express').Router();
-const pool = require('../database/db');
+const pool = require('../connections/database');
 
 /* Add component */
 componentsRouter.post('/', async (req, res) => {

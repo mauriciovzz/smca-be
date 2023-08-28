@@ -1,5 +1,5 @@
 const locationsRouter = require('express').Router();
-const pool = require('../database/db');
+const pool = require('../connections/database');
 
 /* Get all locations */
 locationsRouter.get('/', async (req, res) => {

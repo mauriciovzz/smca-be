@@ -1,8 +1,27 @@
 const app = require('./app');
+const client = require('./connections/mqtt');
+const pool = require('./connections/database');
 const config = require('./utils/config');
 const logger = require('./utils/logger');
 
-app.listen(config.PORT, () => {
+const server = app.listen(config.PORT, () => {
   logger.info(`Server running on port ${config.PORT}`);
   logger.info('---');
 });
+
+function handle(signal) {
+  logger.info(`\nReceived ${signal}`);
+  server.close(() => {
+    logger.info('Http server closed.');
+    client.end().then(() => {
+      logger.info('Mqtt connection closed.');
+      pool.end().then(() => {
+        logger.info('PostgreSQL connection closed.');
+        process.exit(0);
+      });
+    });
+  });
+}
+
+process.on('SIGINT', handle);
+process.on('SIGTERM', handle);

@@ -1,5 +1,5 @@
 const averageReadingsRouter = require('express').Router();
-const pool = require('../database/db');
+const pool = require('../connections/database');
 
 /* Get all average readings of a node variable on a given day */
 averageReadingsRouter.get('/:nodeType/:nodeId/:variableId/:date', async (req, res) => {

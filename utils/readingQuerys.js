@@ -1,5 +1,5 @@
-const logger = require('../utils/logger');
-const pool = require('./db');
+const logger = require('./logger');
+const pool = require('../connections/database');
 
 const insertReading = async (reading) => {
   try {

@@ -3,7 +3,7 @@ const config = require('../utils/config');
 const logger = require('../utils/logger');
 
 const pool = new Pool({
-  connectionString: config.DB_LOCAL_URL,
+  connectionString: config.DB_URL,
   ssl: {
     rejectUnauthorized: false,
   },
@@ -20,6 +20,9 @@ const query = async (text, params) => {
   return res;
 };
 
+const end = async () => pool.end();
+
 module.exports = {
   query,
+  end,
 };

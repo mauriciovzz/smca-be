@@ -3,9 +3,7 @@ const express = require('express');
 const app = express();
 const cors = require('cors');
 const schedule = require('node-schedule');
-const mqtt = require('mqtt');
 
-const config = require('./utils/config');
 const nodesRouter = require('./controllers/nodes');
 const locationsRouter = require('./controllers/locations');
 const nodeLocationsRouter = require('./controllers/node_locations');
@@ -16,21 +14,7 @@ const nodeComponentsRouter = require('./controllers/node_components');
 const averageReadingsRouter = require('./controllers/average_readings');
 
 const middleware = require('./utils/middleware');
-const readingsHelper = require('./database/readingQuerys');
-
-const options = {
-  host: config.MQTT_HOST,
-  port: config.MQTT_PORT,
-  protocol: config.MQTT_PROTOCOL,
-  username: config.MQTT_USERNAME,
-  password: config.MQTT_PASSWORD,
-};
-const client = mqtt.connect(options);
-
-client.subscribe('/node_readings');
-client.on('message', (topic, message) => {
-  readingsHelper.insertReading(JSON.parse(message));
-});
+const readingsHelper = require('./utils/readingQuerys');
 
 schedule.scheduleJob('00 * * * *', (fireDate) => {
   readingsHelper.calculateAverageReadings(fireDate);

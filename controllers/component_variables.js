@@ -1,5 +1,5 @@
 const componentVariablesRouter = require('express').Router();
-const pool = require('../database/db');
+const pool = require('../connections/database');
 
 /* Add component variable */
 componentVariablesRouter.post('/', async (req, res) => {

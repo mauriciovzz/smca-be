@@ -1,5 +1,5 @@
 const variablesRouter = require('express').Router();
-const pool = require('../database/db');
+const pool = require('../connections/database');
 
 /* Get all variables of a node */
 variablesRouter.get('/:nodeType/:nodeId', async (req, res) => {
