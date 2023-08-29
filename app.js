@@ -2,7 +2,6 @@ const express = require('express');
 
 const app = express();
 const cors = require('cors');
-const schedule = require('node-schedule');
 
 const nodesRouter = require('./controllers/nodes');
 const locationsRouter = require('./controllers/locations');
@@ -14,11 +13,6 @@ const nodeComponentsRouter = require('./controllers/node_components');
 const averageReadingsRouter = require('./controllers/average_readings');
 
 const middleware = require('./utils/middleware');
-const readingsHelper = require('./utils/readingQuerys');
-
-schedule.scheduleJob('00 * * * *', (fireDate) => {
-  readingsHelper.calculateAverageReadings(fireDate);
-});
 
 app.use(cors());
 app.use(express.static('dist'));

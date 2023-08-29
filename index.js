@@ -1,6 +1,7 @@
 const app = require('./app');
 const client = require('./connections/mqtt');
 const pool = require('./connections/database');
+const schedule = require('./connections/schedule');
 const config = require('./utils/config');
 const logger = require('./utils/logger');
 
@@ -15,9 +16,12 @@ function handle(signal) {
     logger.info('Http server closed.');
     client.end().then(() => {
       logger.info('Mqtt connection closed.');
-      pool.end().then(() => {
-        logger.info('PostgreSQL connection closed.');
-        process.exit(0);
+      schedule.end().then(() => {
+        logger.info('Schedule shutdown.');
+        pool.end().then(() => {
+          logger.info('PostgreSQL connection closed.');
+          process.exit(0);
+        });
       });
     });
   });
