@@ -2,6 +2,6 @@ POST http://localhost:3001/api/component_variables
 Content-Type: application/json
 
 {
-    "component_id": 1, 
-    "variable_id": 7
+    "componentId": 1, 
+    "variableId": 8
 }

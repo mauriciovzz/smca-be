@@ -7,8 +7,8 @@ const nodesRouter = require('./routes/nodes');
 const locationsRouter = require('./routes/locations');
 const nodeLocationsRouter = require('./routes/node_locations');
 const componentsRouter = require('./routes/components');
-const variablesRouter = require('./controllers/variables');
-const componentVariablesRouter = require('./controllers/component_variables');
+const variablesRouter = require('./routes/variables');
+const componentVariablesRouter = require('./routes/component_variables');
 const nodeComponentsRouter = require('./controllers/node_components');
 const averageReadingsRouter = require('./controllers/average_readings');
 

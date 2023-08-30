@@ -27,7 +27,31 @@ const create = async (req, res) => {
   res.send(response.rows);
 };
 
+/* Get all variables of a node */
+const getVariables = async (req, res) => {
+  const { nodeType, nodeId } = req.params;
+  const sql = ` SELECT 
+                  *
+                FROM 
+                  variable 
+                JOIN 
+                  component_variable
+                ON 
+                  variable.variable_id = component_variable.variable_id
+                JOIN 
+                  node_component
+                ON 
+                  component_variable.component_id = node_component.component_id
+                WHERE
+                  node_component.node_type    = $1
+                  AND node_component.node_id  = $2`;
+
+  const response = await pool.query(sql, [nodeType, nodeId]);
+  res.send(response.rows);
+};
+
 module.exports = {
   getAll,
   create,
+  getVariables,
 };

@@ -2,8 +2,9 @@ POST http://localhost:3001/api/variables
 Content-Type: application/json
 
 {
-    "variable_type": "ENVIROMENTAL", 
-    "variable_name": "Indice VOC"
+    "variableType": "ENVIROMNTAL", 
+    "variableName": "indice VOC",
+    "variableUnit": "de 500"
 }
 
 //'ENVIROMENTAL', 'METEOROLOGICAL'
