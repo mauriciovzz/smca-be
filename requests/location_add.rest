@@ -1,9 +1,0 @@
-POST http://localhost:3001/api/locations
-Content-Type: application/json
-
-  {
-    "lat": 8.2945,
-    "long": -62.7199,
-    "locationName": "ARIVANA",
-    "locationAddress": "Altavista Norte Puerto Ordaz, Edo Bolivar"
-  }

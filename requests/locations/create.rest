@@ -1,0 +1,9 @@
+POST http://localhost:3001/api/locations
+Content-Type: application/json
+
+{
+  "lat": 8.2918, 
+  "long": -62.7382,
+  "locationName": "Parque Residencial Habitania",
+  "locationAddress": "Parque Habitania, Ciudad Guayana 8050, Bolívar"
+}

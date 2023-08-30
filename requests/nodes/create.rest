@@ -2,5 +2,5 @@ POST http://localhost:3001/api/nodes
 Content-Type: application/json
 
 {
-    "nodeType": "INDOOR"
+  "nodeType": "INDOOR"
 }

@@ -3,8 +3,8 @@ const express = require('express');
 const app = express();
 const cors = require('cors');
 
-const nodesRouter = require('./controllers/nodes');
-const locationsRouter = require('./controllers/locations');
+const nodesRouter = require('./routes/nodes');
+const locationsRouter = require('./routes/locations');
 const nodeLocationsRouter = require('./controllers/node_locations');
 const variablesRouter = require('./controllers/variables');
 const componentsRouter = require('./controllers/components');

@@ -1,8 +1,7 @@
-const locationsRouter = require('express').Router();
 const pool = require('../connections/database');
 
 /* Get all locations */
-locationsRouter.get('/', async (req, res) => {
+const getAll = async (req, res) => {
   const sql = ` SELECT 
                   * 
                 FROM
@@ -10,10 +9,10 @@ locationsRouter.get('/', async (req, res) => {
 
   const result = await pool.query(sql);
   res.send(result.rows);
-});
+};
 
 /* Get a location */
-locationsRouter.get('/:lat/:long', async (req, res) => {
+const getOne = async (req, res) => {
   const { lat, long } = req.params;
 
   const sql = ` SELECT 
@@ -26,10 +25,10 @@ locationsRouter.get('/:lat/:long', async (req, res) => {
 
   const response = await pool.query(sql, [lat, long]);
   res.send(response.rows);
-});
+};
 
 /* Add location */
-locationsRouter.post('/', async (req, res) => {
+const create = async (req, res) => {
   const {
     lat,
     long,
@@ -37,12 +36,16 @@ locationsRouter.post('/', async (req, res) => {
     locationAddress,
   } = req.body;
 
-  const sql = ` INSERT INTO location 
+  const sql = ` INSERT INTO location
                 VALUES ($1, $2, $3, $4)
                 RETURNING *`;
 
-  const response = pool.query(sql, [lat, long, locationName, locationAddress]);
+  const response = await pool.query(sql, [lat, long, locationName, locationAddress]);
   res.send(response.rows);
-});
+};
 
-module.exports = locationsRouter;
+module.exports = {
+  getAll,
+  getOne,
+  create,
+};
