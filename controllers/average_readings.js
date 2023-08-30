@@ -1,8 +1,7 @@
-const averageReadingsRouter = require('express').Router();
 const pool = require('../connections/database');
 
 /* Get all average readings of a node variable on a given day */
-averageReadingsRouter.get('/:nodeType/:nodeId/:variableId/:date', async (req, res) => {
+const getAll = async (req, res) => {
   const {
     nodeType,
     nodeId,
@@ -23,6 +22,52 @@ averageReadingsRouter.get('/:nodeType/:nodeId/:variableId/:date', async (req, re
 
   const response = await pool.query(sql, [nodeType, nodeId, variableId, date]);
   res.send(response.rows);
-});
+};
 
-module.exports = averageReadingsRouter;
+/* Add an average reading */
+const create = async (averageReading, fullDate, endHour) => {
+  const {
+    nodetype,
+    nodeid,
+    variableid,
+    averagevalue,
+  } = averageReading;
+
+  const sql = ` INSERT INTO average_reading
+                VALUES ($1, $2, $3, $4, $5, $6)`;
+
+  await pool.query(
+    sql,
+    [nodetype, nodeid, variableid, fullDate, `${endHour}:00:00`, averagevalue],
+  );
+};
+
+const calculateAverageReadings = async (date) => {
+  const fullDate = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+  const endTime = date.getHours();
+  const startTime = (endTime === 0) ? 23 : endTime - 1;
+
+  const sql = ` SELECT 
+                  node_type AS nodeType, 
+                  node_id AS nodeId,
+                  variable_id AS variableId,             
+                  ROUND(AVG(reading.reading_value)::numeric,2) AS averageValue
+                FROM 
+                  reading
+                WHERE 
+                  reading_date      = $1
+                  AND reading_time >= $2 
+                  AND reading_time <= $3
+                GROUP BY 
+                  node_type,
+                  node_id,
+                  variable_id`;
+
+  const response = await pool.query(sql, [fullDate, `${startTime}:00:00`, `${startTime}:59:59`]);
+  response.rows.forEach((row) => create(row, fullDate, endTime));
+};
+
+module.exports = {
+  getAll,
+  calculateAverageReadings,
+};

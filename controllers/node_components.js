@@ -1,8 +1,7 @@
-const nodeComponentsRouter = require('express').Router();
 const pool = require('../connections/database');
 
-/* Add component variable */
-nodeComponentsRouter.post('/', async (req, res) => {
+/* Add node component */
+const create = async (req, res) => {
   const { nodeType, nodeId, componentId } = req.body;
   const sql = ` INSERT INTO node_component 
                 VALUES ($1, $2, $3)
@@ -10,6 +9,8 @@ nodeComponentsRouter.post('/', async (req, res) => {
 
   const response = await pool.query(sql, [nodeType, nodeId, componentId]);
   res.send(response.rows);
-});
+};
 
-module.exports = nodeComponentsRouter;
+module.exports = {
+  create,
+};

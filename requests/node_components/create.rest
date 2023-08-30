@@ -2,7 +2,7 @@ POST http://localhost:3001/api/node_components
 Content-Type: application/json
 
 {
-     "node_type": "OUTDOOR",
-     "node_id": 1,
-     "component_id": 1
+     "nodeType": "INDOOR",
+     "nodeId": 1,
+     "componentId": 4
 }

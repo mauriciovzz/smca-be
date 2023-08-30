@@ -7,10 +7,10 @@ const nodesRouter = require('./routes/nodes');
 const locationsRouter = require('./routes/locations');
 const nodeLocationsRouter = require('./routes/node_locations');
 const componentsRouter = require('./routes/components');
+const nodeComponentsRouter = require('./routes/node_components');
 const variablesRouter = require('./routes/variables');
 const componentVariablesRouter = require('./routes/component_variables');
-const nodeComponentsRouter = require('./controllers/node_components');
-const averageReadingsRouter = require('./controllers/average_readings');
+const averageReadingsRouter = require('./routes/average_readings');
 
 const middleware = require('./utils/middleware');
 

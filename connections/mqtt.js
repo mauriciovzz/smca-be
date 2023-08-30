@@ -1,6 +1,6 @@
 const mqtt = require('mqtt');
 const config = require('../utils/config');
-const readingsHelper = require('../utils/readingQuerys');
+const readingsController = require('../controllers/readings');
 
 const options = {
   host: config.MQTT_HOST,
@@ -15,7 +15,7 @@ const client = mqtt.connect(options);
 client.subscribe('/node_readings');
 
 client.on('message', (topic, message) => {
-  readingsHelper.insertReading(JSON.parse(message));
+  readingsController.create(JSON.parse(message));
 });
 
 const end = async () => client.end();

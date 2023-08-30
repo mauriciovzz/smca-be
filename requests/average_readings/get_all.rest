@@ -1,0 +1,1 @@
+GET http://localhost:3001/api/average_readings/OUTDOOR/1/1/2023-08-27
