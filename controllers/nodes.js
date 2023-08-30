@@ -16,27 +16,16 @@ nodesRouter.get('/', async (req, res) => {
 nodesRouter.post('/', async (req, res) => {
   const { nodeType } = req.body;
 
-  if (nodeType === 'INDOOR') {
-    const sql = ` INSERT INTO node (
-                    node_type, 
-                    node_id
-                  ) 
-                  VALUES ($1, nextval('indoor_nodes'))
-                  RETURNING *`;
+  const type = (nodeType === 'OUTDOOR') ? 'outdoor' : 'indoor';
+  const sql = ` INSERT INTO node (
+                  node_type, 
+                  node_id
+                ) 
+                VALUES ($1, nextval('${type}_nodes'))
+                RETURNING *`;
 
-    const response = await pool.query(sql, [nodeType]);
-    res.send(response.rows);
-  } else if (nodeType === 'OUTDOOR') {
-    const sql = ` INSERT INTO node (
-                    node_type, 
-                    node_id
-                  ) 
-                  VALUES ($1, nextval('indoor_nodes'))
-                  RETURNING *`;
-
-    const response = await pool.query(sql, [nodeType]);
-    res.send(response.rows);
-  }
+  const response = await pool.query(sql, [nodeType]);
+  res.send(response.rows);
 });
 
 module.exports = nodesRouter;
