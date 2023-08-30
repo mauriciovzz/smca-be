@@ -5,9 +5,9 @@ const cors = require('cors');
 
 const nodesRouter = require('./routes/nodes');
 const locationsRouter = require('./routes/locations');
-const nodeLocationsRouter = require('./controllers/node_locations');
+const nodeLocationsRouter = require('./routes/node_locations');
+const componentsRouter = require('./routes/components');
 const variablesRouter = require('./controllers/variables');
-const componentsRouter = require('./controllers/components');
 const componentVariablesRouter = require('./controllers/component_variables');
 const nodeComponentsRouter = require('./controllers/node_components');
 const averageReadingsRouter = require('./controllers/average_readings');
