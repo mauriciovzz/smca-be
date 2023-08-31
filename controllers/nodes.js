@@ -12,8 +12,8 @@ const getAll = async (req, res) => {
 };
 
 /* Add a node */
-const create = async (req, res) => {
-  const { nodeType } = req.body;
+const create = async (reqBody) => {
+  const { nodeType } = reqBody;
 
   const type = (nodeType === 'OUTDOOR') ? 'outdoor' : 'indoor';
   const sql = ` INSERT INTO node (
@@ -24,7 +24,7 @@ const create = async (req, res) => {
                 RETURNING *`;
 
   const response = await pool.query(sql, [nodeType]);
-  res.send(response.rows);
+  return response.rows;
 };
 
 /* Get all variables of a node */
@@ -50,8 +50,17 @@ const getVariables = async (req, res) => {
   res.send(response.rows);
 };
 
+/* Get all variables of a node */
+const deleteAll = async () => {
+  const sql = ` DELETE FROM 
+                  node`;
+
+  await pool.query(sql);
+};
+
 module.exports = {
   getAll,
   create,
   getVariables,
+  deleteAll,
 };
