@@ -43,7 +43,9 @@ const create = async (averageReading, fullDate, endHour) => {
   );
 };
 
-const calculateAverageReadings = async (date) => {
+const calculateAverageReadings = async (serverDate) => {
+  logger.info(serverDate);
+  const date = new Date(serverDate.toLocaleString('en-US', { timeZone: 'America/Caracas' }));
   logger.info(date);
   const fullDate = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
   const endTime = date.getHours();
