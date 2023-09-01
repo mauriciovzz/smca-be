@@ -1,23 +1,16 @@
 const supertest = require('supertest');
 const pool = require('../connections/database');
+const helper = require('./test_helper');
 const app = require('../app');
-const nodesController = require('../controllers/nodes');
 
 const api = supertest(app);
 
-const initialNodes = [
-  {
-    nodeType: 'INDOOR',
-  },
-  {
-    nodeType: 'OUTDOOR',
-  },
-];
-
 beforeEach(async () => {
-  await nodesController.deleteAll();
-  await nodesController.create(initialNodes[0]);
-  await nodesController.create(initialNodes[1]);
+  await helper.deleteAllNodes();
+
+  for (let node of helper.initialNodes) {
+    await helper.createNode(node);
+  }
 });
 
 test('nodes are returned as json', async () => {
@@ -27,16 +20,46 @@ test('nodes are returned as json', async () => {
     .expect('Content-Type', /application\/json/);
 });
 
-test('all notes are returned', async () => {
+test('all nodes are returned', async () => {
   const response = await api.get('/api/nodes');
-  expect(response.body).toHaveLength(initialNodes.length);
+  expect(response.body).toHaveLength(helper.initialNodes.length);
 });
 
 test('a specific node is within the returned nodes', async () => {
   const response = await api.get('/api/nodes');
 
-  const contents = response.body.map((r) => r.node_type);
-  expect(contents).toContain('INDOOR');
+  expect(response.body).toContainEqual({ node_id: 2, node_type: 'OUTDOOR' });
+});
+
+test('a valid node can be added', async () => {
+  const newNode = {
+    nodeType: 'INDOOR',
+  };
+
+  await api
+    .post('/api/nodes')
+    .send(newNode)
+    .expect(201)
+    .expect('Content-Type', /application\/json/);
+
+  const notesAtEnd = await helper.getAllNodes();
+
+  expect(notesAtEnd).toHaveLength(helper.initialNodes.length + 1);
+  expect(notesAtEnd).toContainEqual({ node_id: 2, node_type: 'INDOOR' });
+});
+
+test('node without type is not added', async () => {
+  const newNode = {
+  };
+
+  await api
+    .post('/api/nodes')
+    .send(newNode)
+    .expect(400);
+
+  const notesAtEnd = await helper.getAllNodes();
+
+  expect(notesAtEnd).toHaveLength(helper.initialNodes.length);
 });
 
 afterAll(async () => {

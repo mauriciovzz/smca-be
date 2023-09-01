@@ -5,10 +5,7 @@ const nodesController = require('../controllers/nodes');
 nodesRouter.get('/', nodesController.getAll);
 
 /* Add a node */
-nodesRouter.post('/', async (req, res) => {
-  const response = await nodesController.create(req.body);
-  res.send(response);
-});
+nodesRouter.post('/', nodesController.create);
 
 /* Get all variables of a node */
 nodesRouter.get('/:nodeType/:nodeId/variables', nodesController.getVariables);

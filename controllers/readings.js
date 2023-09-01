@@ -1,9 +1,9 @@
 const pool = require('../connections/database');
-const { requestLogger } = require('../utils/middleware');
+const logger = require('../utils/logger');
 
 const create = async (reading) => {
   try {
-       const {
+    const {
       nodeType,
       nodeId,
       readingDate,
@@ -27,10 +27,10 @@ const create = async (reading) => {
       sql,
       [nodeType, nodeId, variableId, readingDate, readingTime, readingValue],
     );
-
     return response.rows;
   } catch (error) {
-    console.log(error);
+    logger.error(error);
+    return null;
   }
 };
 

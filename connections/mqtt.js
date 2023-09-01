@@ -14,8 +14,8 @@ const client = mqtt.connect(options);
 
 client.subscribe('/node_readings');
 
-client.on('message', (topic, message) => {
-  readingsController.create(JSON.parse(message));
+client.on('message', async (topic, message) => {
+  await readingsController.create(JSON.parse(message));
 });
 
 const end = async () => client.end();
