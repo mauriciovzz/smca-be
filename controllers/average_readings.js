@@ -1,3 +1,4 @@
+const logger = require('../utils/logger');
 const pool = require('../connections/database');
 
 /* Get all average readings of a node variable on a given day */
@@ -43,6 +44,7 @@ const create = async (averageReading, fullDate, endHour) => {
 };
 
 const calculateAverageReadings = async (date) => {
+  logger.info(date);
   const fullDate = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
   const endTime = date.getHours();
   const startTime = (endTime === 0) ? 23 : endTime - 1;
