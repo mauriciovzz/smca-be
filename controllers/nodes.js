@@ -1,3 +1,4 @@
+const jwt = require('jsonwebtoken');
 const pool = require('../connections/database');
 
 /* Get all nodes */
@@ -14,6 +15,12 @@ const getAll = async (req, res) => {
 /* Add a node */
 const create = async (req, res) => {
   const { nodeType } = req.body;
+
+  const decodedToken = jwt.verify(req.token, process.env.SECRET);
+  if (!decodedToken.id) {
+    return res.status(401).json({ error: 'token invalid' });
+  }
+
   const type = (nodeType === 'OUTDOOR') ? 'outdoor' : 'indoor';
   const sql = ` INSERT INTO node (
                   node_type, 
@@ -23,7 +30,7 @@ const create = async (req, res) => {
                 RETURNING *`;
 
   const response = await pool.query(sql, [nodeType]);
-  res.status(201).send(response.rows);
+  return res.status(201).send(response.rows);
 };
 
 /* Get all variables of a node */

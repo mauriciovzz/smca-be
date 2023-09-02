@@ -1,0 +1,6 @@
+POST http://localhost:3001/api/user_roles
+Content-Type: application/json
+
+{
+  "roleName": "admin"
+}
