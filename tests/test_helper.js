@@ -17,18 +17,31 @@ const createNode = async (node) => {
   await pool.query(`INSERT INTO node (node_type,node_id) VALUES ($1, nextval('${type}_nodes'))`, [node.node_type]);
 };
 
-const getAllNodes = async () => {
-  const response = await pool.query('SELECT * FROM node');
+const createUserRole = async (userRole) => {
+  await pool.query('INSERT INTO user_role (role_name) VALUES ($1)', [userRole.roleName]);
+};
+
+const createUserAccount = async (userAccount) => {
+  const {
+    firstName, lastName, email, password, roleId,
+  } = userAccount;
+  await pool.query('INSERT INTO user_account (first_name, last_name, email, password, role_id) VALUES ($1, $2, $3, $4, $5)', [firstName, lastName, email, password, roleId]);
+};
+
+const getRows = async (table) => {
+  const response = await pool.query(`SELECT * FROM ${table}`);
   return response.rows;
 };
 
-const deleteAllNodes = async () => {
-  await pool.query('DELETE FROM node');
+const deleteRows = async (table) => {
+  await pool.query(`TRUNCATE TABLE ${table} RESTART IDENTITY CASCADE`);
 };
 
 module.exports = {
   initialNodes,
   createNode,
-  getAllNodes,
-  deleteAllNodes,
+  createUserRole,
+  createUserAccount,
+  getRows,
+  deleteRows,
 };

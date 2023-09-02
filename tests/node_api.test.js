@@ -6,7 +6,7 @@ const app = require('../app');
 const api = supertest(app);
 
 beforeEach(async () => {
-  await helper.deleteAllNodes();
+  await helper.deleteRows('node');
 
   for (let node of helper.initialNodes) {
     await helper.createNode(node);
@@ -42,7 +42,7 @@ test('a valid node can be added', async () => {
     .expect(201)
     .expect('Content-Type', /application\/json/);
 
-  const notesAtEnd = await helper.getAllNodes();
+  const notesAtEnd = await helper.getRows('node');
 
   expect(notesAtEnd).toHaveLength(helper.initialNodes.length + 1);
   expect(notesAtEnd).toContainEqual({ node_id: 2, node_type: 'INDOOR' });
@@ -57,7 +57,7 @@ test('node without type is not added', async () => {
     .send(newNode)
     .expect(400);
 
-  const notesAtEnd = await helper.getAllNodes();
+  const notesAtEnd = await helper.getRows('node');
 
   expect(notesAtEnd).toHaveLength(helper.initialNodes.length);
 });

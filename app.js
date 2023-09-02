@@ -12,6 +12,8 @@ const nodeComponentsRouter = require('./routes/node_components');
 const variablesRouter = require('./routes/variables');
 const componentVariablesRouter = require('./routes/component_variables');
 const averageReadingsRouter = require('./routes/average_readings');
+const userRolesRouter = require('./routes/user_roles');
+const userAccountsRouter = require('./routes/user_accounts');
 
 const middleware = require('./utils/middleware');
 
@@ -28,6 +30,8 @@ app.use('/api/components', componentsRouter);
 app.use('/api/component_variables', componentVariablesRouter);
 app.use('/api/node_components', nodeComponentsRouter);
 app.use('/api/average_readings', averageReadingsRouter);
+app.use('/api/user_roles', userRolesRouter);
+app.use('/api/user_accounts', userAccountsRouter);
 
 app.use(middleware.unknownEndpoint);
 app.use(middleware.errorHandler);
