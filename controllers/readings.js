@@ -22,14 +22,12 @@ const create = async (reading) => {
                   )
                   VALUES ($1, $2, $3, $4, $5, $6)
                   RETURNING *`;
+    const values = [nodeType, nodeId, variableId, readingDate, readingTime, readingValue];
 
-    const response = await pool.query(
-      sql,
-      [nodeType, nodeId, variableId, readingDate, readingTime, readingValue],
-    );
+    const response = await pool.query(sql, values);
     return response.rows;
   } catch (error) {
-    logger.error(error);
+    logger.error(`readings: ${error.message}`);
     return null;
   }
 };

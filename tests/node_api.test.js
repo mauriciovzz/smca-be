@@ -8,7 +8,9 @@ const api = supertest(app);
 beforeEach(async () => {
   await helper.deleteRows('node');
 
-  for (let node of helper.initialNodes) {
+  // eslint-disable-next-line no-restricted-syntax
+  for (const node of helper.initialNodes) {
+    // eslint-disable-next-line no-await-in-loop
     await helper.createNode(node);
   }
 });
