@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const pool = require('../connections/database');
+const config = require('../utils/config');
 
 /* Add an user */
 const create = async (req, res) => {
@@ -54,7 +55,7 @@ const login = async (req, res) => {
   // token expires in one hour
   const token = jwt.sign(
     userForToken,
-    process.env.SECRET,
+    config.SECRET,
     { expiresIn: 60 * 60 },
   );
 

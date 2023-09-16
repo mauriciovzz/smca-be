@@ -20,6 +20,7 @@ const {
   MQTT_PROTOCOL,
   MQTT_USERNAME,
   MQTT_PASSWORD,
+  SECRET,
 } = process.env;
 
 const DB_URL = selectDB();
@@ -32,4 +33,5 @@ module.exports = {
   MQTT_PROTOCOL,
   MQTT_USERNAME,
   MQTT_PASSWORD,
+  SECRET,
 };
