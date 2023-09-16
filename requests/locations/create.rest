@@ -1,9 +1,10 @@
 POST http://localhost:3001/api/locations
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Im1hdXZlbGF6cXVlekBnbWFpbC5jb20iLCJpZCI6MSwiaWF0IjoxNjkzNjc4MzcxLCJleHAiOjE2OTM2ODE5NzF9.CAlcUBKNoLhVDIr_7BGDDyIrRQSCIdNK9gxPyhbM_2E
 
 {
-  "lat": 8.298, 
-  "long": -6.382,
+  "lat": 8.29b8, 
+  "long": -6.3h82,
   "locationName": "Parque Residencial Habitania",
   "locationAddress": "Parque Habitania, Ciudad Guayana 8050, Bolívar"
 }

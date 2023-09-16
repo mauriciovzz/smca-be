@@ -1,3 +1,4 @@
+const jwt = require('jsonwebtoken');
 const pool = require('../connections/database');
 
 /* Get all locations */
@@ -36,12 +37,17 @@ const create = async (req, res) => {
     locationAddress,
   } = req.body;
 
+  const decodedToken = jwt.verify(req.token, process.env.SECRET);
+  if (!decodedToken.id) {
+    return res.status(401).json({ error: 'token invalid' });
+  }
+
   const sql = ` INSERT INTO location
                 VALUES ($1, $2, $3, $4)
                 RETURNING *`;
 
   const response = await pool.query(sql, [lat, long, locationName, locationAddress]);
-  res.send(response.rows);
+  return res.send(response.rows);
 };
 
 module.exports = {
