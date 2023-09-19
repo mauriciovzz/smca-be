@@ -16,11 +16,6 @@ const getAll = async (req, res) => {
 const create = async (req, res) => {
   const { nodeType } = req.body;
 
-  const decodedToken = jwt.verify(req.token, process.env.SECRET);
-  if (!decodedToken.id) {
-    return res.status(401).json({ error: 'token invalid' });
-  }
-
   const type = (nodeType === 'OUTDOOR') ? 'outdoor' : 'indoor';
   const sql = ` INSERT INTO node (
                   node_type, 
