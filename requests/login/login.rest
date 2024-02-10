@@ -1,7 +1,8 @@
-POST http://localhost:3001/api/login
+POST http://localhost:3001/api/accounts/login
 Content-Type: application/json
 
 {
-  "email": "mauvelazquez@gmail.com",
-  "password": "123456789"
+  "email": "mauriciovr12@gmail.com",
+  "password": "92328515mM",
+  "rememberMe": false
 }

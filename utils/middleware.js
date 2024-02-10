@@ -1,6 +1,5 @@
-const jwt = require('jsonwebtoken');
-const config = require('./config');
 const logger = require('./logger');
+const tokenHelper = require('./tokenHelper');
 
 const requestLogger = (request, response, next) => {
   logger.info('Method:', request.method);
@@ -13,15 +12,25 @@ const requestLogger = (request, response, next) => {
 const tokenExtractor = (request, response, next) => {
   const authorization = request.get('authorization');
   if (authorization && authorization.startsWith('Bearer ')) {
-    request.token = authorization.replace('Bearer ', '');
+    request.authToken = authorization.replace('Bearer ', '');
   }
 
   next();
 };
 
-const tokenVerification = (request, response, next) => {
-  jwt.verify(request.token, config.SECRET);
-  next();
+// eslint-disable-next-line consistent-return
+const AccessTokenVerification = (request, response, next) => {
+  try {
+    request.accountId = tokenHelper.getAccountId(request.authToken);
+    next();
+  } catch (error) {
+    if (error.name === 'JsonWebTokenError') {
+      return response.status(403).json({ error: 'Acceso denegado.' });
+    }
+    if (error.name === 'TokenExpiredError') {
+      return response.status(403).json({ error: error.name });
+    }
+  }
 };
 
 const unknownEndpoint = (request, response) => {
@@ -33,15 +42,6 @@ const errorHandler = (error, request, response, next) => {
   if (error.message) logger.error(error.message);
   if (error.code) logger.error(error.code);
 
-  if (error.code === '23505') {
-    return response.status(409).json({ error: 'Id existente' });
-  }
-  if (error.name === 'JsonWebTokenError') {
-    return response.status(401).json({ error: 'Token invalido' });
-  }
-  if (error.name === 'TokenExpiredError') {
-    return response.status(401).json({ error: 'La sesión expiró' });
-  }
   if (error.name === 'error') {
     return response.status(400).json({ error: error.message });
   }
@@ -51,7 +51,7 @@ const errorHandler = (error, request, response, next) => {
 module.exports = {
   requestLogger,
   tokenExtractor,
-  tokenVerification,
+  AccessTokenVerification,
   unknownEndpoint,
   errorHandler,
 };
