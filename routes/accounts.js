@@ -11,6 +11,30 @@ accountsRouter.post(
 );
 
 accountsRouter.post(
+  '/resendVerificationLink',
+  validatorMiddleware.validate(schemas.email),
+  accountsController.resendVerificationLink,
+);
+
+accountsRouter.post(
+  '/verifyAccount',
+  validatorMiddleware.validate(schemas.verificationToken),
+  accountsController.verifyAccount,
+);
+
+accountsRouter.post(
+  '/recoverPassword',
+  validatorMiddleware.validate(schemas.email),
+  accountsController.recoverPassword,
+);
+
+accountsRouter.post(
+  '/resetPassword',
+  validatorMiddleware.validate(schemas.resetPassword),
+  accountsController.resetPassword,
+);
+
+accountsRouter.post(
   '/login',
   validatorMiddleware.validate(schemas.login),
   accountsController.login,
@@ -18,23 +42,8 @@ accountsRouter.post(
 
 accountsRouter.post(
   '/refreshAccessToken',
-  validatorMiddleware.validate(schemas.token),
+  validatorMiddleware.validate(schemas.refreshToken),
   accountsController.refreshAccessToken,
-);
-
-accountsRouter.post(
-  '/forgotPassword',
-  validatorMiddleware.validate(schemas.email),
-  accountsController.forgotPassword,
-);
-
-accountsRouter.post(
-  '/resetPassword/:accountId/:verificationToken',
-  [
-    validatorMiddleware.validate(schemas.resetPassword),
-    validatorMiddleware.validateParams(schemas.resetPasswordParams),
-  ],
-  accountsController.resetPassword,
 );
 
 accountsRouter.put(
@@ -56,9 +65,9 @@ accountsRouter.post(
 );
 
 accountsRouter.post(
-  '/confirmEmail',
+  '/verifyEmail',
   validatorMiddleware.validate(schemas.verificationToken),
-  accountsController.confirmEmail,
+  accountsController.verifyEmail,
 );
 
 accountsRouter.put(

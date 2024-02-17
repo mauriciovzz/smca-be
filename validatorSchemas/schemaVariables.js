@@ -5,7 +5,7 @@ const email = Joi.string()
   .required()
   .messages({
     'string.base': 'La entrada "correo electrónico" debe ser de tipo cadena.',
-    'string.email': 'El formato de laa entrada "correo electrónico" no es válido.',
+    'string.email': 'El formato de la entrada "correo electrónico" no es válido.',
     'string.empty': 'La entrada "correo electrónico" no puede estar vacía.',
     'any.required': 'Se requiere la entrada "Correo electrónico".',
   });
@@ -40,10 +40,20 @@ const lastName = Joi.string()
   .required()
   .messages({
     'string.base': 'La entrada "Apellido" debe ser de tipo cadena.',
-    'string.empty': 'La entrada "Apellido" no puede estar vacío.',
+    'string.empty': 'La entrada "Apellido" no puede estar vacía.',
     'string.min': 'La entrada "Apellido" debe contar con al menos 1 caracter.',
     'string.max': 'La entrada "Apellido" puede contar con máximo 35 caracteres.',
     'any.required': 'Se requiere la entrada "Apellido".',
+  });
+
+const verificationToken = Joi.string()
+  .pattern(/^[0-9A-F]{64}$/)
+  .required()
+  .messages({
+    'string.base': 'Link invalido.',
+    'string.empty': 'link inválido.',
+    'string.pattern.base': 'Link inválido.',
+    'any.required': 'Link inválido.',
   });
 
 const booleanType = (paramName) => Joi.boolean()
@@ -57,9 +67,9 @@ const token = Joi.string()
   .pattern(/^[\w-]+\.[\w-]+\.[\w-]+$/)
   .required()
   .messages({
-    'string.base': 'a Token invalido.',
-    'string.empty': 'b Token inválido.',
-    'string.pattern.base': 'c Token inválido.',
+    'string.base': 'Token invalido.',
+    'string.empty': 'Token inválido.',
+    'string.pattern.base': 'Token inválido.',
     'any.required': 'Se requiere un Token valido.',
   });
 
@@ -118,7 +128,7 @@ const accountIdParam = Joi.string()
   });
 
 const verificationTokenParam = Joi.string()
-  .pattern(/^[A-F0-9]{64}$/)
+  .pattern(/^[\w-]+\.[\w-]+\.[\w-]+$/)
   .required()
   .messages({
     'string.base': 'Link inválido.',
@@ -132,6 +142,7 @@ module.exports = {
   password,
   firstName,
   lastName,
+  verificationToken,
   booleanType,
   token,
   worskpaceName,

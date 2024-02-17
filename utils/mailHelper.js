@@ -21,7 +21,45 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-const resetPassword = async (account, path) => {
+const accountVerification = async (account, path) => {
+  const emailInfo = {
+    body: {
+      greeting: 'Hola',
+      name: `${account.first_name} ${account.last_name}`,
+      action: {
+        instructions: 'Haz clic en el botón para confirmar tu correo electrónico y finalizar el proceso de creación de tu cuenta.',
+        button: {
+          color: '#DC4D2F',
+          text: 'Verificar Cuenta',
+          link: `${config.BASE_URL}${path}`,
+        },
+      },
+      outro: 'Este enlace de verificación expirará en 1 hora. Si tu enlace ha expirado, inicia sesión en la aplicación con los datos registrados para solicitar uno nuevo.',
+      signature: 'Atentamente',
+    },
+  };
+
+  const emailBody = mailGenerator.generate(emailInfo);
+  const emailText = mailGenerator.generatePlaintext(emailInfo);
+
+  const mailOptions = {
+    from: `smca <${config.MAIL_USER}>`,
+    to: account.email,
+    subject: 'Verificación de cuenta.',
+    html: emailBody,
+    text: emailText,
+  };
+
+  transporter.sendMail(mailOptions, (error, data) => {
+    if (error) {
+      logger.error(error.message);
+    } else {
+      logger.info('Email info: ', data);
+    }
+  });
+};
+
+const passwordReset = async (account, path) => {
   const emailInfo = {
     body: {
       greeting: 'Hola',
@@ -31,7 +69,7 @@ const resetPassword = async (account, path) => {
         instructions: 'Haga clic en el botón para restablecer su contraseña:',
         button: {
           color: '#DC4D2F',
-          text: 'Restablecer contraseña',
+          text: 'Restablecer Contraseña',
           link: `${config.BASE_URL}${path}`,
         },
       },
@@ -44,9 +82,9 @@ const resetPassword = async (account, path) => {
   const emailText = mailGenerator.generatePlaintext(emailInfo);
 
   const mailOptions = {
-    from: config.MAIL_USER,
+    from: `smca <${config.MAIL_USER}>`,
     to: account.email,
-    subject: 'Restablecer contraseña',
+    subject: 'Restablecimiento de contraseña.',
     html: emailBody,
     text: emailText,
   };
@@ -60,7 +98,7 @@ const resetPassword = async (account, path) => {
   });
 };
 
-const updateEmail = async (account, newEmail, path) => {
+const emailVerification = async (account, newEmail, path) => {
   const emailInfo = {
     body: {
       greeting: 'Hola',
@@ -70,11 +108,11 @@ const updateEmail = async (account, newEmail, path) => {
         instructions: 'Haga clic en el botón para confirmar el cambio:',
         button: {
           color: '#DC4D2F',
-          text: 'Cambiar correo electrónico',
+          text: 'Confirmar Cambio',
           link: `${config.BASE_URL}${path}`,
         },
       },
-      outro: 'Si no solicitó un cambio de correo electrónico, no se requiere ninguna otra acción de su parte.',
+      outro: 'Este enlace expirara en 10 minutos. Si no solicitó un cambio de correo electrónico, no se requiere ninguna otra acción de su parte.',
       signature: 'Atentamente',
     },
   };
@@ -83,7 +121,7 @@ const updateEmail = async (account, newEmail, path) => {
   const emailText = mailGenerator.generatePlaintext(emailInfo);
 
   const mailOptions = {
-    from: config.MAIL_USER,
+    from: `smca <${config.MAIL_USER}>`,
     to: newEmail,
     subject: 'Confirmación de correo electrónico.',
     html: emailBody,
@@ -100,6 +138,7 @@ const updateEmail = async (account, newEmail, path) => {
 };
 
 module.exports = {
-  resetPassword,
-  updateEmail,
+  accountVerification,
+  passwordReset,
+  emailVerification,
 };

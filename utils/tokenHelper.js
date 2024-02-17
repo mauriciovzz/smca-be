@@ -17,10 +17,10 @@ const generateAccessToken = (accountId) => jwt.sign(
   { expiresIn: parseInt(config.AT_EXPIRATION, 10) },
 );
 
-const generateVerificationToken = (data) => jwt.sign(
+const generateVerificationToken = (data, expirationTime) => jwt.sign(
   data,
   config.SECRET,
-  { expiresIn: parseInt(config.VT_EXPIRATION, 10) },
+  { expiresIn: parseInt(expirationTime, 10) },
 );
 
 const verifyToken = (token) => jwt.verify(token, config.SECRET);

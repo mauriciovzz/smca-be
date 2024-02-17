@@ -8,31 +8,27 @@ const register = Joi.object({
   lastName: schemaVariables.lastName,
 });
 
-const login = Joi.object({
-  email: schemaVariables.email,
-  password: schemaVariables.password,
-  rememberMe: schemaVariables.booleanType('rememberMe'),
-});
-
-const token = Joi.object({
-  refreshToken: schemaVariables.token,
-});
-
 const verificationToken = Joi.object({
-  verificationToken: schemaVariables.token,
+  verificationToken: schemaVariables.verificationToken,
 });
 
 const email = Joi.object({
   email: schemaVariables.email,
 });
 
-const resetPasswordParams = Joi.object({
-  accountId: schemaVariables.accountIdParam,
-  verificationToken: schemaVariables.verificationTokenParam,
+const resetPassword = Joi.object({
+  verificationToken: schemaVariables.verificationToken,
+  newPassword: schemaVariables.password,
 });
 
-const resetPassword = Joi.object({
-  newPassword: schemaVariables.password,
+const login = Joi.object({
+  email: schemaVariables.email,
+  password: schemaVariables.password,
+  rememberMe: schemaVariables.booleanType('rememberMe'),
+});
+
+const refreshToken = Joi.object({
+  refreshToken: schemaVariables.token,
 });
 
 const updateName = Joi.object({
@@ -53,12 +49,11 @@ const updatePassword = Joi.object({
 
 module.exports = {
   register,
-  login,
-  token,
-  verificationToken,
   email,
-  resetPasswordParams,
+  verificationToken,
   resetPassword,
+  login,
+  refreshToken,
   updateName,
   updateEmail,
   updatePassword,
