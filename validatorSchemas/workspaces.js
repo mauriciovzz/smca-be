@@ -6,13 +6,38 @@ const create = Joi.object({
   color: schemaVariables.color,
 });
 
-const account = Joi.object({
+const updateName = Joi.object({
   workspaceId: schemaVariables.id('workspaceId'),
-  email: schemaVariables.email,
-  isAdmin: schemaVariables.booleanType('isAdmin'),
+  newName: schemaVariables.worskpaceName,
 });
 
-const removeAccount = Joi.object({
+const updateColor = Joi.object({
+  workspaceId: schemaVariables.id('workspaceId'),
+  newColor: schemaVariables.color,
+});
+
+const workspaceId = Joi.object({
+  workspaceId: schemaVariables.id('workspaceId'),
+});
+
+const invitationCreation = Joi.object({
+  workspaceId: schemaVariables.id('workspaceId'),
+  email: schemaVariables.email,
+});
+
+const invitationResponse = Joi.object({
+  workspaceId: schemaVariables.id('workspaceId'),
+  wasAccepted: schemaVariables.booleanType('wasAccepted'),
+});
+
+const memberRoleUpdate = Joi.object({
+  workspaceId: schemaVariables.id('workspaceId'),
+  accountId: schemaVariables.id('accountId'),
+  isAdmin: schemaVariables.booleanType('isAdmin'),
+
+});
+
+const memberRemoval = Joi.object({
   workspaceId: schemaVariables.id('workspaceId'),
   accountId: schemaVariables.id('accountId'),
 });
@@ -21,16 +46,14 @@ const leaveWorkspace = Joi.object({
   workspaceId: schemaVariables.id('workspaceId'),
 });
 
-const update = Joi.object({
-  workspaceId: schemaVariables.id('workspaceId'),
-  name: schemaVariables.worskpaceName,
-  color: schemaVariables.color,
-});
-
 module.exports = {
   create,
-  account,
-  removeAccount,
+  updateName,
+  updateColor,
+  workspaceId,
+  invitationCreation,
+  invitationResponse,
+  memberRoleUpdate,
+  memberRemoval,
   leaveWorkspace,
-  update,
 };

@@ -76,13 +76,13 @@ const token = Joi.string()
 const worskpaceName = Joi.string()
   .trim()
   .min(1)
-  .max(50)
+  .max(30)
   .required()
   .messages({
     'string.base': 'La entrada "Nombre" ser de tipo cadena.',
     'string.empty': 'La entrada "Nombre" no puede estar vacía.',
     'string.min': 'La entrada "Nombre" debe contar con al menos 1 caracter.',
-    'string.max': 'La entrada "Nombre" puede contar con máximo 50 caracteres.',
+    'string.max': 'La entrada "Nombre" puede contar con máximo 30 caracteres.',
     'any.required': 'Se requiere la entrada "Nombre".',
   });
 

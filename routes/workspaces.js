@@ -19,49 +19,82 @@ workspacesRouter.get(
   workspacesController.getAll,
 );
 
+workspacesRouter.put(
+  '/updateName',
+  [
+    middleware.AccessTokenVerification,
+    validatorMiddleware.validate(schemas.updateName),
+  ],
+  workspacesController.updateName,
+);
+
+workspacesRouter.put(
+  '/updateColor',
+  [
+    middleware.AccessTokenVerification,
+    validatorMiddleware.validate(schemas.updateColor),
+  ],
+  workspacesController.updateColor,
+);
+
+workspacesRouter.get(
+  '/members/:workspaceId',
+  [
+    middleware.AccessTokenVerification,
+    validatorMiddleware.validateParams(schemas.workspaceId),
+  ],
+  workspacesController.getMembers,
+);
+
+workspacesRouter.get(
+  '/invitations',
+  middleware.AccessTokenVerification,
+  workspacesController.getInvitations,
+);
+
 workspacesRouter.post(
-  '/addAccount',
+  '/invitationCreation',
   [
     middleware.AccessTokenVerification,
-    validatorMiddleware.validate(schemas.account),
+    validatorMiddleware.validate(schemas.invitationCreation),
   ],
-  workspacesController.addAccount,
+  workspacesController.invitationCreation,
+);
+
+workspacesRouter.post(
+  '/invitationResponse',
+  [
+    middleware.AccessTokenVerification,
+    validatorMiddleware.validate(schemas.invitationResponse),
+  ],
+  workspacesController.invitationResponse,
+);
+
+workspacesRouter.put(
+  '/memberRoleUpdate',
+  [
+    middleware.AccessTokenVerification,
+    validatorMiddleware.validate(schemas.memberRoleUpdate),
+  ],
+  workspacesController.memberRoleUpdate,
 );
 
 workspacesRouter.delete(
-  '/removeAccount',
+  '/memberRemoval/:workspaceId/:accountId',
   [
     middleware.AccessTokenVerification,
-    validatorMiddleware.validate(schemas.removeAccount),
+    validatorMiddleware.validateParams(schemas.memberRemoval),
   ],
-  workspacesController.removeAccount,
+  workspacesController.memberRemoval,
 );
 
 workspacesRouter.delete(
-  '/leaveWorkspace',
+  '/leaveWorkspace/:workspaceId',
   [
     middleware.AccessTokenVerification,
-    validatorMiddleware.validate(schemas.leaveWorkspace),
+    validatorMiddleware.validateParams(schemas.workspaceId),
   ],
   workspacesController.leaveWorkspace,
-);
-
-workspacesRouter.put(
-  '/updateAccountRole',
-  [
-    middleware.AccessTokenVerification,
-    validatorMiddleware.validate(schemas.account),
-  ],
-  workspacesController.updateAccountRole,
-);
-
-workspacesRouter.put(
-  '/',
-  [
-    middleware.AccessTokenVerification,
-    validatorMiddleware.validate(schemas.update),
-  ],
-  workspacesController.update,
 );
 
 module.exports = workspacesRouter;
