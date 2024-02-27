@@ -4,12 +4,12 @@ const middleware = require('../../utils/middleware');
 
 const allowedRoles = ['RESEARCHER', 'ADMIN'];
 
-componentsRouter.get('/', [middleware.AccessTokenVerification(allowedRoles)], componentsController.getAll);
+componentsRouter.get('/', [middleware.accessTokenVerification(allowedRoles)], componentsController.getAll);
 
-componentsRouter.post('/', [middleware.AccessTokenVerification(allowedRoles)], componentsController.create);
+componentsRouter.post('/', [middleware.accessTokenVerification(allowedRoles)], componentsController.create);
 
-componentsRouter.put('/', [middleware.AccessTokenVerification(allowedRoles)], componentsController.update);
+componentsRouter.put('/', [middleware.accessTokenVerification(allowedRoles)], componentsController.update);
 
-componentsRouter.delete('/:componentType/:componentId', [middleware.AccessTokenVerification(allowedRoles)], componentsController.remove);
+componentsRouter.delete('/:componentType/:componentId', [middleware.accessTokenVerification(allowedRoles)], componentsController.remove);
 
 module.exports = componentsRouter;

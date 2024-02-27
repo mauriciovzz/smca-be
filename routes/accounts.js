@@ -1,7 +1,7 @@
 const accountsRouter = require('express').Router();
 const accountsController = require('../controllers/accounts');
-const middleware = require('../utils/middleware');
-const validatorMiddleware = require('../utils/validator');
+const middleware = require('../utils/middlewares/middleware');
+const validatorMiddleware = require('../utils/middlewares/validator');
 const schemas = require('../validatorSchemas/accounts');
 
 accountsRouter.post(
@@ -49,7 +49,7 @@ accountsRouter.post(
 accountsRouter.put(
   '/updateName',
   [
-    middleware.AccessTokenVerification,
+    middleware.accessTokenVerification,
     validatorMiddleware.validate(schemas.updateName),
   ],
   accountsController.updateName,
@@ -58,7 +58,7 @@ accountsRouter.put(
 accountsRouter.post(
   '/updateEmail',
   [
-    middleware.AccessTokenVerification,
+    middleware.accessTokenVerification,
     validatorMiddleware.validate(schemas.updateEmail),
   ],
   accountsController.updateEmail,
@@ -73,7 +73,7 @@ accountsRouter.post(
 accountsRouter.put(
   '/updatePassword',
   [
-    middleware.AccessTokenVerification,
+    middleware.accessTokenVerification,
     validatorMiddleware.validate(schemas.updatePassword),
   ],
   accountsController.updatePassword,

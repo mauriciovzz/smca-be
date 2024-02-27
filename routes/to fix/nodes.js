@@ -8,7 +8,7 @@ const allowedRoles = ['RESEARCHER', 'ADMIN'];
 nodesRouter.get('/active', nodesController.getActiveNodes);
 
 /* Get all nodes */
-nodesRouter.get('/all', [middleware.AccessTokenVerification(allowedRoles)], nodesController.getAllNodes);
+nodesRouter.get('/all', [middleware.accessTokenVerification(allowedRoles)], nodesController.getAllNodes);
 
 /* Get all reading averages of a node */
 nodesRouter.get('/:nodeType/:nodeId/:lat/:long/:date/:variableType', nodesController.getReadingAverages);
@@ -19,7 +19,7 @@ nodesRouter.get('/:nodeType/:nodeId/:lat/:long/:date/:variableType/range', nodes
 // /* Add a node */
 // nodesRouter.post(
 //   '/',
-//   [middleware.AccessTokenVerification],
+//   [middleware.accessTokenVerification],
 //   nodesController.create,
 // );
 

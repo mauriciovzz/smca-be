@@ -11,16 +11,6 @@ const create = async (accountId, name, color) => {
   return response.rows[0];
 };
 
-const update = async (column, workspaceId, newValue) => {
-  const sql = ` UPDATE
-                  workspace
-                SET
-                  ${column} = $1
-                WHERE
-                  workspace_id = $2`;
-  await pool.query(sql, [newValue, workspaceId]);
-};
-
 const getAll = async (accountId) => {
   const sql = ` SELECT 
                   w.workspace_id,
@@ -39,6 +29,18 @@ const getAll = async (accountId) => {
 
   const response = await pool.query(sql, [accountId]);
   return response.rows;
+};
+
+const getOne = async (workspaceId) => {
+  const sql = ` SELECT 
+                  *
+                FROM
+                  workspace
+                WHERE
+                  workspace_id = $1`;
+  const response = await pool.query(sql, [workspaceId]);
+
+  return response.rows[0];
 };
 
 const getMembers = async (workspaceId) => {
@@ -91,6 +93,32 @@ const invitationCreation = async (workspaceId, inviterAccountId, invitedAccountI
   await pool.query(sql, [workspaceId, inviterAccountId, invitedAccountId]);
 };
 
+const isWorkspaceAdmin = async (workspaceId, accountId) => {
+  const sql = ` SELECT 
+                  is_admin
+                FROM
+                  workspace_account
+                WHERE
+                  workspace_id = $1
+                  AND account_id = $2`;
+  const response = await pool.query(sql, [workspaceId, accountId]);
+
+  return response.rows[0].is_admin;
+};
+
+const isInWorkspace = async (workspaceId, accountId) => {
+  const sql = ` SELECT 
+                  *
+                FROM
+                  workspace_account
+                WHERE
+                  workspace_id = $1
+                  AND account_id = $2`;
+  const response = await pool.query(sql, [workspaceId, accountId]);
+
+  return response.rows[0];
+};
+
 const findInvitation = async (workspaceId, invitedAccountId) => {
   const sql = ` SELECT
                   * 
@@ -122,6 +150,16 @@ const addMember = async (workspaceId, accountId, isAdmin) => {
   await pool.query(sql, [workspaceId, accountId, isAdmin]);
 };
 
+const updateColumn = async (column, workspaceId, newValue) => {
+  const sql = ` UPDATE
+                  workspace
+                SET
+                  ${column} = $1
+                WHERE
+                  workspace_id = $2`;
+  await pool.query(sql, [newValue, workspaceId]);
+};
+
 const memberRoleUpdate = async (workspaceId, accountId, isAdmin) => {
   const sql = ` UPDATE
                   workspace_account 
@@ -142,33 +180,6 @@ const memberRemoval = async (workspaceId, accountId) => {
   await pool.query(sql, [workspaceId, accountId]);
 };
 
-// hey
-
-const getOne = async (workspaceId) => {
-  const sql = ` SELECT 
-                  *
-                FROM
-                  workspace
-                WHERE
-                  workspace_id = $1`;
-  const response = await pool.query(sql, [workspaceId]);
-
-  return response.rows[0];
-};
-
-const isWorkspaceAdmin = async (workspaceId, accountId) => {
-  const sql = ` SELECT 
-                  is_admin
-                FROM
-                  workspace_account
-                WHERE
-                  workspace_id = $1
-                  AND account_id = $2`;
-  const response = await pool.query(sql, [workspaceId, accountId]);
-
-  return response.rows[0].is_admin;
-};
-
 const getAdminCount = async (workspaceId) => {
   const sql = ` SELECT 
                   COUNT(account_id) as admins
@@ -182,34 +193,29 @@ const getAdminCount = async (workspaceId) => {
   return parseInt(response.rows[0].admins, 10);
 };
 
-const isInWorkspace = async (workspaceId, accountId) => {
-  const sql = ` SELECT 
-                  *
-                FROM
-                  workspace_account
+const deleteWorkspace = async (workspaceId) => {
+  const sql = ` DELETE FROM 
+                  workspace
                 WHERE
-                  workspace_id = $1
-                  AND account_id = $2`;
-  const response = await pool.query(sql, [workspaceId, accountId]);
-
-  return response.rows[0];
+                  workspace_id = $1`;
+  await pool.query(sql, [workspaceId]);
 };
 
 module.exports = {
   create,
   getAll,
+  getOne,
   getMembers,
   getInvitations,
   invitationCreation,
+  isWorkspaceAdmin,
+  isInWorkspace,
   findInvitation,
   invitationRemoval,
   addMember,
-  memberRemoval,
-
-  update,
-  getOne,
-  isWorkspaceAdmin,
-  getAdminCount,
-  isInWorkspace,
+  updateColumn,
   memberRoleUpdate,
+  memberRemoval,
+  getAdminCount,
+  deleteWorkspace,
 };

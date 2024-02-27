@@ -27,36 +27,6 @@ const getAll = async (req, res) => {
   return res.status(200).send(workspaces);
 };
 
-const updateName = async (req, res) => {
-  const { workspaceId, newName } = req.body;
-
-  if (!await workspacesService.getOne(workspaceId)) {
-    return res.status(404).json({ error: 'El espacio de trabajo ingresado no se encuentra registrado.' });
-  }
-
-  if (!await workspacesService.isWorkspaceAdmin(workspaceId, req.accountId)) {
-    return res.status(401).json({ error: 'No tienes los permisos necesarios para realizar esta acción.' });
-  }
-
-  await workspacesService.update('name', workspaceId, newName);
-  return res.status(201).send('Nombre actualizado exitosamente.');
-};
-
-const updateColor = async (req, res) => {
-  const { workspaceId, newColor } = req.body;
-
-  if (!await workspacesService.getOne(workspaceId)) {
-    return res.status(404).json({ error: 'El espacio de trabajo ingresado no se encuentra registrado.' });
-  }
-
-  if (!await workspacesService.isWorkspaceAdmin(workspaceId, req.accountId)) {
-    return res.status(401).json({ error: 'No tienes los permisos necesarios para realizar esta acción.' });
-  }
-
-  await workspacesService.update('color', workspaceId, newColor);
-  return res.status(201).send('Color actualizado exitosamente.');
-};
-
 const getMembers = async (req, res) => {
   const { workspaceId } = req.params;
 
@@ -177,12 +147,39 @@ const memberRemoval = async (req, res) => {
   return res.status(202).send('Cuenta removida exitosamente del espacio de trabajo.');
 };
 
-// hey
+const updateName = async (req, res) => {
+  const { workspaceId, newName } = req.body;
+
+  if (!await workspacesService.getOne(workspaceId)) {
+    return res.status(404).json({ error: 'El espacio de trabajo ingresado no se encuentra registrado.' });
+  }
+
+  if (!await workspacesService.isWorkspaceAdmin(workspaceId, req.accountId)) {
+    return res.status(401).json({ error: 'No tienes los permisos necesarios para realizar esta acción.' });
+  }
+
+  await workspacesService.updateColumn('name', workspaceId, newName);
+  return res.status(201).send('Nombre actualizado exitosamente.');
+};
+
+const updateColor = async (req, res) => {
+  const { workspaceId, newColor } = req.body;
+
+  if (!await workspacesService.getOne(workspaceId)) {
+    return res.status(404).json({ error: 'El espacio de trabajo ingresado no se encuentra registrado.' });
+  }
+
+  if (!await workspacesService.isWorkspaceAdmin(workspaceId, req.accountId)) {
+    return res.status(401).json({ error: 'No tienes los permisos necesarios para realizar esta acción.' });
+  }
+
+  await workspacesService.updateColumn('color', workspaceId, newColor);
+  return res.status(201).send('Color actualizado exitosamente.');
+};
 
 const leaveWorkspace = async (req, res) => {
   const { workspaceId } = req.params;
 
-  console.log(workspaceId, req.accountId)
   if (!await workspacesService.getOne(workspaceId)) {
     return res.status(404).json({ error: 'El espacio de trabajo ingresado no se encuentra registrado.' });
   }
@@ -200,17 +197,32 @@ const leaveWorkspace = async (req, res) => {
   return res.status(202).send('Su cuenta abandonó el espacio de trabajo exitosamente.');
 };
 
+const deleteWorkspace = async (req, res) => {
+  const { workspaceId } = req.params;
+
+  if (!await workspacesService.getOne(workspaceId)) {
+    return res.status(404).json({ error: 'El espacio de trabajo ingresado no se encuentra registrado.' });
+  }
+
+  if (!(await workspacesService.isWorkspaceAdmin(workspaceId, req.accountId))) {
+    return res.status(401).json({ error: 'No tienes los permisos necesarios para realizar esta acción.' });
+  }
+
+  await workspacesService.deleteWorkspace(workspaceId);
+  return res.status(202).send('El espacio de trabajo fue eliminado exitosamente.');
+};
+
 module.exports = {
   create,
   getAll,
-  updateName,
-  updateColor,
   getMembers,
   getInvitations,
   invitationCreation,
   invitationResponse,
   memberRoleUpdate,
   memberRemoval,
-
+  updateName,
+  updateColor,
   leaveWorkspace,
+  deleteWorkspace,
 };

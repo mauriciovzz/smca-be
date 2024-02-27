@@ -1,13 +1,13 @@
 const workspacesRouter = require('express').Router();
 const workspacesController = require('../controllers/workspaces');
-const middleware = require('../utils/middleware');
-const validatorMiddleware = require('../utils/validator');
+const middleware = require('../utils/middlewares/middleware');
+const validatorMiddleware = require('../utils/middlewares/validator');
 const schemas = require('../validatorSchemas/workspaces');
 
 workspacesRouter.post(
   '/',
   [
-    middleware.AccessTokenVerification,
+    middleware.accessTokenVerification,
     validatorMiddleware.validate(schemas.create),
   ],
   workspacesController.create,
@@ -15,32 +15,14 @@ workspacesRouter.post(
 
 workspacesRouter.get(
   '/',
-  middleware.AccessTokenVerification,
+  middleware.accessTokenVerification,
   workspacesController.getAll,
-);
-
-workspacesRouter.put(
-  '/updateName',
-  [
-    middleware.AccessTokenVerification,
-    validatorMiddleware.validate(schemas.updateName),
-  ],
-  workspacesController.updateName,
-);
-
-workspacesRouter.put(
-  '/updateColor',
-  [
-    middleware.AccessTokenVerification,
-    validatorMiddleware.validate(schemas.updateColor),
-  ],
-  workspacesController.updateColor,
 );
 
 workspacesRouter.get(
   '/members/:workspaceId',
   [
-    middleware.AccessTokenVerification,
+    middleware.accessTokenVerification,
     validatorMiddleware.validateParams(schemas.workspaceId),
   ],
   workspacesController.getMembers,
@@ -48,14 +30,14 @@ workspacesRouter.get(
 
 workspacesRouter.get(
   '/invitations',
-  middleware.AccessTokenVerification,
+  middleware.accessTokenVerification,
   workspacesController.getInvitations,
 );
 
 workspacesRouter.post(
   '/invitationCreation',
   [
-    middleware.AccessTokenVerification,
+    middleware.accessTokenVerification,
     validatorMiddleware.validate(schemas.invitationCreation),
   ],
   workspacesController.invitationCreation,
@@ -64,7 +46,7 @@ workspacesRouter.post(
 workspacesRouter.post(
   '/invitationResponse',
   [
-    middleware.AccessTokenVerification,
+    middleware.accessTokenVerification,
     validatorMiddleware.validate(schemas.invitationResponse),
   ],
   workspacesController.invitationResponse,
@@ -73,7 +55,7 @@ workspacesRouter.post(
 workspacesRouter.put(
   '/memberRoleUpdate',
   [
-    middleware.AccessTokenVerification,
+    middleware.accessTokenVerification,
     validatorMiddleware.validate(schemas.memberRoleUpdate),
   ],
   workspacesController.memberRoleUpdate,
@@ -82,19 +64,46 @@ workspacesRouter.put(
 workspacesRouter.delete(
   '/memberRemoval/:workspaceId/:accountId',
   [
-    middleware.AccessTokenVerification,
+    middleware.accessTokenVerification,
     validatorMiddleware.validateParams(schemas.memberRemoval),
   ],
   workspacesController.memberRemoval,
 );
 
+workspacesRouter.put(
+  '/updateName',
+  [
+    middleware.accessTokenVerification,
+    validatorMiddleware.validate(schemas.updateName),
+  ],
+  workspacesController.updateName,
+);
+
+workspacesRouter.put(
+  '/updateColor',
+  [
+    middleware.accessTokenVerification,
+    validatorMiddleware.validate(schemas.updateColor),
+  ],
+  workspacesController.updateColor,
+);
+
 workspacesRouter.delete(
   '/leaveWorkspace/:workspaceId',
   [
-    middleware.AccessTokenVerification,
+    middleware.accessTokenVerification,
     validatorMiddleware.validateParams(schemas.workspaceId),
   ],
   workspacesController.leaveWorkspace,
+);
+
+workspacesRouter.delete(
+  '/deleteWorkspace/:workspaceId',
+  [
+    middleware.accessTokenVerification,
+    validatorMiddleware.validateParams(schemas.workspaceId),
+  ],
+  workspacesController.deleteWorkspace,
 );
 
 module.exports = workspacesRouter;
