@@ -2,13 +2,13 @@ const Joi = require('joi');
 const schemaVariables = require('./schemaVariables');
 
 const create = Joi.object({
-  name: schemaVariables.worskpaceName,
+  name: schemaVariables.name,
   color: schemaVariables.color,
 });
 
 const updateName = Joi.object({
   workspaceId: schemaVariables.id('workspaceId'),
-  newName: schemaVariables.worskpaceName,
+  newName: schemaVariables.name,
 });
 
 const updateColor = Joi.object({

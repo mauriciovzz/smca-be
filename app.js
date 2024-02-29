@@ -10,7 +10,7 @@ const workspacesRouter = require('./routes/workspaces');
 
 // const nodesRouter = require('./routes/nodes');
 // const locationsRouter = require('./routes/locations');
-// const componentsRouter = require('./routes/components');
+const componentsRouter = require('./routes/components');
 const variablesRouter = require('./routes/variables');
 
 // const nodeLocationsRouter = require('./routes/node_locations');
@@ -32,7 +32,7 @@ app.use('/api/workspaces', workspacesRouter);
 
 // app.use('/api/nodes', nodesRouter);
 // app.use('/api/locations', locationsRouter);
-// app.use('/api/components', componentsRouter);
+app.use('/api/components', componentsRouter);
 app.use('/api/variables', variablesRouter);
 
 // app.use('/api/node_locations', nodeLocationsRouter);

@@ -7,18 +7,20 @@ const workspaceId = Joi.object({
 
 const create = Joi.object({
   name: schemaVariables.name,
-  unit: schemaVariables.unit,
-  variableType: schemaVariables.id('variableType'),
+  datasheetLink: schemaVariables.datasheetLink,
+  componentType: schemaVariables.id('ComponentType'),
+  variables: schemaVariables.variablesArray,
 });
 
 const idParams = Joi.object({
-  workspaceId: schemaVariables.id('workspace id'),
-  variableId: schemaVariables.id('variable id'),
+  workspaceId: schemaVariables.id('Workspace id'),
+  componentId: schemaVariables.id('Component id'),
 });
 
 const update = Joi.object({
   name: schemaVariables.name,
-  unit: schemaVariables.unit,
+  datasheetLink: schemaVariables.datasheetLink,
+  variables: schemaVariables.variablesArray,
 });
 
 module.exports = {

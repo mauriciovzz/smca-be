@@ -2,6 +2,7 @@ const logger = require('../logger');
 const tokenHelper = require('../tokenHelper');
 const workspacesService = require('../../services/workspaces');
 const variablesService = require('../../services/variables');
+const componentsService = require('../../services/components');
 
 const requestLogger = (request, response, next) => {
   logger.info('Method:', request.method);
@@ -76,18 +77,12 @@ const variableVerification = async (request, response, next) => {
 };
 
 // eslint-disable-next-line consistent-return
-const variableNameVerification = async (request, response, next) => {
-  const { workspaceId, variableId } = request.params;
-  const { name } = request.body;
+const componentVerification = async (request, response, next) => {
+  const { workspaceId, componentId } = request.params;
 
-  const variable = await variablesService.getOne(workspaceId, variableId);
-
-  if (!(variable.name === name.toLowerCase())) {
-    if (await variablesService.checkName(workspaceId, name.toLowerCase())) {
-      return response.status(409).json({ error: 'El nombre de variable ingresado ya se encuentra registrado.' });
-    }
+  if (!await componentsService.getOne(workspaceId, componentId)) {
+    return response.status(404).json({ error: 'El componente no se encuentra registrado.' });
   }
-
   next();
 };
 
@@ -114,7 +109,7 @@ module.exports = {
   workspaceAdminVerification,
   workspaceMemberVerification,
   variableVerification,
-  variableNameVerification,
+  componentVerification,
   unknownEndpoint,
   errorHandler,
 };

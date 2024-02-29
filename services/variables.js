@@ -22,7 +22,7 @@ const getAll = async (workspaceId) => {
                 WHERE
                   workspace_id = $1
                   AND v.variable_type_id = vt.variable_type_id
-                ORDER BY v.name ASC `;
+                ORDER BY vt.type ASC, v.name ASC `;
 
   const response = await pool.query(sql, [workspaceId]);
   return response.rows;

@@ -73,7 +73,7 @@ const token = Joi.string()
     'any.required': 'Se requiere un Token valido.',
   });
 
-const worskpaceName = Joi.string()
+const name = Joi.string()
   .trim()
   .min(1)
   .max(30)
@@ -114,19 +114,6 @@ const equal = (reference) => Joi.any()
     'any.only': 'Los campos \'Nueva contraseña\' y \'Repetir nueva contraseña\' deben de coincidir.',
   });
 
-const variableName = Joi.string()
-  .trim()
-  .min(1)
-  .max(30)
-  .required()
-  .messages({
-    'string.base': 'La entrada "Nombre" debe ser de tipo cadena.',
-    'string.empty': 'La entrada "Nombre" no puede estar vacía.',
-    'string.min': 'La entrada "Nombre" debe contar con al menos 1 caracter.',
-    'string.max': 'La entrada "Nombre" puede contar con máximo 30 caracteres.',
-    'any.required': 'Se requiere la entrada "Nombre".',
-  });
-
 const unit = Joi.string()
   .trim()
   .min(1)
@@ -138,6 +125,22 @@ const unit = Joi.string()
     'string.min': 'La entrada "Unidad" debe contar con al menos 1 caracter.',
     'string.max': 'La entrada "Unidad" puede contar con máximo 10 caracteres.',
     'any.required': 'Se requiere la entrada "Unidad".',
+  });
+
+const datasheetLink = Joi.string().uri()
+  .required()
+  .messages({
+    'string.base': 'La entrada "Datasheet link" debe ser de tipo cadena.',
+    'string.uri': 'La entrada "Datasheet link" debe un link valido.',
+    'string.empty': 'La entrada "Datasheet link" no puede estar vacía.',
+    'any.required': 'Se requiere la entrada "Unidad".',
+  });
+
+const variablesArray = Joi.array()
+  .items(Joi.number().integer().greater(0))
+  .messages({
+    'array.base': 'La entrada "Variables" debe ser de tipo arreglo.',
+    'array.includes': 'Los datos de la entrada "Variables link" deben ser enteros.',
   });
 
 const accountIdParam = Joi.string()
@@ -171,12 +174,13 @@ module.exports = {
   verificationToken,
   booleanType,
   token,
-  worskpaceName,
+  name,
   color,
   id,
   equal,
-  variableName,
   unit,
+  datasheetLink,
+  variablesArray,
   accountIdParam,
   verificationTokenParam,
 };

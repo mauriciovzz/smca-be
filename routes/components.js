@@ -1,18 +1,18 @@
-const variablesRouter = require('express').Router();
-const variablesController = require('../controllers/variables');
+const componentsRouter = require('express').Router();
+const componentsController = require('../controllers/components');
 const middleware = require('../utils/middlewares/middleware');
 const validatorMiddleware = require('../utils/middlewares/validator');
-const schemas = require('../validatorSchemas/variables');
+const schemas = require('../validatorSchemas/components');
 
-variablesRouter.get(
+componentsRouter.get(
   '/getTypes',
   [
     middleware.accessTokenVerification,
   ],
-  variablesController.getTypes,
+  componentsController.getTypes,
 );
 
-variablesRouter.get(
+componentsRouter.get(
   '/:workspaceId',
   [
     middleware.accessTokenVerification,
@@ -20,10 +20,10 @@ variablesRouter.get(
     middleware.workspaceVerification,
     middleware.workspaceMemberVerification,
   ],
-  variablesController.getAll,
+  componentsController.getAll,
 );
 
-variablesRouter.post(
+componentsRouter.post(
   '/:workspaceId',
   [
     middleware.accessTokenVerification,
@@ -32,32 +32,32 @@ variablesRouter.post(
     middleware.workspaceVerification,
     middleware.workspaceAdminVerification,
   ],
-  variablesController.create,
+  componentsController.create,
 );
 
-variablesRouter.put(
-  '/:workspaceId/:variableId',
+componentsRouter.put(
+  '/:workspaceId/:componentId',
   [
     middleware.accessTokenVerification,
     validatorMiddleware.validateParams(schemas.idParams),
     validatorMiddleware.validate(schemas.update),
     middleware.workspaceVerification,
     middleware.workspaceAdminVerification,
-    middleware.variableVerification,
+    middleware.componentVerification,
   ],
-  variablesController.update,
+  componentsController.update,
 );
 
-variablesRouter.delete(
-  '/:workspaceId/:variableId',
+componentsRouter.delete(
+  '/:workspaceId/:componentId',
   [
     middleware.accessTokenVerification,
     validatorMiddleware.validateParams(schemas.idParams),
     middleware.workspaceVerification,
     middleware.workspaceAdminVerification,
-    middleware.variableVerification,
+    middleware.componentVerification,
   ],
-  variablesController.remove,
+  componentsController.remove,
 );
 
-module.exports = variablesRouter;
+module.exports = componentsRouter;

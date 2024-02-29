@@ -33,6 +33,13 @@ const update = async (req, res) => {
   const { workspaceId, variableId } = req.params;
   const { name, unit } = req.body;
 
+  const variable = await variablesService.getOne(workspaceId, variableId);
+  if (!(variable.name === name.toLowerCase())) {
+    if (await variablesService.checkName(workspaceId, name.toLowerCase())) {
+      return res.status(409).json({ error: 'El nombre de variable ingresado ya se encuentra registrado.' });
+    }
+  }
+
   await variablesService.update(
     workspaceId,
     variableId,
@@ -50,7 +57,7 @@ const remove = async (req, res) => {
   }
 
   await variablesService.remove(workspaceId, variableId);
-  return res.status(200).send('Variable actualizada exitosamente.');
+  return res.status(200).send('Variable eliminada exitosamente.');
 };
 
 module.exports = {
