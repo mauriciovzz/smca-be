@@ -3,6 +3,7 @@ const tokenHelper = require('../tokenHelper');
 const workspacesService = require('../../services/workspaces');
 const variablesService = require('../../services/variables');
 const componentsService = require('../../services/components');
+const locationsService = require('../../services/locations');
 
 const requestLogger = (request, response, next) => {
   logger.info('Method:', request.method);
@@ -86,6 +87,16 @@ const componentVerification = async (request, response, next) => {
   next();
 };
 
+// eslint-disable-next-line consistent-return
+const locationVerification = async (request, response, next) => {
+  const { workspaceId, locationId } = request.params;
+
+  if (!await locationsService.getOne(workspaceId, locationId)) {
+    return response.status(404).json({ error: 'La ubicación no se encuentra registrada.' });
+  }
+  next();
+};
+
 const unknownEndpoint = (request, response) => {
   response.status(404).send({ error: 'unknown endpoint' });
 };
@@ -110,6 +121,7 @@ module.exports = {
   workspaceMemberVerification,
   variableVerification,
   componentVerification,
+  locationVerification,
   unknownEndpoint,
   errorHandler,
 };

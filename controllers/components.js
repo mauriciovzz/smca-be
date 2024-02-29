@@ -70,7 +70,7 @@ const create = async (req, res) => {
     }
   }
 
-  return res.status(201).send('Component creada exitosamente.');
+  return res.status(201).send('Componente creado exitosamente.');
 };
 
 const update = async (req, res) => {
@@ -156,107 +156,3 @@ module.exports = {
   update,
   remove,
 };
-
-// const update = async (req, res) => {
-//   const {
-//     componentId,
-//     componentType,
-//     componentName,
-//     datasheetLink,
-//     variables,
-//   } = req.body;
-
-//   const sql = ` UPDATE
-//                   component
-//                 SET
-//                   component_type = $1,
-//                   component_name = $2,
-//                   datasheet_link = $3
-//                 WHERE
-//                   component_id = $4`;
-
-//   await pool.query(sql, [componentType, componentName, datasheetLink, componentId]);
-
-//   if (componentType === 'SENSOR') {
-//     const sqlVariables = `  SELECT
-//                               variable_id
-//                             FROM
-//                               component_variable
-//                             WHERE
-//                               component_id = $1`;
-//     const dbVariables = await pool.query(sqlVariables, [componentId]);
-
-//     // Delete Variables
-//     const deletedVariables = dbVariables.rows
-//       .filter((e) => !variables.includes(e.variable_id)).map((ee) => ee.variable_id);
-
-//     const deleteSql = ` DELETE FROM
-//                           component_variable
-//                         WHERE
-//                           component_id = $1
-//                         AND
-//                           variable_id  = $2`;
-
-//     for (let i = 0; i < deletedVariables.length; i += 1) {
-//       // eslint-disable-next-line
-//       await pool.query(deleteSql, [componentId, deletedVariables[i]]);
-//     }
-
-//     // Add Variables
-//     const addedVariables = variables
-//       .filter((e) => !dbVariables.rows.map((ee) => ee.variable_id).includes(e));
-
-//     const addSql = `  INSERT INTO component_variable (component_id, variable_id)
-//                       VALUES ($1, $2)`;
-
-//     for (let i = 0; i < addedVariables.length; i += 1) {
-//       // eslint-disable-next-line
-//       await pool.query(addSql, [componentId, addedVariables[i]]);
-//     }
-//   }
-
-//   return res.sendStatus(201);
-// };
-
-// const remove = async (req, res) => {
-//   const { componentType, componentId } = req.params;
-
-//   let sql = ` SELECT EXISTS (
-//                 SELECT
-//                   *
-//                 FROM
-//                   node_component
-//                 WHERE
-//                   component_id = $1
-//               ) AS "exists"`;
-//   const componentFound = await pool.query(sql, [componentId]);
-
-//   if (componentFound.rows[0].exists) {
-//     return res.status(401).json({
-//       error: 'El componente se encuentra en uso.',
-//     });
-//   }
-
-//   if (componentType === 'SENSOR') {
-//     const variablesSql = `  DELETE FROM
-//                             component_variable
-//                             WHERE
-//                               component_id = $1`;
-//     await pool.query(variablesSql, [componentId]);
-//   }
-
-//   sql = ` DELETE FROM
-//             component
-//           WHERE
-//             component_id = $1`;
-
-//   await pool.query(sql, [componentId]);
-//   return res.sendStatus(204);
-// };
-
-// module.exports = {
-//   getAll,
-//   create,
-//   update,
-//   remove,
-// };

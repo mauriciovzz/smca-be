@@ -9,7 +9,7 @@ const accountsRouter = require('./routes/accounts');
 const workspacesRouter = require('./routes/workspaces');
 
 // const nodesRouter = require('./routes/nodes');
-// const locationsRouter = require('./routes/locations');
+const locationsRouter = require('./routes/locations');
 const componentsRouter = require('./routes/components');
 const variablesRouter = require('./routes/variables');
 
@@ -31,7 +31,7 @@ app.use('/api/accounts', accountsRouter);
 app.use('/api/workspaces', workspacesRouter);
 
 // app.use('/api/nodes', nodesRouter);
-// app.use('/api/locations', locationsRouter);
+app.use('/api/locations', locationsRouter);
 app.use('/api/components', componentsRouter);
 app.use('/api/variables', variablesRouter);
 

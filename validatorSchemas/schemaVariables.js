@@ -143,6 +143,31 @@ const variablesArray = Joi.array()
     'array.includes': 'Los datos de la entrada "Variables link" deben ser enteros.',
   });
 
+const location = Joi.string()
+  .trim()
+  .min(1)
+  .max(120)
+  .required()
+  .messages({
+    'string.base': 'La entrada "Ubicacion" ser de tipo cadena.',
+    'string.empty': 'La entrada "Ubicacion" no puede estar vacía.',
+    'string.min': 'La entrada "Ubicacion" debe contar con al menos 1 caracter.',
+    'string.max': 'La entrada "Ubicacion" puede contar con máximo 120 caracteres.',
+    'any.required': 'Se requiere la entrada "Ubicacion".',
+  });
+
+const coordinate = Joi.string()
+  .min(8)
+  .max(10)
+  .required()
+  .messages({
+    'string.base': 'Las coordenadas deben ser de tipo cadena.',
+    'string.empty': 'Las coordenadas no pueden estar vacía.',
+    'string.min': 'Coordenadas invalidas',
+    'string.max': 'Coordenadas invalidas',
+    'any.required': 'Se requiere la entrada "Coordenadas".',
+  });
+
 const accountIdParam = Joi.string()
   .trim()
   .min(1)
@@ -181,6 +206,8 @@ module.exports = {
   unit,
   datasheetLink,
   variablesArray,
+  location,
+  coordinate,
   accountIdParam,
   verificationTokenParam,
 };
