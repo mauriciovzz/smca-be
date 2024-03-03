@@ -3,14 +3,6 @@ const Mailgen = require('mailgen');
 const config = require('./config');
 const logger = require('./logger');
 
-const mailGenerator = new Mailgen({
-  theme: 'default',
-  product: {
-    name: 'smca',
-    link: config.BASE_URL,
-  },
-});
-
 const transporter = nodemailer.createTransport({
   host: config.MAIL_HOST,
   port: config.MAIL_PORT,
@@ -21,7 +13,15 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-const accountVerification = async (account, path) => {
+const accountVerification = async (account, origin, path) => {
+  const mailGenerator = new Mailgen({
+    theme: 'default',
+    product: {
+      name: 'smca',
+      link: origin,
+    },
+  });
+
   const emailInfo = {
     body: {
       greeting: 'Hola',
@@ -31,7 +31,7 @@ const accountVerification = async (account, path) => {
         button: {
           color: '#DC4D2F',
           text: 'Verificar Cuenta',
-          link: `${config.BASE_URL}${path}`,
+          link: `${origin}${path}`,
         },
       },
       outro: 'Este enlace de verificación expirará en 1 hora. Si tu enlace ha expirado, inicia sesión en la aplicación con los datos registrados para solicitar uno nuevo.',
@@ -59,7 +59,15 @@ const accountVerification = async (account, path) => {
   });
 };
 
-const passwordReset = async (account, path) => {
+const passwordReset = async (account, origin, path) => {
+  const mailGenerator = new Mailgen({
+    theme: 'default',
+    product: {
+      name: 'smca',
+      link: origin,
+    },
+  });
+
   const emailInfo = {
     body: {
       greeting: 'Hola',
@@ -70,7 +78,7 @@ const passwordReset = async (account, path) => {
         button: {
           color: '#DC4D2F',
           text: 'Restablecer Contraseña',
-          link: `${config.BASE_URL}${path}`,
+          link: `${origin}${path}`,
         },
       },
       outro: 'Si no solicitó un restablecimiento de contraseña, no se requiere ninguna otra acción de su parte.',
@@ -98,7 +106,15 @@ const passwordReset = async (account, path) => {
   });
 };
 
-const emailVerification = async (account, newEmail, path) => {
+const emailVerification = async (account, newEmail, origin, path) => {
+  const mailGenerator = new Mailgen({
+    theme: 'default',
+    product: {
+      name: 'smca',
+      link: origin,
+    },
+  });
+
   const emailInfo = {
     body: {
       greeting: 'Hola',
@@ -109,7 +125,7 @@ const emailVerification = async (account, newEmail, path) => {
         button: {
           color: '#DC4D2F',
           text: 'Confirmar Cambio',
-          link: `${config.BASE_URL}${path}`,
+          link: `${origin}${path}`,
         },
       },
       outro: 'Este enlace expirara en 10 minutos. Si no solicitó un cambio de correo electrónico, no se requiere ninguna otra acción de su parte.',

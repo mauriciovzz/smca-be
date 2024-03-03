@@ -26,8 +26,9 @@ const register = async (req, res) => {
 
   await accountsService.createVerificationToken(accountInfo.account_id, 'account', null, token, expiration);
 
+  const { origin } = req.headers;
   const path = `/verificar/cuenta/${token}`;
-  await mailHelper.accountVerification(accountInfo, path);
+  await mailHelper.accountVerification(accountInfo, origin, path);
 
   return res.status(200).send('Se ha enviado un enlace para la verificacion de su cuenta');
 };
@@ -47,10 +48,11 @@ const resendVerificationLink = async (req, res) => {
   const token = crypto.randomBytes(32).toString('hex').toUpperCase();
   const expiration = Date.now() / 1000 + parseInt(config.AV_EXPIRATION, 10);
 
-  await accountsService.createVerificationToken(accountInfo.account_id, 'account', token, expiration);
+  await accountsService.createVerificationToken(accountInfo.account_id, 'account', null, token, expiration);
 
+  const { origin } = req.headers;
   const path = `/verificar/cuenta/${token}`;
-  await mailHelper.accountVerification(accountInfo, path);
+  await mailHelper.accountVerification(accountInfo, origin, path);
 
   return res.status(200).send('Se ha enviado un enlace para la verificacion de su cuenta');
 };
@@ -90,8 +92,9 @@ const recoverPassword = async (req, res) => {
 
   await accountsService.createVerificationToken(account.account_id, 'password', null, token, expiration);
 
+  const { origin } = req.headers;
   const path = `/restablecer-contraseña/${token}`;
-  await mailHelper.passwordReset(account, path);
+  await mailHelper.passwordReset(account, origin, path);
 
   return res.status(200).send('Se ha enviado un enlace para el restablecimiento de su contraseña');
 };
@@ -195,8 +198,9 @@ const updateEmail = async (req, res) => {
 
   await accountsService.createVerificationToken(account.account_id, 'email', newEmail, token, expiration);
 
+  const { origin } = req.headers;
   const path = `/verificar/correo-electronico/${token}`;
-  await mailHelper.emailVerification(account, newEmail, path);
+  await mailHelper.emailVerification(account, newEmail, origin, path);
 
   return res.status(201).send('Un enlace de verificacion fue enviado a su nueva cuenta de correo electrónico.');
 };

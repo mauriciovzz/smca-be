@@ -29,9 +29,9 @@ const createVerificationToken = async (accountId, type, email, token, expiration
                 VALUES ($1, $2, $3, $4, TO_TIMESTAMP($5))
                 ON CONFLICT (account_id, type) 
                 DO UPDATE SET
-                  email =$3,
-                  token = $4,
-                  expiration = TO_TIMESTAMP($5)`;
+                  email = EXCLUDED.email,
+                  token = EXCLUDED.token,
+                  expiration = EXCLUDED.expiration`;
 
   await pool.query(sql, [accountId, type, email, token, expiration]);
 };
