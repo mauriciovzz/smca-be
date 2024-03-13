@@ -1,6 +1,6 @@
 const mqtt = require('mqtt');
 const config = require('./config');
-const readingsController = require('../controllers/to fix/readings');
+const readingsController = require('../controllers/readings');
 const photosController = require('../controllers/to fix/photos');
 
 const options = {

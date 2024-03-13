@@ -20,6 +20,7 @@ const getAll = async (req, res) => {
       component_id: components[i].component_id,
       name: components[i].name,
       datasheet_link: components[i].datasheet_link,
+      component_type_id: components[i].component_type_id,
       type: components[i].type,
       variables,
     });

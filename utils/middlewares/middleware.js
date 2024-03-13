@@ -4,6 +4,7 @@ const workspacesService = require('../../services/workspaces');
 const variablesService = require('../../services/variables');
 const componentsService = require('../../services/components');
 const locationsService = require('../../services/locations');
+const nodesService = require('../../services/nodes');
 
 const requestLogger = (request, response, next) => {
   logger.info('Method:', request.method);
@@ -89,11 +90,191 @@ const componentVerification = async (request, response, next) => {
 
 // eslint-disable-next-line consistent-return
 const locationVerification = async (request, response, next) => {
-  const { workspaceId, locationId } = request.params;
+  const { workspaceId } = request.params;
+  const locationId = !request.params.locationId
+    ? request.body.locationId
+    : request.params.locationId;
 
   if (!await locationsService.getOne(workspaceId, locationId)) {
     return response.status(404).json({ error: 'La ubicación no se encuentra registrada.' });
   }
+  next();
+};
+
+// eslint-disable-next-line consistent-return
+const nodeVerification = async (request, response, next) => {
+  const { nodeId } = request.params;
+
+  if (!await nodesService.getOne(nodeId)) {
+    return response.status(404).json({ error: 'El nodo no se encuentra registrado.' });
+  }
+  next();
+};
+
+// eslint-disable-next-line consistent-return
+const nodeStateVerification = async (request, response, next) => {
+  const { nodeId } = request.params;
+
+  const currentState = await nodesService.getState(nodeId);
+  if (currentState === 'Terminado') {
+    return response.status(409).json({ error: 'El nodo indicado ha sido terminado.' });
+  }
+  next();
+};
+
+// eslint-disable-next-line consistent-return
+const nodeWorkspaceVerification = async (request, response, next) => {
+  const { workspaceId, nodeId } = request.params;
+
+  const node = await nodesService.getOne(nodeId);
+  if (node.workspace_id !== workspaceId) {
+    return response.status(401).json({ error: 'El nodo no se encuentra en dicho espacio de trabajo.' });
+  }
+  next();
+};
+
+// eslint-disable-next-line consistent-return
+const nodeNameVerification = async (request, response, next) => {
+  const { workspaceId, nodeId } = request.params;
+  const { nodeName } = request.body;
+
+  if (!await nodesService.isNameAvailableInWS(workspaceId, nodeName)) {
+    return response.status(409).json({ error: 'Ya existe un nodo con el nombre ingresado.' });
+  }
+
+  let isVisible;
+
+  if (nodeId) {
+    const node = nodesService.getOne(nodeId);
+    isVisible = node.is_visible;
+  } else {
+    const { nodeVisibility } = request.body;
+    isVisible = nodeVisibility;
+  }
+
+  if ((isVisible) && (!await nodesService.isNameAvailablePublicly(nodeName))) {
+    return response.status(409).json({ error: 'Ya existe un nodo publico con el nombre ingresado.' });
+  }
+
+  next();
+};
+
+// eslint-disable-next-line consistent-return
+const nodeTypeVerification = async (request, response, next) => {
+  const { nodeType } = request.body;
+
+  const nodeTypes = await nodesService.getTypes();
+
+  if (!nodeTypes.map((nt) => nt.node_type_id).includes(nodeType)) {
+    return response.status(404).json({ error: 'El tipo ingresado no se encuentra registrado.' });
+  }
+
+  next();
+};
+
+// eslint-disable-next-line consistent-return
+const nodeComponentsAndVariablesVerification = async (request, response, next) => {
+  const { workspaceId } = request.params;
+  const { nodeComponents, nodeVariables } = request.body;
+
+  const workspaceComponents = await componentsService.getAll(workspaceId);
+  const workspaceComponentsIds = workspaceComponents.map((wc) => wc.component_id);
+
+  for (let i = 0; i < nodeComponents.length; i += 1) {
+    // eslint-disable-next-line no-await-in-loop
+    if (!workspaceComponentsIds.includes(nodeComponents[i])) {
+      return response.status(404).json({ error: 'Uno de los componentes no se encuentra registrado.' });
+    }
+
+    const currentComponent = workspaceComponents.find((c) => c.component_id === nodeComponents[i]);
+    if (currentComponent.type === 'Sensor') {
+      // eslint-disable-next-line no-await-in-loop
+      const currentComponenVariables = await componentsService.getVariables(nodeComponents[i]);
+      const currentComponenVariablesIds = currentComponenVariables.map((v) => v.variable_id);
+
+      const nodeVariablesIds = nodeVariables
+        .filter((nv) => nv.component_id === nodeComponents[i])
+        .map((nv) => nv.variable_id);
+
+      for (let j = 0; j < nodeVariablesIds.length; j += 1) {
+        if (!currentComponenVariablesIds.includes(nodeVariablesIds[j])) {
+          return response.status(404).json({ error: 'Una de las variables no se encuentra registrada.' });
+        }
+      }
+    }
+  }
+
+  next();
+};
+
+// eslint-disable-next-line consistent-return
+const nodeComponentsQuantityVerification = async (request, response, next) => {
+  const { workspaceId } = request.params;
+  const { nodeComponents } = request.body;
+
+  const workspaceComponents = await componentsService.getAll(workspaceId);
+
+  // at least one board
+  const workspaceBoards = workspaceComponents
+    .filter((wc) => wc.type === 'Placa')
+    .map((wc) => wc.component_id);
+
+  const nodeBoards = nodeComponents.filter((nc) => workspaceBoards.includes(nc));
+  if (nodeBoards.length === 0) {
+    return response.status(400).send('El nodo debe contener al menos una placa.');
+  }
+
+  // at least one sensor
+  const workspaceSensors = workspaceComponents
+    .filter((wc) => wc.type === 'Sensor')
+    .map((wc) => wc.component_id);
+
+  const nodeSensors = nodeComponents.filter((nc) => workspaceSensors.includes(nc));
+  if (nodeSensors.length === 0) {
+    return response.status(400).send('El nodo debe contener al menos un sensor.');
+  }
+
+  // only one rain sensor
+  const workspaceRainSensors = workspaceComponents
+    .filter((wc) => wc.type === 'Sensor de Lluvia')
+    .map((wc) => wc.component_id);
+
+  const nodeRainSensors = nodeComponents.filter((nc) => workspaceRainSensors.includes(nc));
+  if (nodeRainSensors.length > 1) {
+    return response.status(400).send('El nodo no puede contener mas de un sensor de lluvia.');
+  }
+
+  next();
+};
+
+// eslint-disable-next-line consistent-return
+const nodeLocationVerification = async (request, response, next) => {
+  const { workspaceId, nodeId } = request.params;
+  const { nodeLocation } = request.body;
+
+  const chosenLocation = locationsService.getOne(workspaceId, nodeLocation);
+  if (!chosenLocation) {
+    return response.status(404).json({ error: 'La ubicación no se encuentra registrada.' });
+  }
+
+  if (chosenLocation.is_taken) {
+    return response.status(409).send('La ubicacion selecionada se encuentra en uso.');
+  }
+
+  let isVisible;
+
+  if (nodeId) {
+    const node = nodesService.getOne(nodeId);
+    isVisible = node.is_visible;
+  } else {
+    const { nodeVisibility } = request.body;
+    isVisible = nodeVisibility;
+  }
+
+  if ((isVisible) && (!await nodesService.areCoordinatesAvailablePublicly(chosenLocation))) {
+    return response.status(409).json({ error: 'Ya existe un nodo visible en la ubicación ingresada.' });
+  }
+
   next();
 };
 
@@ -122,6 +303,14 @@ module.exports = {
   variableVerification,
   componentVerification,
   locationVerification,
+  nodeVerification,
+  nodeStateVerification,
+  nodeWorkspaceVerification,
+  nodeNameVerification,
+  nodeTypeVerification,
+  nodeComponentsAndVariablesVerification,
+  nodeComponentsQuantityVerification,
+  nodeLocationVerification,
   unknownEndpoint,
   errorHandler,
 };

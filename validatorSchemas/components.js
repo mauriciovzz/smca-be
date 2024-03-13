@@ -9,7 +9,7 @@ const create = Joi.object({
   name: schemaVariables.name,
   datasheetLink: schemaVariables.datasheetLink,
   componentType: schemaVariables.id('ComponentType'),
-  variables: schemaVariables.variablesArray,
+  variables: schemaVariables.idsArray('Variables'),
 });
 
 const idParams = Joi.object({
@@ -20,7 +20,7 @@ const idParams = Joi.object({
 const update = Joi.object({
   name: schemaVariables.name,
   datasheetLink: schemaVariables.datasheetLink,
-  variables: schemaVariables.variablesArray,
+  variables: schemaVariables.idsArray('Variables'),
 });
 
 module.exports = {

@@ -1,7 +1,14 @@
+const crypto = require('node:crypto');
 const nodesService = require('../services/nodes');
+const locationsService = require('../services/locations');
 
 const getTypes = async (req, res) => {
   const nodeTypes = await nodesService.getTypes();
+  return res.status(200).send(nodeTypes);
+};
+
+const getStates = async (req, res) => {
+  const nodeTypes = await nodesService.getStates();
   return res.status(200).send(nodeTypes);
 };
 
@@ -12,183 +19,223 @@ const getAll = async (req, res) => {
   return res.status(200).send(response);
 };
 
-module.exports = {
-  getTypes,
-  getAll,
+const getComponents = async (req, res) => {
+  const { nodeId } = req.params;
+
+  const nodeComponents = await nodesService.getComponents(nodeId);
+
+  const componentsInfo = [];
+  for (let j = 0; j < nodeComponents.length; j += 1) {
+    // eslint-disable-next-line no-await-in-loop
+    const variables = await nodesService.getVariables(nodeId, nodeComponents[j].component_id);
+
+    componentsInfo.push({
+      component_id: nodeComponents[j].component_id,
+      name: nodeComponents[j].name,
+      datasheet_link: nodeComponents[j].datasheet_link,
+      component_type_id: nodeComponents[j].component_type_id,
+      type: nodeComponents[j].type,
+      variables,
+    });
+  }
+
+  return res.status(200).send(componentsInfo);
 };
 
-// /* Get all active nodes */
-// const getActiveNodes = async (req, res) => {
-//   const sql = ` SELECT
-//                   n.node_type,
-//                   n.node_id,
-//                   n.lat ,
-//                   n.long,
-//                   n.start_date,
-//                   l.location_name,
-//                   ( select exists (
-//                     select *
-//                     from node_component nc, component com
-//                     where nc.node_type=n.node_type
-//                         AND nc.node_id=n.node_id
-//                         AND nc.component_id=com.component_id
-//                         AND com.component_type='CAMERA'
-//                     )
-//                   ) AS camera
-//                 FROM node n, location l
-//                   where n.node_state = 'ACT'
-//                   AND n.lat = l.lat
-//                   AND n.long = l.long`;
+const create = async (req, res) => {
+  const { workspaceId } = req.params;
+  const {
+    nodeName, nodeType, nodeComponents, nodeVariables, nodeLocation, nodeVisibility,
+  } = req.body;
 
-//   const response = await pool.query(sql);
-//   res.send(response.rows);
-// };
+  let nodeCode = crypto.randomBytes(4).toString('hex').toUpperCase();
 
-// /* Get all nodes */
-// const getAllNodes = async (req, res) => {
-//   const sql = ` SELECT
-//                   n.node_type,
-//                   n.node_id,
-//                   n.node_state,
-//                   n.lat ,
-//                   n.long,
-//                   l.location_name,
-//                   l.address
-//                 FROM node n, location l
-//                   WHERE n.lat = l.lat
-//                   AND n.long = l.long`;
+  let flag = true;
+  while (flag) {
+    // eslint-disable-next-line no-await-in-loop
+    const isCodeInUse = await nodesService.getOneWithNodeCode(nodeCode);
 
-//   const response = await pool.query(sql);
-//   res.send(response.rows);
-// };
+    if (isCodeInUse) {
+      nodeCode = crypto.randomBytes(4).toString('hex').toUpperCase();
+    } else {
+      flag = false;
+    }
+  }
 
-// /* Get variable list of a node */
-// const getVariableList = async (nodeType, nodeId, variableType) => {
-//   const sqlVariables = `  SELECT
-//                             v.variable_id,
-//                             v.variable_name,
-//                             v.unit
-//                           FROM
-//                             node_variable nv
-//                           INNER JOIN variable v
-//                             ON nv.variable_id=v.variable_id
-//                           WHERE nv.node_type    = $1
-//                             AND nv.node_id      = $2
-//                             AND v.variable_type = $3`;
-//   const variableList = await pool.query(sqlVariables, [nodeType, nodeId, variableType]);
-//   return variableList.rows;
-// };
+  const newNode = await nodesService.create(
+    workspaceId,
+    nodeName,
+    nodeType,
+    nodeLocation,
+    nodeVisibility,
+    nodeCode,
+  );
 
-// /* Get all reading averages of a node */
-// const getReadingAverages = async (req, res) => {
-//   const {
-//     nodeType, nodeId, lat, long, date, variableType,
-//   } = req.params;
+  await locationsService.updateTakenField(
+    workspaceId,
+    nodeLocation,
+    true,
+  );
 
-//   const variableList = await getVariableList(nodeType, nodeId, variableType);
+  for (let i = 0; i < nodeComponents.length; i += 1) {
+    // eslint-disable-next-line no-await-in-loop
+    await nodesService.addComponents(newNode.node_id, nodeComponents[i]);
+  }
 
-//   const readingData = [];
-//   for (let i = 0; i < variableList.length; i += 1) {
-//     const sqlAverages = ` SELECT
-//                             end_hour,
-//                             average
-//                           FROM reading_average
-//                           WHERE node_type    = $1
-//                             AND node_id      = $2
-//                             AND lat          = $3
-//                             AND long         = $4
-//                             AND variable_id  = $5
-//                             AND average_date = $6`;
-//     const values = [nodeType, nodeId, lat, long, variableList[i].variable_id, date];
-//     // eslint-disable-next-line
-//     const averageList = await pool.query(sqlAverages, values);
+  for (let i = 0; i < nodeVariables.length; i += 1) {
+    // eslint-disable-next-line no-await-in-loop
+    await nodesService.addVariables(
+      newNode.node_id,
+      nodeVariables[i].component_id,
+      nodeVariables[i].variable_id,
+    );
+  }
 
-//     readingData.push({
-//       name: variableList[i].variable_name,
-//       unit: variableList[i].unit,
-//       averages: averageList.rows,
-//     });
-//   }
+  return res.sendStatus(201);
+};
 
-//   return res.status(201).send(readingData);
-// };
+const updateName = async (req, res) => {
+  const { nodeId } = req.params;
+  const { nodeName } = req.body;
 
-// /* Get range of reading averages of a node */
-// const getAveragesRange = async (req, res) => {
-//   const {
-//     nodeType, nodeId, lat, long, date, variableType,
-//   } = req.params;
+  await nodesService.updateColumn(nodeId, 'name', nodeName);
+  return res.status(200).send('Nombre actualizado exitosamente.');
+};
 
-//   // Get the variables of the node
-//   const variableList = await getVariableList(nodeType, nodeId, variableType);
+const updateState = async (req, res) => {
+  const { workspaceId, nodeId } = req.params;
+  const { stateId } = req.body;
 
-//   // Get the dates of the week
-//   const currentDate = new Date(date);
-//   const sundayDate = new Date(currentDate.setDate(currentDate.getDate() - currentDate.getDay()));
-//   const weekDates = [new Date(sundayDate)];
+  const states = await nodesService.getStates();
 
-//   while (sundayDate.setDate(sundayDate.getDate() + 1) && sundayDate.getDay() !== 0) {
-//     weekDates.push(new Date(sundayDate));
-//   }
+  if (!states.map((s) => s.node_state_id).includes(stateId)) {
+    return res.status(404).json({ error: 'El estado ingresado no se encuentra registrado.' });
+  }
 
-//   // Get averages range
-//   const readingData = [];
+  const newState = states.find((s) => s.node_state_id === stateId).state;
+  const node = await nodesService.getOne(nodeId);
 
-//   for (let i = 0; i < variableList.length; i += 1) {
-//     const weekData = [];
+  await nodesService.updateColumn(nodeId, 'node_state_id', stateId);
 
-//     for (let j = 0; j < 7; j += 1) {
-//       const sqlAverages = ` SELECT
-//                               MIN(average) as min,
-//                               MAX(average) as max
-//                             FROM reading_average
-//                             WHERE node_type    = $1
-//                               AND node_id      = $2
-//                               AND lat          = $3
-//                               AND long         = $4
-//                               AND variable_id  = $5
-//                               AND average_date = $6`;
-//       const values = [nodeType, nodeId, lat, long, variableList[i].variable_id, weekDates[j]];
-//       // eslint-disable-next-line
-//       const range = await pool.query(sqlAverages, values);
+  if (newState === 'Activo' && !node.start_date) {
+    const date = new Date();
+    const localDate = new Date(date.toLocaleString('en-US', { timeZone: 'America/Caracas' }));
+    const fullDate = `${localDate.getFullYear()}-${localDate.getMonth() + 1}-${localDate.getDate()}`;
 
-//       weekData.push({
-//         day: weekDates[j].getDay(),
-//         min: range.rows[0].min,
-//         max: range.rows[0].max,
-//       });
-//     }
+    await nodesService.updateColumn(nodeId, 'start_date', fullDate);
+  }
 
-//     readingData.push({
-//       name: variableList[i].variable_name,
-//       unit: variableList[i].unit,
-//       ranges: weekData,
-//     });
-//   }
+  if (newState === 'Terminado') {
+    await nodesService.updateColumn(nodeId, 'start_date', null);
+    await locationsService.updateTakenField(workspaceId, node.location_id, false);
+    await nodesService.updateColumn(nodeId, 'location_id', null);
+  }
 
-//   return res.status(201).send(readingData);
-// };
+  return res.status(200).send('Estado actualizado exitosamente.');
+};
 
-// /* Add a node */
-// const create = async (req, res) => {
-//   const { nodeType } = req.body;
+const updateType = async (req, res) => {
+  const { nodeId } = req.params;
+  const { nodeType } = req.body;
 
-//   const type = (nodeType === 'OUTDOOR') ? 'outdoor' : 'indoor';
-//   const sql = ` INSERT INTO node (
-//                   node_type,
-//                   node_id
-//                 )
-//                 VALUES ($1, nextval('${type}_nodes'))
-//                 RETURNING *`;
+  await nodesService.updateColumn(nodeId, 'node_type_id', nodeType);
+  return res.status(200).send('Tipo actualizado exitosamente.');
+};
 
-//   const response = await pool.query(sql, [nodeType]);
-//   return res.status(201).send(response.rows);
-// };
+const updateVisibility = async (req, res) => {
+  const { workspaceId, nodeId } = req.params;
+  const { newVisibility } = req.body;
 
-// module.exports = {
-//   // getActiveNodes,
-//   // getAllNodes,
-//   // getReadingAverages,
-//   // getAveragesRange,
-//   // create,
-// };
+  if (newVisibility) {
+    const node = nodesService.getOne(nodeId);
+    const currentLocation = locationsService.getOne(workspaceId, node.location_id);
+
+    if (!await nodesService.areCoordinatesAvailablePublicly(currentLocation)) {
+      return res.status(409).json({ error: 'Ya existe un nodo visible en la posición de este nodo.' });
+    }
+
+    if (!await nodesService.isNameAvailablePublicly(node.name)) {
+      return res.status(409).json({ error: 'Ya existe un nodo visible con el nombre de este nodo.' });
+    }
+  }
+
+  await nodesService.updateColumn(nodeId, 'is_visible', newVisibility);
+  return res.status(200).send('Visibilidad actualizada exitosamente.');
+};
+
+const updateLocation = async (req, res) => {
+  const { workspaceId, nodeId } = req.params;
+  const { locationId } = req.body;
+
+  const node = await nodesService.getOne(nodeId);
+
+  await locationsService.updateTakenField(workspaceId, node.location_id, false);
+  await nodesService.updateColumn(nodeId, 'location_id', locationId);
+  await nodesService.updateColumn(nodeId, 'start_date', null);
+  await locationsService.updateTakenField(workspaceId, locationId, true);
+
+  const states = await nodesService.getStates();
+  await nodesService.updateColumn(
+    nodeId,
+    'node_state_id',
+    states.find((s) => s.state === 'Inactivo').node_state_id,
+  );
+
+  return res.sendStatus(200);
+};
+
+const updateComponents = async (req, res) => {
+  const { nodeId } = req.params;
+  const { nodeComponents, nodeVariables } = req.body;
+
+  await nodesService.removeAllNodeComponents(nodeId);
+  await nodesService.removeAllNodeVariables(nodeId);
+
+  for (let i = 0; i < nodeComponents.length; i += 1) {
+    // eslint-disable-next-line no-await-in-loop
+    await nodesService.addComponents(nodeId, nodeComponents[i]);
+  }
+
+  for (let i = 0; i < nodeVariables.length; i += 1) {
+    // eslint-disable-next-line no-await-in-loop
+    await nodesService.addVariables(
+      nodeId,
+      nodeVariables[i].component_id,
+      nodeVariables[i].variable_id,
+    );
+  }
+
+  const states = await nodesService.getStates();
+  await nodesService.updateColumn(
+    nodeId,
+    'node_state_id',
+    states.find((s) => s.state === 'Inactivo').node_state_id,
+  );
+
+  return res.sendStatus(200);
+};
+
+const remove = async (req, res) => {
+  const { workspaceId, nodeId } = req.params;
+
+  const node = await nodesService.getOne(nodeId);
+  await locationsService.updateTakenField(workspaceId, node.location_id, false);
+
+  await nodesService.remove(nodeId);
+  return res.status(200).send('Nodo eliminado exitosamente.');
+};
+
+module.exports = {
+  getTypes,
+  getStates,
+  getAll,
+  getComponents,
+  create,
+  updateName,
+  updateState,
+  updateType,
+  updateVisibility,
+  updateLocation,
+  updateComponents,
+  remove,
+};

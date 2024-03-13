@@ -83,6 +83,17 @@ const remove = async (workspaceId, locationId) => {
   await pool.query(sql, [workspaceId, locationId]);
 };
 
+const updateTakenField = async (worskapceId, locationId, isTaken) => {
+  const sql = ` UPDATE
+                  location
+                SET
+                  is_taken = $1
+                WHERE
+                  workspace_id = $2
+                  AND location_id = $3`;
+  await pool.query(sql, [isTaken, worskapceId, locationId]);
+};
+
 module.exports = {
   getAll,
   getOne,
@@ -91,4 +102,5 @@ module.exports = {
   create,
   update,
   remove,
+  updateTakenField,
 };

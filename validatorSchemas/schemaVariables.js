@@ -136,11 +136,25 @@ const datasheetLink = Joi.string().uri()
     'any.required': 'Se requiere la entrada "Unidad".',
   });
 
-const variablesArray = Joi.array()
+const idsArray = (reference) => Joi.array()
   .items(Joi.number().integer().greater(0))
   .messages({
-    'array.base': 'La entrada "Variables" debe ser de tipo arreglo.',
-    'array.includes': 'Los datos de la entrada "Variables link" deben ser enteros.',
+    'array.base': `La entrada "${reference}" debe ser de tipo arreglo.`,
+    'array.includes': `Los datos de la entrada "${reference}" deben ser enteros.`,
+  });
+
+const nodeVariable = Joi.object({
+  component_id: id('component id'),
+  variable_id: id('variable id'),
+});
+
+const nodeVariablesArray = Joi.array()
+  .items(nodeVariable)
+  .min(1)
+  .messages({
+    'array.base': 'La entradas "Variables del componente" debe ser de tipo arreglo.',
+    'array.min': 'El nodo debe contar con al menos una variable.',
+    'array.includes': 'Los datos de la entrada "Variables del componente" deben ser enteros.',
   });
 
 const location = Joi.string()
@@ -205,7 +219,8 @@ module.exports = {
   equal,
   unit,
   datasheetLink,
-  variablesArray,
+  idsArray,
+  nodeVariablesArray,
   location,
   coordinate,
   accountIdParam,

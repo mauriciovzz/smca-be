@@ -13,6 +13,14 @@ nodesRouter.get(
 );
 
 nodesRouter.get(
+  '/getStates',
+  [
+    middleware.accessTokenVerification,
+  ],
+  nodesController.getStates,
+);
+
+nodesRouter.get(
   '/:workspaceId',
   [
     middleware.accessTokenVerification,
@@ -23,69 +31,137 @@ nodesRouter.get(
   nodesController.getAll,
 );
 
-// variables example
+nodesRouter.get(
+  '/:workspaceId/:nodeId',
+  [
+    middleware.accessTokenVerification,
+    validatorMiddleware.validateParams(schemas.idParams),
+    middleware.workspaceVerification,
+    middleware.workspaceMemberVerification,
+  ],
+  nodesController.getComponents,
+);
 
-// nodesRouter.post(
-//   '/:workspaceId',
-//   [
-//     middleware.accessTokenVerification,
-//     validatorMiddleware.validateParams(schemas.workspaceId),
-//     validatorMiddleware.validate(schemas.create),
-//     middleware.workspaceVerification,
-//     middleware.workspaceAdminVerification,
-//   ],
-//   nodesController.create,
-// );
+nodesRouter.post(
+  '/:workspaceId',
+  [
+    middleware.accessTokenVerification,
+    validatorMiddleware.validateParams(schemas.workspaceId),
+    validatorMiddleware.validate(schemas.create),
+    middleware.workspaceVerification,
+    middleware.workspaceAdminVerification,
+    middleware.nodeNameVerification,
+    middleware.nodeTypeVerification,
+    middleware.nodeComponentsAndVariablesVerification,
+    middleware.nodeComponentsQuantityVerification,
+    middleware.nodeLocationVerification,
+  ],
+  nodesController.create,
+);
 
-// nodesRouter.put(
-//   '/:workspaceId/:variableId',
-//   [
-//     middleware.accessTokenVerification,
-//     validatorMiddleware.validateParams(schemas.idParams),
-//     validatorMiddleware.validate(schemas.update),
-//     middleware.workspaceVerification,
-//     middleware.workspaceAdminVerification,
-//     middleware.variableVerification,
-//   ],
-//   nodesController.update,
-// );
+nodesRouter.put(
+  '/updateName/:workspaceId/:nodeId',
+  [
+    middleware.accessTokenVerification,
+    validatorMiddleware.validateParams(schemas.idParams),
+    validatorMiddleware.validate(schemas.updateName),
+    middleware.workspaceVerification,
+    middleware.workspaceAdminVerification,
+    middleware.nodeVerification,
+    middleware.nodeStateVerification,
+    middleware.nodeWorkspaceVerification,
+    middleware.nodeNameVerification,
+  ],
+  nodesController.updateName,
+);
 
-// nodesRouter.delete(
-//   '/:workspaceId/:variableId',
-//   [
-//     middleware.accessTokenVerification,
-//     validatorMiddleware.validateParams(schemas.idParams),
-//     middleware.workspaceVerification,
-//     middleware.workspaceAdminVerification,
-//     middleware.variableVerification,
-//   ],
-//   nodesController.remove,
-// );
+nodesRouter.put(
+  '/updateState/:workspaceId/:nodeId',
+  [
+    middleware.accessTokenVerification,
+    validatorMiddleware.validateParams(schemas.idParams),
+    validatorMiddleware.validate(schemas.updateState),
+    middleware.workspaceVerification,
+    middleware.workspaceAdminVerification,
+    middleware.nodeVerification,
+    middleware.nodeStateVerification,
+    middleware.nodeWorkspaceVerification,
+  ],
+  nodesController.updateState,
+);
 
-// old
+nodesRouter.put(
+  '/updateType/:workspaceId/:nodeId',
+  [
+    middleware.accessTokenVerification,
+    validatorMiddleware.validateParams(schemas.idParams),
+    validatorMiddleware.validate(schemas.updateType),
+    middleware.workspaceVerification,
+    middleware.workspaceAdminVerification,
+    middleware.nodeVerification,
+    middleware.nodeStateVerification,
+    middleware.nodeWorkspaceVerification,
+    middleware.nodeTypeVerification,
+  ],
+  nodesController.updateType,
+);
 
-// /* Get all active nodes */
-// nodesRouter.get('/active', nodesController.getActiveNodes);
+nodesRouter.put(
+  '/updateVisibility/:workspaceId/:nodeId',
+  [
+    middleware.accessTokenVerification,
+    validatorMiddleware.validateParams(schemas.idParams),
+    validatorMiddleware.validate(schemas.updateVisibility),
+    middleware.workspaceVerification,
+    middleware.workspaceAdminVerification,
+    middleware.nodeVerification,
+    middleware.nodeStateVerification,
+    middleware.nodeWorkspaceVerification,
+  ],
+  nodesController.updateVisibility,
+);
 
-// /* Get all nodes */
-// nodesRouter.get('/all', nodesController.getAllNodes);
+nodesRouter.put(
+  '/updateLocation/:workspaceId/:nodeId',
+  [
+    middleware.accessTokenVerification,
+    validatorMiddleware.validateParams(schemas.idParams),
+    validatorMiddleware.validate(schemas.updateLocation),
+    middleware.workspaceVerification,
+    middleware.workspaceAdminVerification,
+    middleware.nodeVerification,
+    middleware.nodeStateVerification,
+    middleware.nodeWorkspaceVerification,
+    middleware.nodeLocationVerification,
+  ],
+  nodesController.updateLocation,
+);
 
-// /* Get all reading averages of a node */
-// nodesRouter.get('/:nodeType/:nodeId/:lat/:long/:date/:variableType'
-// , nodesController.getReadingAverages);
+nodesRouter.put(
+  '/updateComponents/:workspaceId/:nodeId',
+  [
+    middleware.accessTokenVerification,
+    validatorMiddleware.validateParams(schemas.idParams),
+    validatorMiddleware.validate(schemas.updateComponents),
+    middleware.workspaceVerification,
+    middleware.workspaceAdminVerification,
+    middleware.nodeComponentsAndVariablesVerification,
+    middleware.nodeComponentsQuantityVerification,
+  ],
+  nodesController.updateComponents,
+);
 
-// /* Get range of reading averages of a node */
-// nodesRouter.get('/:nodeType/:nodeId/:lat/:long/:date/:variableType/range'
-// , nodesController.getAveragesRange);
-
-// /* Add a node */
-// nodesRouter.post(
-//   '/',
-//   [middleware.accessTokenVerification],
-//   nodesController.create,
-// );
-
-// /* Get all variables of a node */
-// nodesRouter.get('/:nodeType/:nodeId/variables', nodesController.getVariables);
+nodesRouter.delete(
+  '/:workspaceId/:nodeId',
+  [
+    middleware.accessTokenVerification,
+    validatorMiddleware.validateParams(schemas.idParams),
+    middleware.workspaceVerification,
+    middleware.workspaceAdminVerification,
+    middleware.nodeVerification,
+    middleware.nodeWorkspaceVerification,
+  ],
+  nodesController.remove,
+);
 
 module.exports = nodesRouter;

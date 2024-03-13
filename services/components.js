@@ -15,6 +15,7 @@ const getAll = async (workspaceId) => {
                   co.workspace_id,
                   co.name,
                   co.datasheet_link,
+                  ct.component_type_id,
                   ct.type
                 FROM
                   component co,
@@ -22,7 +23,7 @@ const getAll = async (workspaceId) => {
                 WHERE
                   ct.component_type_id = co.component_type_id
                   AND co.workspace_id = $1
-                ORDER BY name ASC `;
+                ORDER BY ct.component_type_id ASC, co.name ASC`;
 
   const response = await pool.query(sql, [workspaceId]);
   return response.rows;

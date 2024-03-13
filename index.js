@@ -1,7 +1,7 @@
 const app = require('./app');
 const client = require('./utils/mqttHelper');
 const pool = require('./utils/databaseHelper');
-const schedule = require('./utils/averageReadingsScheduler');
+const schedule = require('./utils/scheduler');
 const config = require('./utils/config');
 const logger = require('./utils/logger');
 

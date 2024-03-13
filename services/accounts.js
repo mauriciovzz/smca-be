@@ -5,7 +5,8 @@ const create = async (email, passwordHash, firstName, lastName) => {
                   email,
                   password_hash,
                   first_name,
-                  last_name
+                  last_name,
+                  
                 ) 
                 VALUES ($1, $2, $3, $4)
                 RETURNING *`;

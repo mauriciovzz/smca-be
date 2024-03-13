@@ -73,33 +73,6 @@ const remove = async (req, res) => {
   return res.status(200).send('Ubicación eliminada exitosamente.');
 };
 
-// const getFree = async (req, res) => {
-//   const sql = ` SELECT
-//                   *
-//                 FROM
-//                   location
-//                 WHERE
-//                   taken=false`;
-
-//   const result = await pool.query(sql);
-//   res.send(result.rows);
-// };
-
-// const getOne = async (req, res) => {
-//   const { lat, long } = req.params;
-
-//   const sql = ` SELECT
-//                   *
-//                 FROM
-//                   location
-//                 WHERE
-//                   lat      = $1
-//                   AND long = $2`;
-
-//   const response = await pool.query(sql, [lat, long]);
-//   res.send(response.rows);
-// };
-
 module.exports = {
   getAll,
   create,

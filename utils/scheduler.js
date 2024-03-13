@@ -1,8 +1,8 @@
 const schedule = require('node-schedule');
-// const averageReadingsController = require('../controllers/to fix/average_readings');
+const readingsController = require('../controllers/readings');
 
 schedule.scheduleJob('00 * * * *', (fireDate) => {
-  // averageReadingsController.calculateAverageReadings(fireDate);
+  readingsController.calculateReadingsAverages(fireDate);
 });
 
 const end = () => schedule.gracefulShutdown();
