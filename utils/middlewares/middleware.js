@@ -5,6 +5,7 @@ const variablesService = require('../../services/variables');
 const componentsService = require('../../services/components');
 const locationsService = require('../../services/locations');
 const nodesService = require('../../services/nodes');
+const readingsService = require('../../services/readings');
 
 const requestLogger = (request, response, next) => {
   logger.info('Method:', request.method);
@@ -249,7 +250,7 @@ const nodeComponentsQuantityVerification = async (request, response, next) => {
 
 // eslint-disable-next-line consistent-return
 const nodeLocationVerification = async (request, response, next) => {
-  const { workspaceId, nodeId } = request.params;
+  const { workspaceId } = request.params;
   const { nodeLocation } = request.body;
 
   const chosenLocation = locationsService.getOne(workspaceId, nodeLocation);
@@ -260,21 +261,28 @@ const nodeLocationVerification = async (request, response, next) => {
   if (chosenLocation.is_taken) {
     return response.status(409).send('La ubicacion selecionada se encuentra en uso.');
   }
+  next();
+};
 
-  let isVisible;
+// eslint-disable-next-line consistent-return
+const publicVerification = async (request, response, next) => {
+  const { nodeId } = request.params;
+  const node = await nodesService.getOne(nodeId);
 
-  if (nodeId) {
-    const node = nodesService.getOne(nodeId);
-    isVisible = node.is_visible;
-  } else {
-    const { nodeVisibility } = request.body;
-    isVisible = nodeVisibility;
+  if (!node.is_visible) {
+    return response.status(409).json({ error: 'El nodo seleccionado ya no es visible.' });
   }
+  next();
+};
 
-  if ((isVisible) && (!await nodesService.areCoordinatesAvailablePublicly(chosenLocation))) {
-    return response.status(409).json({ error: 'Ya existe un nodo visible en la ubicación ingresada.' });
+// eslint-disable-next-line consistent-return
+const nodeAccessVerification = async (request, response, next) => {
+  const { nodeId } = request.params;
+  const hasAccess = await readingsService.canAccountAccessReadings(request.accountId, nodeId);
+
+  if (!hasAccess) {
+    return response.status(403).json({ error: 'Acceso denegado.' });
   }
-
   next();
 };
 
@@ -311,6 +319,8 @@ module.exports = {
   nodeComponentsAndVariablesVerification,
   nodeComponentsQuantityVerification,
   nodeLocationVerification,
+  publicVerification,
+  nodeAccessVerification,
   unknownEndpoint,
   errorHandler,
 };

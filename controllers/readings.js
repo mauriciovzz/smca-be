@@ -30,15 +30,6 @@ const create = async (reading) => {
   }
 };
 
-const getAll = async (req, res) => {
-  const {
-    nodeType, nodeId, variableId, date,
-  } = req.params;
-
-  const readings = await readingsService.getAll(nodeType, nodeId, variableId, date);
-  res.send(readings);
-};
-
 const calculateReadingsAverages = async (serverDate) => {
   const date = new Date(serverDate.toLocaleString('en-US', { timeZone: 'America/Caracas' }));
   const fullDate = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
@@ -53,8 +44,65 @@ const calculateReadingsAverages = async (serverDate) => {
   }
 };
 
+const getNodeReadings = async (req, res) => {
+  const { nodeId, date } = req.params;
+
+  const nodeVariables = await nodesService.getNodeVariables(nodeId);
+
+  const dayReadings = [];
+
+  const currentDate = new Date(date);
+  const sundayDate = new Date(currentDate.setDate(currentDate.getDate() - currentDate.getDay()));
+  const weekDates = [new Date(sundayDate)];
+
+  while (sundayDate.setDate(sundayDate.getDate() + 1) && sundayDate.getDay() !== 0) {
+    weekDates.push(new Date(sundayDate));
+  }
+
+  for (let i = 0; i < nodeVariables.length; i += 1) {
+    // eslint-disable-next-line no-await-in-loop
+    const dayAverages = await readingsService.getDayReadings(
+      nodeId,
+      nodeVariables[i].component_id,
+      nodeVariables[i].variable_id,
+      date,
+    );
+
+    const weekData = [];
+
+    for (let j = 0; j < 7; j += 1) {
+      // eslint-disable-next-line no-await-in-loop
+      const dayRange = await readingsService.getDayRanges(
+        nodeId,
+        nodeVariables[i].component_id,
+        nodeVariables[i].variable_id,
+        date,
+      );
+
+      weekData.push({
+        day: weekDates[j].getDay(),
+        min: dayRange.min,
+        max: dayRange.max,
+      });
+    }
+
+    dayReadings.push({
+      component_id: nodeVariables[i].component_id,
+      component_name: nodeVariables[i].component_name,
+      variable_id: nodeVariables[i].variable_id,
+      type: nodeVariables[i].type,
+      variable_name: nodeVariables[i].variable_name,
+      unit: nodeVariables[i].unit,
+      dayAverages,
+      weekData,
+    });
+  }
+
+  return res.status(200).send(dayReadings);
+};
+
 module.exports = {
   create,
-  getAll,
   calculateReadingsAverages,
+  getNodeReadings,
 };

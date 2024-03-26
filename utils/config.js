@@ -1,20 +1,8 @@
 require('dotenv').config();
 
-function selectDB() {
-  switch (process.env.NODE_ENV) {
-    case 'test':
-      return process.env.DB_TEST_URL;
-    case 'development':
-      return process.env.DB_LOCAL_URL;
-    case 'production':
-      return process.env.DB_URL;
-    default:
-      return null;
-  }
-}
-
 const {
   PORT,
+  DB_URL,
   MQTT_HOST,
   MQTT_PORT,
   MQTT_PROTOCOL,
@@ -24,6 +12,7 @@ const {
   MAIL_PORT,
   MAIL_USER,
   MAIL_PASSWORD,
+  MQTT_TOPIC,
   SECRET,
   RT_LONG_EXPIRATION,
   RT_SHORT_EXPIRATION,
@@ -33,8 +22,6 @@ const {
   PR_EXPIRATION,
 } = process.env;
 
-const DB_URL = selectDB();
-
 module.exports = {
   PORT,
   DB_URL,
@@ -43,6 +30,7 @@ module.exports = {
   MQTT_PROTOCOL,
   MQTT_USERNAME,
   MQTT_PASSWORD,
+  MQTT_TOPIC,
   MAIL_HOST,
   MAIL_PORT,
   MAIL_USER,

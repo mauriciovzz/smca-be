@@ -1,4 +1,6 @@
 const crypto = require('node:crypto');
+const fs = require('node:fs');
+const config = require('../utils/config');
 const nodesService = require('../services/nodes');
 const locationsService = require('../services/locations');
 
@@ -16,6 +18,31 @@ const getAll = async (req, res) => {
   const { workspaceId } = req.params;
 
   const response = await nodesService.getAll(workspaceId);
+  return res.status(200).send(response);
+};
+
+const getPublicNodes = async (req, res) => {
+  const response = await nodesService.getPublicNodes();
+  return res.status(200).send(response);
+};
+
+const getAccountNodes = async (req, res) => {
+  const publicNodes = await nodesService.getPublicNodes();
+  const accountNodes = await nodesService.getAccountNodes(req.accountId);
+  const allNodes = [...publicNodes];
+
+  accountNodes.forEach(
+    (an) => (
+      allNodes.map((n) => n.node_id).includes(an.node_id) ? null : allNodes.push(an)
+    ),
+  );
+  return res.status(200).send(allNodes);
+};
+
+const getWorkspaceNodes = async (req, res) => {
+  const { workspaceId } = req.params;
+
+  const response = await nodesService.getWorkspaceNodes(workspaceId);
   return res.status(200).send(response);
 };
 
@@ -40,6 +67,42 @@ const getComponents = async (req, res) => {
   }
 
   return res.status(200).send(componentsInfo);
+};
+
+const getConfigFile = async (req, res) => {
+  const { nodeId } = req.params;
+
+  const node = await nodesService.getOne(nodeId);
+  const filePath = `files/node_${node.node_code}_config.h`;
+  const writer = fs.createWriteStream(filePath, { flags: 'w' });
+
+  writer.write('// MQTT\n');
+  writer.write(`#define MQTT_HOST "${config.MQTT_HOST}"\n`);
+  writer.write(`#define MQTT_PORT ${config.MQTT_PORT}\n`);
+  writer.write(`#define MQTT_USERNAME "${config.MQTT_USERNAME}"\n`);
+  writer.write(`#define MQTT_PASSWORD "${config.MQTT_PASSWORD}"\n`);
+  writer.write(`#define MQTT_TOPIC "${config.MQTT_TOPIC}"\n\n`);
+
+  writer.write('// NODE INFO\n');
+  writer.write(`#define NODE_CODE "${node.node_code}"\n\n`);
+  const allComponents = await nodesService.getComponents(nodeId);
+  const components = allComponents.filter((c) => !['Placa', 'Pantalla', 'Otro'].includes(c.type));
+
+  for (let i = 0; i < components.length; i += 1) {
+    const componentMacro = components[i].name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\W/g, '_');
+    writer.write(`#define ${componentMacro} "${components[i].component_id}"\n`);
+
+    // eslint-disable-next-line no-await-in-loop
+    const variables = await nodesService.getVariables(nodeId, components[i].component_id);
+
+    for (let j = 0; j < variables.length; j += 1) {
+      const variableMacro = `${components[i].name}_${variables[j].name}`.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\W/g, '_');
+      writer.write(`#define ${variableMacro} "${variables[j].variable_id}"\n`);
+    }
+    writer.write('\n');
+  }
+
+  return res.sendStatus(200);
 };
 
 const create = async (req, res) => {
@@ -143,21 +206,8 @@ const updateType = async (req, res) => {
 };
 
 const updateVisibility = async (req, res) => {
-  const { workspaceId, nodeId } = req.params;
+  const { nodeId } = req.params;
   const { newVisibility } = req.body;
-
-  if (newVisibility) {
-    const node = nodesService.getOne(nodeId);
-    const currentLocation = locationsService.getOne(workspaceId, node.location_id);
-
-    if (!await nodesService.areCoordinatesAvailablePublicly(currentLocation)) {
-      return res.status(409).json({ error: 'Ya existe un nodo visible en la posición de este nodo.' });
-    }
-
-    if (!await nodesService.isNameAvailablePublicly(node.name)) {
-      return res.status(409).json({ error: 'Ya existe un nodo visible con el nombre de este nodo.' });
-    }
-  }
 
   await nodesService.updateColumn(nodeId, 'is_visible', newVisibility);
   return res.status(200).send('Visibilidad actualizada exitosamente.');
@@ -229,7 +279,11 @@ module.exports = {
   getTypes,
   getStates,
   getAll,
+  getPublicNodes,
+  getAccountNodes,
+  getWorkspaceNodes,
   getComponents,
+  getConfigFile,
   create,
   updateName,
   updateState,

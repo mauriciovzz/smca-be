@@ -13,16 +13,16 @@ const create = async (req, res) => {
     name, location, lat, long,
   } = req.body;
 
-  if (await locationsService.checkCoordinates(workspaceId, lat, long)) {
+  if (await locationsService.checkCoordinates(lat, long)) {
     return res.status(409).json({ error: 'Las coordenadas ingresadas ya se encuentran registradas.' });
   }
 
   if (await locationsService.checkColumn(workspaceId, 'name', name.toLowerCase())) {
-    return res.status(409).json({ error: 'El nombre de ubicacion ingresado ya se encuentra registrado.' });
+    return res.status(409).json({ error: 'El nombre de ubicación ingresado ya se encuentra registrado.' });
   }
 
   if (await locationsService.checkColumn(workspaceId, 'location', location.toLowerCase())) {
-    return res.status(409).json({ error: 'La ubicacion ingresada ya se encuentra registrada.' });
+    return res.status(409).json({ error: 'La ubicación ingresada ya se encuentra registrada.' });
   }
 
   await locationsService.create(

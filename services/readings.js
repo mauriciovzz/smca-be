@@ -26,20 +26,36 @@ const create = async (
   );
 };
 
-const getAll = async (nodeType, nodeId, variableId, date) => {
+const getDayReadings = async (nodeId, componentId, variableId, date) => {
   const sql = ` SELECT 
-                  end_hour, 
-                  average_value
+                  end_hour,
+                  average
                 FROM 
-                  average_reading
-                WHERE 
-                  node_type       = $1
-                  AND node_id     = $2
+                  readings_average
+                WHERE
+                  node_id = $1
+                  AND component_id = $2
                   AND variable_id = $3
-                  AND date        = $4 `;
+                  AND average_date = $4`;
 
-  const response = await pool.query(sql, [nodeType, nodeId, variableId, date]);
+  const response = await pool.query(sql, [nodeId, componentId, variableId, date]);
   return response.rows;
+};
+
+const getDayRanges = async (nodeId, componentId, variableId, date) => {
+  const sql = ` SELECT        
+                  MIN(average) as min,                     
+                  MAX(average) as max
+                FROM 
+                  readings_average
+                WHERE
+                  node_id = $1
+                  AND component_id = $2
+                  AND variable_id  = $3
+                  AND average_date = $4`;
+
+  const response = await pool.query(sql, [nodeId, componentId, variableId, date]);
+  return response.rows[0];
 };
 
 const getPastHourAverages = async (fullDate, startTime) => {
@@ -87,9 +103,28 @@ const createReadingsAverage = async (readingAverage, fullDate, endHour) => {
   );
 };
 
+const canAccountAccessReadings = async (accountId, nodeId) => {
+  const sql = ` SELECT EXISTS (
+                  SELECT
+                    account_id
+                  FROM
+                    workspace_account ws,
+                    node no
+                  WHERE
+                    ws.account_id = $1
+                    AND ws.workspace_id = no.workspace_id
+                    AND no.node_id = $2
+                )`;
+
+  const response = await pool.query(sql, [accountId, nodeId]);
+  return response.rows[0].exists;
+};
+
 module.exports = {
   create,
-  getAll,
+  getDayReadings,
+  getDayRanges,
   getPastHourAverages,
   createReadingsAverage,
+  canAccountAccessReadings,
 };

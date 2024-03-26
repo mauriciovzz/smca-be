@@ -38,7 +38,7 @@ const create = async (req, res) => {
   const componentTypes = await componentsService.getTypes();
   const isSensor = (componentTypes.find((ct) => ct.component_type_id === componentType).type === 'Sensor');
 
-  if (await componentsService.checkColumn(workspaceId, 'name', name.toLowerCase())) {
+  if (await componentsService.checkColumn(workspaceId, 'name', name.toUpperCase())) {
     return res.status(409).json({ error: 'El nombre de componente ingresado ya se encuentra registrado.' });
   }
 
@@ -56,8 +56,8 @@ const create = async (req, res) => {
 
   const component = await componentsService.create(
     workspaceId,
-    name.toLowerCase(),
-    datasheetLink.toLowerCase(),
+    name.toUpperCase(),
+    datasheetLink,
     componentType,
   );
 
@@ -111,8 +111,8 @@ const update = async (req, res) => {
     }
   }
 
-  if (!(originalComponent.name === name.toLowerCase())) {
-    if (await componentsService.checkColumn(workspaceId, 'name', name.toLowerCase())) {
+  if (!(originalComponent.name === name.toUpperCase())) {
+    if (await componentsService.checkColumn(workspaceId, 'name', name.toUpperCase())) {
       return res.status(409).json({ error: 'El nombre de componente ingresado ya se encuentra registrado.' });
     }
   }
@@ -120,8 +120,8 @@ const update = async (req, res) => {
   await componentsService.update(
     workspaceId,
     componentId,
-    name.toLowerCase(),
-    datasheetLink.toLowerCase(),
+    name.toUpperCase(),
+    datasheetLink,
   );
 
   if (isSensor) {

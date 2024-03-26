@@ -25,16 +25,15 @@ const getOne = async (workspaceId, locationId) => {
   return response.rows[0];
 };
 
-const checkCoordinates = async (workspaceId, lat, long) => {
+const checkCoordinates = async (lat, long) => {
   const sql = ` SELECT 
                  *
                 FROM
                   location
                 WHERE
-                  workspace_id = $1
-                  AND lat = $2
-                  AND long = $3`;
-  const response = await pool.query(sql, [workspaceId, lat, long]);
+                  lat = $1
+                  AND long = $2`;
+  const response = await pool.query(sql, [lat, long]);
   return response.rows[0];
 };
 

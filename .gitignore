@@ -3,4 +3,5 @@
 .env
 /tests
 /images
+/files
 /dist

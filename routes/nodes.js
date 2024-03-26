@@ -21,6 +21,30 @@ nodesRouter.get(
 );
 
 nodesRouter.get(
+  '/publicNodes',
+  nodesController.getPublicNodes,
+);
+
+nodesRouter.get(
+  '/accountNodes',
+  [
+    middleware.accessTokenVerification,
+  ],
+  nodesController.getAccountNodes,
+);
+
+nodesRouter.get(
+  '/workspaceNodes/:workspaceId',
+  [
+    middleware.accessTokenVerification,
+    validatorMiddleware.validateParams(schemas.workspaceId),
+    middleware.workspaceVerification,
+    middleware.workspaceMemberVerification,
+  ],
+  nodesController.getWorkspaceNodes,
+);
+
+nodesRouter.get(
   '/:workspaceId',
   [
     middleware.accessTokenVerification,
@@ -38,8 +62,24 @@ nodesRouter.get(
     validatorMiddleware.validateParams(schemas.idParams),
     middleware.workspaceVerification,
     middleware.workspaceMemberVerification,
+    middleware.nodeVerification,
+    middleware.nodeWorkspaceVerification,
   ],
   nodesController.getComponents,
+);
+
+nodesRouter.get(
+  '/getConfigFile/:workspaceId/:nodeId',
+  [
+    middleware.accessTokenVerification,
+    validatorMiddleware.validateParams(schemas.idParams),
+    middleware.workspaceVerification,
+    middleware.workspaceAdminVerification,
+    middleware.nodeVerification,
+    middleware.nodeStateVerification,
+    middleware.nodeWorkspaceVerification,
+  ],
+  nodesController.getConfigFile,
 );
 
 nodesRouter.post(

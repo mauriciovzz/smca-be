@@ -182,6 +182,11 @@ const coordinate = Joi.string()
     'any.required': 'Se requiere la entrada "Coordenadas".',
   });
 
+const date = Joi.date()
+  .messages({
+    'date.base': 'Fecha inválida.',
+  });
+
 const accountIdParam = Joi.string()
   .trim()
   .min(1)
@@ -223,6 +228,7 @@ module.exports = {
   nodeVariablesArray,
   location,
   coordinate,
+  date,
   accountIdParam,
   verificationTokenParam,
 };

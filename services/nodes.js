@@ -26,10 +26,7 @@ const getAll = async (workspaceId) => {
                   nt.type,
                   no.is_visible,
                   ns.state,
-                  no.reading_interval,
-                  no.start_date,
                   no.node_code,  
-                  no.location_id,
                   ( SELECT lo.name FROM location lo WHERE lo.location_id = no.location_id ) AS location_name,
                   ( SELECT lo.location FROM location lo WHERE lo.location_id = no.location_id ) AS location,
                   ( SELECT lo.lat FROM location lo WHERE lo.location_id = no.location_id ) AS lat,
@@ -43,6 +40,166 @@ const getAll = async (workspaceId) => {
                   AND no.node_state_id = ns.node_state_id 
                   AND no.workspace_id = $1
                 ORDER BY ns.state ASC, no.node_id ASC`;
+
+  const response = await pool.query(sql, [workspaceId]);
+  return response.rows;
+};
+
+const getPublicNodes = async () => {
+  const sql = ` SELECT
+                  no.node_id,
+                  no.name AS node_name,
+                  nt.type,
+                  ns.state,
+                  no.is_visible,
+                  no.start_date,
+                  lo.name AS location_name,
+                  lo.location,
+                  lo.lat,
+                  lo.long,
+                  EXISTS ( SELECT 
+                        co.component_id
+                      FROM 
+                        node_component nc,
+                        component co,
+                        component_type ct
+                      WHERE
+                        no.node_id = nc.node_id
+                        AND nc.component_id = co.component_id
+                        AND co.component_type_id = ct.component_type_id
+                        AND ct.type = 'Camara'
+                  ) AS camera,
+                  EXISTS ( SELECT 
+                        co.component_id
+                      FROM 
+                        node_component nc,
+                        component co,
+                        component_type ct
+                      WHERE
+                        no.node_id = nc.node_id
+                        AND nc.component_id = co.component_id
+                        AND co.component_type_id = ct.component_type_id
+                        AND ct.type = 'Sensor de Lluvia'
+                  ) AS rain
+                FROM
+                  node no,
+                  node_type nt,
+                  node_state ns,
+                  location lo
+                WHERE
+                  no.node_type_id = nt.node_type_id
+                  AND no.node_state_id = ns.node_state_id
+                  AND ns.state != 'Terminado'
+                  AND no.location_id = lo.location_id
+                  AND no.is_visible is true`;
+
+  const response = await pool.query(sql);
+  return response.rows;
+};
+
+const getAccountNodes = async (accountId) => {
+  const sql = ` SELECT
+                  no.node_id,
+                  no.name AS node_name,
+                  nt.type,
+                  ns.state,
+                  no.is_visible,
+                  no.start_date,
+                  lo.name AS location_name,
+                  lo.location,
+                  lo.lat,
+                  lo.long,
+                  EXISTS ( 
+                    SELECT 
+                      co.component_id
+                    FROM 
+                      node_component nc,
+                      component co,
+                      component_type ct
+                    WHERE
+                      no.node_id = nc.node_id
+                      AND nc.component_id = co.component_id
+                      AND co.component_type_id = ct.component_type_id
+                      AND ct.type = 'Camara' 
+                  ) AS camera,
+                  EXISTS ( 
+                    SELECT 
+                      co.component_id
+                    FROM 
+                      node_component nc,
+                      component co,
+                      component_type ct
+                    WHERE
+                      no.node_id = nc.node_id
+                      AND nc.component_id = co.component_id
+                      AND co.component_type_id = ct.component_type_id
+                      AND ct.type = 'Sensor de Lluvia' 
+                  ) AS rain
+                FROM
+                  workspace_account wa,
+                  node no,
+                  node_type nt,
+                  node_state ns,
+                  location lo
+                WHERE
+                  wa.account_id = $1
+                  AND wa.workspace_id = no.workspace_id
+                  AND no.node_type_id = nt.node_type_id
+                  AND no.node_state_id = ns.node_state_id
+                  AND ns.state != 'Terminado'
+                  AND no.location_id = lo.location_id`;
+
+  const response = await pool.query(sql, [accountId]);
+  return response.rows;
+};
+
+const getWorkspaceNodes = async (workspaceId) => {
+  const sql = ` SELECT
+                  no.node_id,
+                  no.name AS node_name,
+                  nt.type,
+                  ns.state,
+                  no.is_visible,
+                  no.start_date,
+                  lo.name AS location_name,
+                  lo.location,
+                  lo.lat,
+                  lo.long,
+                  EXISTS ( SELECT 
+                        co.component_id
+                      FROM 
+                        node_component nc,
+                        component co,
+                        component_type ct
+                      WHERE
+                        no.node_id = nc.node_id
+                        AND nc.component_id = co.component_id
+                        AND co.component_type_id = ct.component_type_id
+                        AND ct.type = 'Camara'
+                  ) AS camera,
+                  EXISTS ( SELECT 
+                        co.component_id
+                      FROM 
+                        node_component nc,
+                        component co,
+                        component_type ct
+                      WHERE
+                        no.node_id = nc.node_id
+                        AND nc.component_id = co.component_id
+                        AND co.component_type_id = ct.component_type_id
+                        AND ct.type = 'Sensor de Lluvia'
+                  ) AS rain
+                FROM
+                  node no,
+                  node_type nt,
+                  node_state ns,
+                  location lo
+                WHERE
+                  no.workspace_id = $1
+                  AND no.node_type_id = nt.node_type_id
+                  AND no.node_state_id = ns.node_state_id
+                  AND ns.state != 'Terminado'
+                  AND no.location_id = lo.location_id`;
 
   const response = await pool.query(sql, [workspaceId]);
   return response.rows;
@@ -115,6 +272,29 @@ const getVariables = async (nodeId, componentId) => {
                   AND nv.component_id = $2`;
 
   const response = await pool.query(sql, [nodeId, componentId]);
+  return response.rows;
+};
+
+const getNodeVariables = async (nodeId) => {
+  const sql = ` SELECT 
+                  co.component_id,
+                  co.name AS component_name,
+                  va.variable_id,
+                  vt.type,
+                  va.name AS variable_name,
+                  va.unit
+                FROM
+                  component co,
+                  variable va,
+                  variable_type vt, 
+                  node_variable nv
+                WHERE
+                  nv.component_id = co.component_id
+                  AND nv.variable_id = va.variable_id
+                  AND vt.variable_Type_id = va.variable_type_id
+                  AND nv.node_id = $1`;
+
+  const response = await pool.query(sql, [nodeId]);
   return response.rows;
 };
 
@@ -256,10 +436,14 @@ module.exports = {
   getTypes,
   getStates,
   getAll,
+  getPublicNodes,
+  getAccountNodes,
+  getWorkspaceNodes,
   getOne,
   getOneWithNodeCode,
   getComponents,
   getVariables,
+  getNodeVariables,
   getState,
   create,
   addComponents,
