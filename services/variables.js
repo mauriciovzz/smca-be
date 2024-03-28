@@ -9,20 +9,32 @@ const getTypes = async () => {
   return response.rows;
 };
 
+const getValueTypes = async () => {
+  const sql = ` SELECT 
+                 *
+                FROM
+                  variable_value_type`;
+  const response = await pool.query(sql);
+  return response.rows;
+};
+
 const getAll = async (workspaceId) => {
   const sql = ` SELECT 
                   v.variable_id,
                   v.workspace_id,
                   v.name,
                   v.unit,
-                  vt.type
+                  vt.type,
+                  vvt.type AS value_type
                 FROM
                   variable v,
-                  variable_type vt
+                  variable_type vt,
+                  variable_value_type vvt
                 WHERE
                   workspace_id = $1
                   AND v.variable_type_id = vt.variable_type_id
-                ORDER BY vt.type ASC, v.name ASC `;
+                  AND v.variable_value_type_id = vvt.variable_value_type_id
+                ORDER BY vt.type ASC, v.name ASC`;
 
   const response = await pool.query(sql, [workspaceId]);
   return response.rows;
@@ -52,15 +64,16 @@ const checkName = async (workspaceId, name) => {
   return response.rows[0];
 };
 
-const create = async (workspaceId, name, unit, variableType) => {
+const create = async (workspaceId, variableType, variableValueType, name, unit) => {
   const sql = ` INSERT INTO variable (
                   workspace_id,
+                  variable_type_id,
+                  variable_value_type_id,
                   name,
-                  unit,
-                  variable_type_id
+                  unit
                 )
-                VALUES ($1, $2, $3, $4)`;
-  await pool.query(sql, [workspaceId, name, unit, variableType]);
+                VALUES ($1, $2, $3, $4, $5)`;
+  await pool.query(sql, [workspaceId, variableType, variableValueType, name, unit]);
 };
 
 const update = async (workspaceId, variableId, name, unit) => {
@@ -100,6 +113,7 @@ const remove = async (workspaceId, variableId) => {
 
 module.exports = {
   getTypes,
+  getValueTypes,
   getAll,
   getOne,
   checkName,

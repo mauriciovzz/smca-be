@@ -6,9 +6,10 @@ const workspaceId = Joi.object({
 });
 
 const create = Joi.object({
+  variableType: schemaVariables.id('variableType'),
+  variableValueType: schemaVariables.id('variableValueType'),
   name: schemaVariables.name,
   unit: schemaVariables.unit,
-  variableType: schemaVariables.id('variableType'),
 });
 
 const idParams = Joi.object({

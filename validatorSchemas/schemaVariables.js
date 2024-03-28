@@ -118,7 +118,6 @@ const unit = Joi.string()
   .trim()
   .min(1)
   .max(10)
-  .required()
   .messages({
     'string.base': 'La entrada "Unidad" debe ser de tipo cadena.',
     'string.empty': 'La entrada "Unidad" no puede estar vacía.',

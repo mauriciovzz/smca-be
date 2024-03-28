@@ -13,6 +13,14 @@ variablesRouter.get(
 );
 
 variablesRouter.get(
+  '/getValueTypes',
+  [
+    middleware.accessTokenVerification,
+  ],
+  variablesController.getValueTypes,
+);
+
+variablesRouter.get(
   '/:workspaceId',
   [
     middleware.accessTokenVerification,
