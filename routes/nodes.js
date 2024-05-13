@@ -93,7 +93,7 @@ nodesRouter.post(
     middleware.nodeNameVerification,
     middleware.nodeTypeVerification,
     middleware.nodeComponentsAndVariablesVerification,
-    middleware.nodeComponentsQuantityVerification,
+    middleware.nodeQuantitiesVerification,
     middleware.nodeLocationVerification,
   ],
   nodesController.create,
@@ -186,7 +186,7 @@ nodesRouter.put(
     middleware.workspaceVerification,
     middleware.workspaceAdminVerification,
     middleware.nodeComponentsAndVariablesVerification,
-    middleware.nodeComponentsQuantityVerification,
+    middleware.nodeQuantitiesVerification,
   ],
   nodesController.updateComponents,
 );

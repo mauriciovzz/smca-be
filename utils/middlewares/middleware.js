@@ -176,7 +176,7 @@ const nodeTypeVerification = async (request, response, next) => {
 // eslint-disable-next-line consistent-return
 const nodeComponentsAndVariablesVerification = async (request, response, next) => {
   const { workspaceId } = request.params;
-  const { nodeComponents, nodeVariables } = request.body;
+  const { nodeComponents, nodeVariables, rainSensor } = request.body;
 
   const workspaceComponents = await componentsService.getAll(workspaceId);
   const workspaceComponentsIds = workspaceComponents.map((wc) => wc.component_id);
@@ -205,13 +205,19 @@ const nodeComponentsAndVariablesVerification = async (request, response, next) =
     }
   }
 
+  if (rainSensor) {
+    if (!workspaceComponentsIds.includes(rainSensor.component_id)) {
+      return response.status(404).json({ error: 'El sensor de lluvia ingresado no se encuentra registrado.' });
+    }
+  }
+
   next();
 };
 
 // eslint-disable-next-line consistent-return
-const nodeComponentsQuantityVerification = async (request, response, next) => {
+const nodeQuantitiesVerification = async (request, response, next) => {
   const { workspaceId } = request.params;
-  const { nodeComponents } = request.body;
+  const { nodeComponents, nodeVariables, rainSensor } = request.body;
 
   const workspaceComponents = await componentsService.getAll(workspaceId);
 
@@ -231,18 +237,12 @@ const nodeComponentsQuantityVerification = async (request, response, next) => {
     .map((wc) => wc.component_id);
 
   const nodeSensors = nodeComponents.filter((nc) => workspaceSensors.includes(nc));
-  if (nodeSensors.length === 0) {
+  if (nodeSensors.length === 0 && rainSensor === undefined) {
     return response.status(400).send('El nodo debe contener al menos un sensor.');
   }
 
-  // only one rain sensor
-  const workspaceRainSensors = workspaceComponents
-    .filter((wc) => wc.type === 'Sensor de Lluvia')
-    .map((wc) => wc.component_id);
-
-  const nodeRainSensors = nodeComponents.filter((nc) => workspaceRainSensors.includes(nc));
-  if (nodeRainSensors.length > 1) {
-    return response.status(400).send('El nodo no puede contener mas de un sensor de lluvia.');
+  if (!nodeVariables && !rainSensor) {
+    return response.status(400).send('El nodo debe contener al menos una variable.');
   }
 
   next();
@@ -317,7 +317,7 @@ module.exports = {
   nodeNameVerification,
   nodeTypeVerification,
   nodeComponentsAndVariablesVerification,
-  nodeComponentsQuantityVerification,
+  nodeQuantitiesVerification,
   nodeLocationVerification,
   publicVerification,
   nodeAccessVerification,

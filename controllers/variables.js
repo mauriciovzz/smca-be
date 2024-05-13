@@ -14,7 +14,7 @@ const getAll = async (req, res) => {
   const { workspaceId } = req.params;
 
   const variables = await variablesService.getAll(workspaceId);
-  return res.status(200).send(variables);
+  return res.status(200).send(variables.filter((v) => v.name !== 'lluvia'));
 };
 
 const create = async (req, res) => {

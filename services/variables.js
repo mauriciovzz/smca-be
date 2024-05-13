@@ -52,6 +52,18 @@ const getOne = async (workspaceId, varibleId) => {
   return response.rows[0];
 };
 
+const getRainVariable = async (workspaceId) => {
+  const sql = ` SELECT 
+                 *
+                FROM
+                  variable
+                WHERE
+                  workspace_id = $1
+                  AND name = $2`;
+  const response = await pool.query(sql, [workspaceId, 'lluvia']);
+  return response.rows[0];
+};
+
 const checkName = async (workspaceId, name) => {
   const sql = ` SELECT 
                  *
@@ -72,8 +84,14 @@ const create = async (workspaceId, variableType, variableValueType, name, unit) 
                   name,
                   unit
                 )
-                VALUES ($1, $2, $3, $4, $5)`;
-  await pool.query(sql, [workspaceId, variableType, variableValueType, name, unit]);
+                VALUES ($1, $2, $3, $4, $5)
+                RETURNING *`;
+
+  const response = await pool.query(
+    sql,
+    [workspaceId, variableType, variableValueType, name, unit],
+  );
+  return response.rows[0];
 };
 
 const update = async (workspaceId, variableId, name, unit) => {
@@ -116,6 +134,7 @@ module.exports = {
   getValueTypes,
   getAll,
   getOne,
+  getRainVariable,
   checkName,
   create,
   update,

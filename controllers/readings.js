@@ -8,21 +8,17 @@ const create = async (reading) => {
       nodeCode, componentId, variableId, readingDate, readingTime, readingValue,
     } = reading;
 
-    const nodeInfo = nodesService.getOneWithNodeCode(nodeCode);
-    const nodeVariables = nodesService.getVariables(nodeInfo.node_id);
+    const foundNode = await nodesService.checkNodeVariable(nodeCode, componentId, variableId);
 
-    const hasVariable = nodeVariables
-      .find((nv) => nv.component_id === componentId && nv.variable_id === variableId);
-
-    if (nodeInfo.state === 'Activo' && hasVariable) {
+    if (foundNode) {
       await readingsService.create(
-        nodeInfo.node_id,
+        foundNode.node_id,
         componentId,
         variableId,
-        nodeInfo.location_id,
+        foundNode.location_id,
         readingDate,
         readingTime,
-        readingValue,
+        parseFloat(readingValue),
       );
     }
   } catch (err) {
@@ -40,17 +36,26 @@ const calculateReadingsAverages = async (serverDate) => {
 
   for (let i = 0; i < pastHourAverages.length; i += 1) {
     // eslint-disable-next-line no-await-in-loop
-    await nodesService.createReadingsAverage(pastHourAverages[i], fullDate, endHour);
+    await readingsService.createReadingsAverage(pastHourAverages[i], fullDate, endHour);
   }
+
+  await readingsService.deletePastHourReadings(fullDate, startTime);
+};
+
+const getUiInfo = async (req, res) => {
+  const { nodeId, locationId, date } = req.params;
+  const uiInfo = await readingsService.getUiInfo(nodeId, locationId, date);
+
+  return res.status(200).send(uiInfo);
 };
 
 const getNodeReadings = async (req, res) => {
-  const { nodeId, date } = req.params;
-
-  const nodeVariables = await nodesService.getNodeVariables(nodeId);
+  const { nodeId, locationId, date } = req.params;
+  const dayVariables = await readingsService.getDayVariables(nodeId, locationId, date);
 
   const dayReadings = [];
 
+  // // Get week dates
   const currentDate = new Date(date);
   const sundayDate = new Date(currentDate.setDate(currentDate.getDate() - currentDate.getDay()));
   const weekDates = [new Date(sundayDate)];
@@ -59,40 +64,39 @@ const getNodeReadings = async (req, res) => {
     weekDates.push(new Date(sundayDate));
   }
 
-  for (let i = 0; i < nodeVariables.length; i += 1) {
+  for (let i = 0; i < dayVariables.length; i += 1) {
     // eslint-disable-next-line no-await-in-loop
     const dayAverages = await readingsService.getDayReadings(
       nodeId,
-      nodeVariables[i].component_id,
-      nodeVariables[i].variable_id,
-      date,
+      locationId,
+      dayVariables[i].variable_id,
+      date.toISOString().split('T')[0],
     );
 
     const weekData = [];
 
-    for (let j = 0; j < 7; j += 1) {
+    for (let j = 0; j < weekDates.length; j += 1) {
       // eslint-disable-next-line no-await-in-loop
       const dayRange = await readingsService.getDayRanges(
         nodeId,
-        nodeVariables[i].component_id,
-        nodeVariables[i].variable_id,
-        date,
+        locationId,
+        dayVariables[i].variable_id,
+        weekDates[j].toISOString().split('T')[0],
       );
 
       weekData.push({
         day: weekDates[j].getDay(),
+        weekDay: weekDates[j],
         min: dayRange.min,
         max: dayRange.max,
       });
     }
 
     dayReadings.push({
-      component_id: nodeVariables[i].component_id,
-      component_name: nodeVariables[i].component_name,
-      variable_id: nodeVariables[i].variable_id,
-      type: nodeVariables[i].type,
-      variable_name: nodeVariables[i].variable_name,
-      unit: nodeVariables[i].unit,
+      type: dayVariables[i].type,
+      variable_id: dayVariables[i].variable_id,
+      variable_name: dayVariables[i].name,
+      unit: dayVariables[i].unit,
       dayAverages,
       weekData,
     });
@@ -104,5 +108,6 @@ const getNodeReadings = async (req, res) => {
 module.exports = {
   create,
   calculateReadingsAverages,
+  getUiInfo,
   getNodeReadings,
 };

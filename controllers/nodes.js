@@ -102,13 +102,13 @@ const getConfigFile = async (req, res) => {
     writer.write('\n');
   }
 
-  return res.sendStatus(200);
+  return res.status(200).download(filePath);
 };
 
 const create = async (req, res) => {
   const { workspaceId } = req.params;
   const {
-    nodeName, nodeType, nodeComponents, nodeVariables, nodeLocation, nodeVisibility,
+    nodeName, nodeType, nodeComponents, nodeVariables, rainSensor, nodeLocation, nodeVisibility,
   } = req.body;
 
   let nodeCode = crypto.randomBytes(4).toString('hex').toUpperCase();
@@ -151,6 +151,16 @@ const create = async (req, res) => {
       newNode.node_id,
       nodeVariables[i].component_id,
       nodeVariables[i].variable_id,
+    );
+  }
+
+  if (rainSensor) {
+    await nodesService.addComponents(newNode.node_id, rainSensor.component_id);
+
+    await nodesService.addVariables(
+      newNode.node_id,
+      rainSensor.component_id,
+      rainSensor.variable_id,
     );
   }
 
@@ -236,7 +246,7 @@ const updateLocation = async (req, res) => {
 
 const updateComponents = async (req, res) => {
   const { nodeId } = req.params;
-  const { nodeComponents, nodeVariables } = req.body;
+  const { nodeComponents, nodeVariables, rainSensor } = req.body;
 
   await nodesService.removeAllNodeComponents(nodeId);
   await nodesService.removeAllNodeVariables(nodeId);
@@ -252,6 +262,16 @@ const updateComponents = async (req, res) => {
       nodeId,
       nodeVariables[i].component_id,
       nodeVariables[i].variable_id,
+    );
+  }
+
+  if (rainSensor) {
+    await nodesService.addComponents(nodeId, rainSensor.component_id);
+
+    await nodesService.addVariables(
+      nodeId,
+      rainSensor.component_id,
+      rainSensor.variable_id,
     );
   }
 

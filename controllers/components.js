@@ -37,6 +37,7 @@ const create = async (req, res) => {
 
   const componentTypes = await componentsService.getTypes();
   const isSensor = (componentTypes.find((ct) => ct.component_type_id === componentType).type === 'Sensor');
+  const isRainSensor = (componentTypes.find((ct) => ct.component_type_id === componentType).type === 'Sensor de Lluvia');
 
   if (await componentsService.checkColumn(workspaceId, 'name', name.toUpperCase())) {
     return res.status(409).json({ error: 'El nombre de componente ingresado ya se encuentra registrado.' });
@@ -69,6 +70,19 @@ const create = async (req, res) => {
         variables[i],
       );
     }
+  }
+
+  if (isRainSensor) {
+    let rainVariable = await variablesService.getRainVariable(workspaceId);
+
+    if (!rainVariable) {
+      rainVariable = await variablesService.create(workspaceId, 2, 2, 'lluvia', null);
+    }
+
+    await componentsService.addVariable(
+      component.component_id,
+      rainVariable.variable_id,
+    );
   }
 
   return res.status(201).send('Componente creado exitosamente.');

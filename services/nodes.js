@@ -53,34 +53,11 @@ const getPublicNodes = async () => {
                   ns.state,
                   no.is_visible,
                   no.start_date,
+                  lo.location_id,
                   lo.name AS location_name,
                   lo.location,
                   lo.lat,
-                  lo.long,
-                  EXISTS ( SELECT 
-                        co.component_id
-                      FROM 
-                        node_component nc,
-                        component co,
-                        component_type ct
-                      WHERE
-                        no.node_id = nc.node_id
-                        AND nc.component_id = co.component_id
-                        AND co.component_type_id = ct.component_type_id
-                        AND ct.type = 'Camara'
-                  ) AS camera,
-                  EXISTS ( SELECT 
-                        co.component_id
-                      FROM 
-                        node_component nc,
-                        component co,
-                        component_type ct
-                      WHERE
-                        no.node_id = nc.node_id
-                        AND nc.component_id = co.component_id
-                        AND co.component_type_id = ct.component_type_id
-                        AND ct.type = 'Sensor de Lluvia'
-                  ) AS rain
+                  lo.long
                 FROM
                   node no,
                   node_type nt,
@@ -105,36 +82,11 @@ const getAccountNodes = async (accountId) => {
                   ns.state,
                   no.is_visible,
                   no.start_date,
+                  lo.location_id,
                   lo.name AS location_name,
                   lo.location,
                   lo.lat,
-                  lo.long,
-                  EXISTS ( 
-                    SELECT 
-                      co.component_id
-                    FROM 
-                      node_component nc,
-                      component co,
-                      component_type ct
-                    WHERE
-                      no.node_id = nc.node_id
-                      AND nc.component_id = co.component_id
-                      AND co.component_type_id = ct.component_type_id
-                      AND ct.type = 'Camara' 
-                  ) AS camera,
-                  EXISTS ( 
-                    SELECT 
-                      co.component_id
-                    FROM 
-                      node_component nc,
-                      component co,
-                      component_type ct
-                    WHERE
-                      no.node_id = nc.node_id
-                      AND nc.component_id = co.component_id
-                      AND co.component_type_id = ct.component_type_id
-                      AND ct.type = 'Sensor de Lluvia' 
-                  ) AS rain
+                  lo.long
                 FROM
                   workspace_account wa,
                   node no,
@@ -161,34 +113,11 @@ const getWorkspaceNodes = async (workspaceId) => {
                   ns.state,
                   no.is_visible,
                   no.start_date,
+                  lo.location_id,
                   lo.name AS location_name,
                   lo.location,
                   lo.lat,
-                  lo.long,
-                  EXISTS ( SELECT 
-                        co.component_id
-                      FROM 
-                        node_component nc,
-                        component co,
-                        component_type ct
-                      WHERE
-                        no.node_id = nc.node_id
-                        AND nc.component_id = co.component_id
-                        AND co.component_type_id = ct.component_type_id
-                        AND ct.type = 'Camara'
-                  ) AS camera,
-                  EXISTS ( SELECT 
-                        co.component_id
-                      FROM 
-                        node_component nc,
-                        component co,
-                        component_type ct
-                      WHERE
-                        no.node_id = nc.node_id
-                        AND nc.component_id = co.component_id
-                        AND co.component_type_id = ct.component_type_id
-                        AND ct.type = 'Sensor de Lluvia'
-                  ) AS rain
+                  lo.long
                 FROM
                   node no,
                   node_type nt,
@@ -230,6 +159,26 @@ const getOneWithNodeCode = async (nodeCode) => {
                   AND node_code = $1`;
 
   const response = await pool.query(sql, [nodeCode]);
+  return response.rows[0];
+};
+
+const checkNodeVariable = async (nodeCode, componentId, variableId) => {
+  const sql = ` SELECT 
+                  no.node_id,
+                  no.location_id
+                FROM 
+                  node no,
+                  node_state ns,
+                  node_variable nv
+                WHERE
+                  no.node_code = $1
+                  AND no.node_state_id = ns.node_state_id
+                  AND ns.state = 'Activo'
+                  AND no.node_id = nv.node_id
+                  AND nv.component_id = $2
+                  AND nv.variable_id = $3`;
+
+  const response = await pool.query(sql, [nodeCode, componentId, variableId]);
   return response.rows[0];
 };
 
@@ -441,6 +390,7 @@ module.exports = {
   getWorkspaceNodes,
   getOne,
   getOneWithNodeCode,
+  checkNodeVariable,
   getComponents,
   getVariables,
   getNodeVariables,

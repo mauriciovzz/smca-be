@@ -5,7 +5,18 @@ const validatorMiddleware = require('../utils/middlewares/validator');
 const schemas = require('../validatorSchemas/readings');
 
 readingsRuter.get(
-  '/getPublicNodeReadings/:nodeId/:date',
+  '/getUiInfo/:nodeId/:locationId/:date',
+  [
+    validatorMiddleware.validateParams(schemas.readingsParams),
+    middleware.nodeVerification,
+    middleware.nodeStateVerification,
+    middleware.publicVerification,
+  ],
+  averageReadingsController.getUiInfo,
+);
+
+readingsRuter.get(
+  '/getPublicNodeReadings/:nodeId/:locationId/:date',
   [
     validatorMiddleware.validateParams(schemas.readingsParams),
     middleware.nodeVerification,
@@ -16,7 +27,7 @@ readingsRuter.get(
 );
 
 readingsRuter.get(
-  '/getPrivateNodeReadings/:nodeId/:date',
+  '/getPrivateNodeReadings/:nodeId/:locationId/:date',
   [
     validatorMiddleware.validateParams(schemas.readingsParams),
     middleware.nodeVerification,

@@ -10,6 +10,7 @@ const create = Joi.object({
   nodeType: schemaVariables.id('tipo de nodo (id)'),
   nodeComponents: schemaVariables.idsArray('componentes'),
   nodeVariables: schemaVariables.nodeVariablesArray,
+  rainSensor: schemaVariables.nodeVariable,
   nodeLocation: schemaVariables.id('ubicación (id)'),
   nodeVisibility: schemaVariables.booleanType('visiblidad del nodo'),
 });
@@ -33,6 +34,7 @@ const updateVisibility = Joi.object({
 const updateComponents = Joi.object({
   nodeComponents: schemaVariables.idsArray('componentes'),
   nodeVariables: schemaVariables.nodeVariablesArray,
+  rainSensor: schemaVariables.nodeVariable,
 });
 
 const idParams = Joi.object({

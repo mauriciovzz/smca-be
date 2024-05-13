@@ -107,6 +107,15 @@ const id = (idName) => Joi.number().integer()
     'any.required': `Se requiere el parámetro "${idName}".`,
   });
 
+const optionalId = (idName) => Joi.number().integer()
+  .greater(0)
+  .messages({
+    'number.base': `El parámetro "${idName}" es invalido.`,
+    'number.interger': `El parámetro "${idName}" es invalido.`,
+    'number.greater': `El parámetro "${idName}" es invalido.`,
+    'any.required': `Se requiere el parámetro "${idName}".`,
+  });
+
 const equal = (reference) => Joi.any()
   .valid(Joi.ref(reference))
   .required()
@@ -149,10 +158,8 @@ const nodeVariable = Joi.object({
 
 const nodeVariablesArray = Joi.array()
   .items(nodeVariable)
-  .min(1)
   .messages({
     'array.base': 'La entradas "Variables del componente" debe ser de tipo arreglo.',
-    'array.min': 'El nodo debe contar con al menos una variable.',
     'array.includes': 'Los datos de la entrada "Variables del componente" deben ser enteros.',
   });
 
@@ -220,10 +227,12 @@ module.exports = {
   name,
   color,
   id,
+  optionalId,
   equal,
   unit,
   datasheetLink,
   idsArray,
+  nodeVariable,
   nodeVariablesArray,
   location,
   coordinate,
