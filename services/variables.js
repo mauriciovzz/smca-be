@@ -24,6 +24,7 @@ const getAll = async (workspaceId) => {
                   v.workspace_id,
                   v.name,
                   v.unit,
+                  v.color,
                   vt.type,
                   vvt.type AS value_type
                 FROM
@@ -76,34 +77,36 @@ const checkName = async (workspaceId, name) => {
   return response.rows[0];
 };
 
-const create = async (workspaceId, variableType, variableValueType, name, unit) => {
+const create = async (workspaceId, variableType, variableValueType, name, unit, color) => {
   const sql = ` INSERT INTO variable (
                   workspace_id,
                   variable_type_id,
                   variable_value_type_id,
                   name,
-                  unit
+                  unit,
+                  color
                 )
-                VALUES ($1, $2, $3, $4, $5)
+                VALUES ($1, $2, $3, $4, $5, $6)
                 RETURNING *`;
 
   const response = await pool.query(
     sql,
-    [workspaceId, variableType, variableValueType, name, unit],
+    [workspaceId, variableType, variableValueType, name, unit, color],
   );
   return response.rows[0];
 };
 
-const update = async (workspaceId, variableId, name, unit) => {
+const update = async (workspaceId, variableId, name, unit, color) => {
   const sql = ` UPDATE 
                   variable
                 SET 
                   name = $1,
-                  unit = $2
+                  unit = $2,
+                  color = $3
                 WHERE
-                  workspace_id = $3
-                  AND variable_id = $4`;
-  await pool.query(sql, [name, unit, workspaceId, variableId]);
+                  workspace_id = $4
+                  AND variable_id = $5`;
+  await pool.query(sql, [name, unit, color, workspaceId, variableId]);
 };
 
 const isBeingUsed = async (variableId) => {

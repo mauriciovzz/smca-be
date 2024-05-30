@@ -97,6 +97,7 @@ const getNodeReadings = async (req, res) => {
       variable_id: dayVariables[i].variable_id,
       variable_name: dayVariables[i].name,
       unit: dayVariables[i].unit,
+      color: dayVariables[i].color,
       dayAverages,
       weekData,
     });

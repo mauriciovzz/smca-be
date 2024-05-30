@@ -47,6 +47,7 @@ const getAll = async (workspaceId) => {
 
 const getPublicNodes = async () => {
   const sql = ` SELECT
+                  no.workspace_id,
                   no.node_id,
                   no.name AS node_name,
                   nt.type,
@@ -76,6 +77,7 @@ const getPublicNodes = async () => {
 
 const getAccountNodes = async (accountId) => {
   const sql = ` SELECT
+                  no.workspace_id,
                   no.node_id,
                   no.name AS node_name,
                   nt.type,
@@ -107,6 +109,7 @@ const getAccountNodes = async (accountId) => {
 
 const getWorkspaceNodes = async (workspaceId) => {
   const sql = ` SELECT
+                  no.workspace_id,
                   no.node_id,
                   no.name AS node_name,
                   nt.type,
@@ -209,7 +212,8 @@ const getVariables = async (nodeId, componentId) => {
                   nv.variable_id,
                   va.name,
                   va.unit,
-                  vt.type
+                  vt.type,
+                  va.color
                 FROM
                   node_variable nv,
                   variable va,

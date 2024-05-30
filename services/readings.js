@@ -38,42 +38,6 @@ const getUiInfo = async (nodeId, locationId, date) => {
                             AND no.location_id = ra.location_id
                             AND ra.average_date = $3
                             AND ra.variable_id = va.variable_id
-                            AND va.name = 'temperatura'
-                          ) AS has_temp,
-                  EXISTS (SELECT
-                            *
-                          FROM
-                            readings_average ra,
-                            variable va
-                          WHERE
-                            no.node_id = ra.node_id
-                            AND no.location_id = ra.location_id
-                            AND ra.average_date = $3
-                            AND ra.variable_id = va.variable_id
-                            AND va.name = 'humedad'
-                          ) AS has_hum,
-                  EXISTS (SELECT
-                            *
-                          FROM
-                            readings_average ra,
-                            variable va
-                          WHERE
-                            no.node_id = ra.node_id
-                            AND no.location_id = ra.location_id
-                            AND ra.average_date = $3
-                            AND ra.variable_id = va.variable_id
-                            AND va.name = 'presión atmosférica'
-                          ) AS has_press,
-                  EXISTS (SELECT
-                            *
-                          FROM
-                            readings_average ra,
-                            variable va
-                          WHERE
-                            no.node_id = ra.node_id
-                            AND no.location_id = ra.location_id
-                            AND ra.average_date = $3
-                            AND ra.variable_id = va.variable_id
                             AND va.name = 'lluvia'
                           ) AS has_rain,
                   EXISTS (SELECT
@@ -100,7 +64,8 @@ const getDayVariables = async (nodeId, locationId, date) => {
                   vt.type,
                   ra.variable_id,
                   va.name,
-                  va.unit
+                  va.unit,
+                  va.color
                 FROM
                   readings_average ra,
                   variable va,
@@ -111,7 +76,7 @@ const getDayVariables = async (nodeId, locationId, date) => {
                   AND ra.average_date = $3
                   AND va.variable_id = ra.variable_id
                   AND va.variable_type_id = vt.variable_type_id
-                GROUP BY vt.type, ra.variable_id, va.name, va.unit
+                GROUP BY vt.type, ra.variable_id, va.name, va.unit, va.color
                 ORDER BY ra.variable_id`;
 
   const response = await pool.query(sql, [nodeId, locationId, date]);

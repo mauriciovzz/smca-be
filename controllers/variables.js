@@ -20,7 +20,7 @@ const getAll = async (req, res) => {
 const create = async (req, res) => {
   const { workspaceId } = req.params;
   const {
-    variableType, variableValueType, name, unit,
+    variableType, variableValueType, name, unit, color,
   } = req.body;
 
   if (await variablesService.checkName(workspaceId, name.toLowerCase())) {
@@ -42,6 +42,7 @@ const create = async (req, res) => {
     variableValueType,
     name.toLowerCase(),
     unit,
+    color.toUpperCase(),
   );
 
   return res.status(201).send('Variable creada exitosamente.');
@@ -49,7 +50,7 @@ const create = async (req, res) => {
 
 const update = async (req, res) => {
   const { workspaceId, variableId } = req.params;
-  const { name, unit } = req.body;
+  const { name, unit, color } = req.body;
 
   const variable = await variablesService.getOne(workspaceId, variableId);
   if (!(variable.name === name.toLowerCase())) {
@@ -63,6 +64,7 @@ const update = async (req, res) => {
     variableId,
     name.toLowerCase(),
     unit,
+    color,
   );
   return res.status(201).send('Variable actualizada exitosamente.');
 };

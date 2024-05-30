@@ -10,6 +10,7 @@ const create = Joi.object({
   variableValueType: schemaVariables.id('variableValueType'),
   name: schemaVariables.name,
   unit: schemaVariables.unit,
+  color: schemaVariables.color,
 });
 
 const idParams = Joi.object({
@@ -20,6 +21,7 @@ const idParams = Joi.object({
 const update = Joi.object({
   name: schemaVariables.name,
   unit: schemaVariables.unit,
+  color: schemaVariables.color,
 });
 
 module.exports = {

@@ -69,6 +69,17 @@ nodesRouter.get(
 );
 
 nodesRouter.get(
+  '/publicNodeComponents/:workspaceId/:nodeId',
+  [
+    validatorMiddleware.validateParams(schemas.idParams),
+    middleware.workspaceVerification,
+    middleware.nodeVerification,
+    middleware.nodeWorkspaceVerification,
+  ],
+  nodesController.getComponents,
+);
+
+nodesRouter.get(
   '/getConfigFile/:workspaceId/:nodeId',
   [
     middleware.accessTokenVerification,
