@@ -56,7 +56,7 @@ nodesRouter.get(
 );
 
 nodesRouter.get(
-  '/:workspaceId/:nodeId',
+  '/privateNodeComponents/:workspaceId/:nodeId',
   [
     middleware.accessTokenVerification,
     validatorMiddleware.validateParams(schemas.idParams),

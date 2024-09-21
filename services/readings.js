@@ -26,39 +26,6 @@ const create = async (
   );
 };
 
-const getUiInfo = async (nodeId, locationId, date) => {
-  const sql = ` SELECT
-                  EXISTS (SELECT
-                            *
-                          FROM
-                            readings_average ra,
-                            variable va
-                          WHERE
-                            no.node_id = ra.node_id
-                            AND no.location_id = ra.location_id
-                            AND ra.average_date = $3
-                            AND ra.variable_id = va.variable_id
-                            AND va.name = 'lluvia'
-                          ) AS has_rain,
-                  EXISTS (SELECT
-                            *
-                          FROM
-                            photo ph
-                          WHERE
-                            no.node_id = ph.node_id
-                            AND no.location_id = ph.location_id
-                            AND ph.photo_date = $3
-                          ) AS has_cam
-                FROM
-                  node no
-                WHERE
-                  no.node_id = $1
-                  AND no.location_id = $2`;
-
-  const response = await pool.query(sql, [nodeId, locationId, date]);
-  return response.rows[0];
-};
-
 const getDayVariables = async (nodeId, locationId, date) => {
   const sql = ` SELECT
                   vt.type,
@@ -167,7 +134,7 @@ const createReadingsAverage = async (readingAverage, fullDate, endHour) => {
 
   await pool.query(
     sql,
-    [nodeid, componentid, variableid, locationid, fullDate, endHour, averagevalue],
+    [nodeid, componentid, variableid, locationid, fullDate, endHour, Math.round(averagevalue)],
   );
 };
 
@@ -190,7 +157,6 @@ const canAccountAccessReadings = async (accountId, nodeId) => {
 
 module.exports = {
   create,
-  getUiInfo,
   getDayVariables,
   getDayReadings,
   getDayRanges,

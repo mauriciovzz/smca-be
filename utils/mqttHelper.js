@@ -13,13 +13,14 @@ const options = {
 
 const client = mqtt.connect(options);
 
-// client.subscribe(config.MQTT_TOPIC);
+client.subscribe(config.MQTT_TOPIC);
 client.subscribe('/photos');
 
 client.on('message', async (topic, message) => {
   if (topic === config.MQTT_TOPIC) {
     await readingsController.create(JSON.parse(message));
   }
+
   if (topic === '/photos') {
     await photosController.create(message);
   }

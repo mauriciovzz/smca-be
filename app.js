@@ -14,7 +14,7 @@ const componentsRouter = require('./routes/components');
 const variablesRouter = require('./routes/variables');
 
 const readingsRouter = require('./routes/readings');
-// const photosRouter = require('./routes/photos');
+const photosRouter = require('./routes/photos');
 
 const middleware = require('./utils/middlewares/middleware');
 
@@ -33,7 +33,7 @@ app.use('/api/components', componentsRouter);
 app.use('/api/variables', variablesRouter);
 
 app.use('/api/readings', readingsRouter);
-// app.use('/api/photos', photosRouter);
+app.use('/api/photos', photosRouter);
 
 app.use('/api/images', express.static(path.join(__dirname, 'images')));
 

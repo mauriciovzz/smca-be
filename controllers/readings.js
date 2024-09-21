@@ -8,18 +8,20 @@ const create = async (reading) => {
       nodeCode, componentId, variableId, readingDate, readingTime, readingValue,
     } = reading;
 
-    const foundNode = await nodesService.checkNodeVariable(nodeCode, componentId, variableId);
+    if (nodeCode && componentId && variableId && readingDate && readingTime && readingValue) {
+      const foundNode = await nodesService.checkNodeVariable(nodeCode, componentId, variableId);
 
-    if (foundNode) {
-      await readingsService.create(
-        foundNode.node_id,
-        componentId,
-        variableId,
-        foundNode.location_id,
-        readingDate,
-        readingTime,
-        parseFloat(readingValue),
-      );
+      if (foundNode) {
+        await readingsService.create(
+          foundNode.node_id,
+          componentId,
+          variableId,
+          foundNode.location_id,
+          readingDate,
+          readingTime,
+          parseFloat(readingValue),
+        );
+      }
     }
   } catch (err) {
     logger.error(`Saving reading error: ${err.message}`);
@@ -40,13 +42,6 @@ const calculateReadingsAverages = async (serverDate) => {
   }
 
   await readingsService.deletePastHourReadings(fullDate, startTime);
-};
-
-const getUiInfo = async (req, res) => {
-  const { nodeId, locationId, date } = req.params;
-  const uiInfo = await readingsService.getUiInfo(nodeId, locationId, date);
-
-  return res.status(200).send(uiInfo);
 };
 
 const getNodeReadings = async (req, res) => {
@@ -109,6 +104,5 @@ const getNodeReadings = async (req, res) => {
 module.exports = {
   create,
   calculateReadingsAverages,
-  getUiInfo,
   getNodeReadings,
 };

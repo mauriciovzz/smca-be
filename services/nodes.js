@@ -185,6 +185,33 @@ const checkNodeVariable = async (nodeCode, componentId, variableId) => {
   return response.rows[0];
 };
 
+const checkNodeCamera = async (nodeCode, componentId) => {
+  const sql = ` SELECT 
+                  no.node_id,
+                  no.location_id
+                FROM 
+                  node no,
+                  node_state ns,
+                  component co,
+                  component_type ct,
+                  node_component nc
+                WHERE
+                  no.node_code = $1
+
+                  AND no.node_state_id = ns.node_state_id
+                  AND ns.state = 'Activo'
+
+                  AND no.node_id = nc.node_id
+                  AND nc.component_id = $2
+
+                  AND co.component_id = $2
+                  AND co.component_type_id = ct.component_type_id
+                  AND ct.type = 'Camara'`;
+
+  const response = await pool.query(sql, [nodeCode, componentId]);
+  return response.rows[0];
+};
+
 const getComponents = async (nodeId) => {
   const sql = ` SELECT
                   co.component_id,
@@ -395,6 +422,7 @@ module.exports = {
   getOne,
   getOneWithNodeCode,
   checkNodeVariable,
+  checkNodeCamera,
   getComponents,
   getVariables,
   getNodeVariables,

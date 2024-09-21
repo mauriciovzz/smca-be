@@ -1,22 +1,22 @@
-const readingsRuter = require('express').Router();
-const averageReadingsController = require('../controllers/readings');
+const photosRouter = require('express').Router();
+const photosController = require('../controllers/photos');
 const middleware = require('../utils/middlewares/middleware');
 const validatorMiddleware = require('../utils/middlewares/validator');
 const schemas = require('../validatorSchemas/readings');
 
-readingsRuter.get(
-  '/getPublicNodeReadings/:nodeId/:locationId/:date',
+photosRouter.get(
+  '/getPublicNodephotos/:nodeId/:locationId/:date',
   [
     validatorMiddleware.validateParams(schemas.readingsParams),
     middleware.nodeVerification,
     middleware.nodeStateVerification,
     middleware.publicVerification,
   ],
-  averageReadingsController.getNodeReadings,
+  photosController.getNodePhotos,
 );
 
-readingsRuter.get(
-  '/getPrivateNodeReadings/:nodeId/:locationId/:date',
+photosRouter.get(
+  '/getPrivateNodePhotos/:nodeId/:locationId/:date',
   [
     validatorMiddleware.validateParams(schemas.readingsParams),
     middleware.nodeVerification,
@@ -24,7 +24,7 @@ readingsRuter.get(
     middleware.accessTokenVerification,
     middleware.nodeAccessVerification,
   ],
-  averageReadingsController.getNodeReadings,
+  photosController.getNodePhotos,
 );
 
-module.exports = readingsRuter;
+module.exports = photosRouter;
