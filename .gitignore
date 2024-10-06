@@ -1,7 +1,5 @@
 /node_modules
+/files
+/images
 /requests
 .env
-/tests
-/images
-/files
-/dist

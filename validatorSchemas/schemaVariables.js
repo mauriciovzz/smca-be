@@ -28,7 +28,6 @@ const firstName = Joi.string()
   .messages({
     'string.base': 'La entrada "Nombre" debe ser de tipo cadena.',
     'string.empty': 'La entrada "Nombre" no puede estar vacía.',
-    'string.min': 'La entrada "Nombre" debe contar con al menos 1 caracter.',
     'string.max': 'La entrada "Nombre" puede contar con máximo 35 caracteres.',
     'any.required': 'Se requiere la entrada "Nombre".',
   });

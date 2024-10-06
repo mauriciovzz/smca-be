@@ -1,109 +1,104 @@
-const pool = require('../utils/databaseHelper');
+const pool = require('../config/db');
 
-const create = async (email, passwordHash, firstName, lastName) => {
+const create = async (firstName, lastName, email, passwordHash) => {
   const sql = ` INSERT INTO account (
-                  email,
-                  password_hash,
                   first_name,
                   last_name,
-                  
+                  email,
+                  password_hash
                 ) 
                 VALUES ($1, $2, $3, $4)
-                RETURNING *`;
-  const accountInfo = await pool.query(sql, [email, passwordHash, firstName, lastName]);
-  return accountInfo.rows[0];
+                RETURNING account_id, first_name, last_name, email`;
+
+  const response = await pool.query(sql, [firstName, lastName, email, passwordHash]);
+  return response.rows[0];
 };
 
-const findAccount = async (column, value) => {
-  const accountQuery = await pool.query(`SELECT * FROM account WHERE ${column} = $1`, [value]);
-  return accountQuery.rows[0];
-};
-
-const createVerificationToken = async (accountId, type, email, token, expiration) => {
-  const sql = ` INSERT INTO verification_token (
-                  account_id,
-                  type,
-                  email,
-                  token,
-                  expiration
-                ) 
-                VALUES ($1, $2, $3, $4, TO_TIMESTAMP($5))
-                ON CONFLICT (account_id, type) 
-                DO UPDATE SET
-                  email = EXCLUDED.email,
-                  token = EXCLUDED.token,
-                  expiration = EXCLUDED.expiration`;
-
-  await pool.query(sql, [accountId, type, email, token, expiration]);
-};
-
-const findVerificationToken = async (type, token) => {
-  const sql = (`  SELECT 
-                    * 
-                  FROM
-                    verification_token
-                  WHERE 
-                    type = $1
-                    AND token = $2`);
-  const verificationToken = await pool.query(sql, [type, token]);
-  return verificationToken.rows[0];
-};
-
-const deleteVerificationToken = async (token) => {
-  const sql = (`  DELETE FROM
-                    verification_token
-                  WHERE 
-                    token = $1`);
-  await pool.query(sql, [token]);
-};
-
-const verifyAccount = async (accountId) => {
+const verify = async (accountId) => {
   const sql = ` UPDATE 
                   account
                 SET
                   is_verified = true
                 WHERE
                   account_id = $1`;
+
   await pool.query(sql, [accountId]);
 };
 
-const updateName = async (firstName, lastName, accountId) => {
+const findByEmail = async (email) => {
+  const sql = ` SELECT
+                  *
+                FROM
+                  account
+                WHERE
+                  email = $1`;
+
+  const response = await pool.query(sql, [email]);
+  return response.rows[0];
+};
+
+const findById = async (accountId) => {
+  const sql = ` SELECT
+                  *
+                FROM
+                  account
+                WHERE
+                  account_id = $1`;
+
+  const response = await pool.query(sql, [accountId]);
+  return response.rows[0];
+};
+
+const updateName = async (accountId, firstName, lastName) => {
   const sql = ` UPDATE 
                   account
                 SET
-                  first_name = $1,
-                  last_name = $2
+                  first_name = $2,
+                  last_name = $3
                 WHERE
-                  account_id = $3`;
-  await pool.query(sql, [firstName, lastName, accountId]);
+                  account_id = $1`;
+
+  await pool.query(sql, [accountId, firstName, lastName]);
 };
 
-const updatePassword = async (passwordHash, accountId) => {
-  const sql = ` UPDATE account
-                SET
-                  password_hash = $1
-                WHERE account_id = $2`;
-  await pool.query(sql, [passwordHash, accountId]);
-};
-
-const updateEmail = async (email, accountId) => {
+const updatePassword = async (accountId, newPasswordHash) => {
   const sql = ` UPDATE 
                   account
                 SET
-                  email = $1
+                  password_hash = $2
                 WHERE
-                  account_id = $2`;
-  await pool.query(sql, [email, accountId]);
+                  account_id = $1`;
+
+  await pool.query(sql, [accountId, newPasswordHash]);
+};
+
+const updateEmail = async (accountId, newEmail) => {
+  const sql = ` UPDATE 
+                  account
+                SET
+                  email = $2
+                WHERE
+                  account_id = $1`;
+
+  await pool.query(sql, [accountId, newEmail]);
+};
+
+const remove = async (accountId) => {
+  const sql = ` DELETE FROM 
+                  account 
+                WHERE
+                  account_id = $1`;
+
+  await pool.query(sql, [accountId]);
 };
 
 module.exports = {
   create,
-  findAccount,
-  createVerificationToken,
-  findVerificationToken,
-  deleteVerificationToken,
-  verifyAccount,
+  verify,
+  findByEmail,
+  findById,
   updateName,
-  updateEmail,
   updatePassword,
+  updateEmail,
+  remove,
 };

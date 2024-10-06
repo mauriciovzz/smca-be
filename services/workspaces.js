@@ -1,4 +1,4 @@
-const pool = require('../utils/databaseHelper');
+const pool = require('../config/db');
 
 const create = async (accountId, name, color) => {
   const sql = ` INSERT INTO workspace (

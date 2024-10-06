@@ -1,1 +1,0 @@
-GET http://localhost:3001/api/locations/8.2945/-62.7199

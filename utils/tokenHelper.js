@@ -1,39 +1,36 @@
+const crypto = require('node:crypto');
+const ms = require('ms');
 const jwt = require('jsonwebtoken');
-const config = require('./config');
+const config = require('../config/config');
 
-const generateRefreshToken = (accountId, rememberMe) => jwt.sign(
+const createVerificationToken = (expiration) => (
+  {
+    verificationToken: crypto.randomBytes(32).toString('hex').toUpperCase(),
+    verificationTokenExpiration: (Date.now() + ms(expiration)) / 1000,
+  }
+);
+
+const createRefreshToken = (accountId, rememberMe) => jwt.sign(
   { accountId },
-  config.SECRET,
+  config.REFRESH_TOKEN_SECRET,
   {
     expiresIn: rememberMe
-      ? parseInt(config.RT_LONG_EXPIRATION, 10)
-      : parseInt(config.RT_SHORT_EXPIRATION, 10),
+      ? config.REFRESH_TOKEN_LONG_EXPIRY
+      : config.REFRESH_TOKEN_SHORT_EXPIRY,
   },
 );
 
-const generateAccessToken = (accountId) => jwt.sign(
+const createAccessToken = (accountId) => jwt.sign(
   { accountId },
-  config.SECRET,
-  { expiresIn: parseInt(config.AT_EXPIRATION, 10) },
+  config.ACCESS_TOKEN_SECRET,
+  { expiresIn: config.ACCESS_TOKEN_EXPIRY },
 );
 
-const generateVerificationToken = (data, expirationTime) => jwt.sign(
-  data,
-  config.SECRET,
-  { expiresIn: parseInt(expirationTime, 10) },
-);
-
-const verifyToken = (token) => jwt.verify(token, config.SECRET);
-
-const getAccountId = (token) => {
-  const decode = verifyToken(token);
-  return decode.accountId;
-};
+const verify = (token, secret) => jwt.verify(token, secret);
 
 module.exports = {
-  generateRefreshToken,
-  generateAccessToken,
-  generateVerificationToken,
-  verifyToken,
-  getAccountId,
+  createVerificationToken,
+  createRefreshToken,
+  createAccessToken,
+  verify,
 };

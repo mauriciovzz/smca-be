@@ -1,82 +1,110 @@
 const accountsRouter = require('express').Router();
 const accountsController = require('../controllers/accounts');
-const middleware = require('../utils/middlewares/middleware');
-const validatorMiddleware = require('../utils/middlewares/validator');
-const schemas = require('../validatorSchemas/accounts');
+const accountSchemas = require('../schemas/accounts');
+
+const accessTokenVerification = require('../middlewares/accessTokenVerification');
+const { reqBodyValidator, reqParamsValidator } = require('../middlewares/requestDataValidator');
+const accountAuthentication = require('../middlewares/accountAuthentication');
+const verificationTokenVerification = require('../middlewares/verificationTokenVerification');
 
 accountsRouter.post(
-  '/register',
-  validatorMiddleware.validate(schemas.register),
-  accountsController.register,
+  '/',
+  reqBodyValidator(accountSchemas.create),
+  accountsController.create,
 );
 
 accountsRouter.post(
-  '/resendVerificationLink',
-  validatorMiddleware.validate(schemas.email),
-  accountsController.resendVerificationLink,
+  '/verify/:accountId/:verificationToken',
+  [
+    reqParamsValidator(accountSchemas.verificationToken),
+    verificationTokenVerification('account'),
+  ],
+  accountsController.verify,
 );
 
 accountsRouter.post(
-  '/verifyAccount',
-  validatorMiddleware.validate(schemas.verificationToken),
-  accountsController.verifyAccount,
+  '/resend-verification-token',
+  reqBodyValidator(accountSchemas.email),
+  accountsController.resendVerificationToken,
 );
 
-accountsRouter.post(
-  '/recoverPassword',
-  validatorMiddleware.validate(schemas.email),
-  accountsController.recoverPassword,
-);
-
-accountsRouter.post(
-  '/resetPassword',
-  validatorMiddleware.validate(schemas.resetPassword),
-  accountsController.resetPassword,
-);
-
-accountsRouter.post(
-  '/login',
-  validatorMiddleware.validate(schemas.login),
-  accountsController.login,
-);
-
-accountsRouter.post(
-  '/refreshAccessToken',
-  validatorMiddleware.validate(schemas.refreshToken),
-  accountsController.refreshAccessToken,
+accountsRouter.get(
+  '/:accountId',
+  [
+    accessTokenVerification,
+    reqParamsValidator(accountSchemas.accountId),
+    accountAuthentication,
+  ],
+  accountsController.get,
 );
 
 accountsRouter.put(
-  '/updateName',
+  '/:accountId/update-name',
   [
-    middleware.accessTokenVerification,
-    validatorMiddleware.validate(schemas.updateName),
+    accessTokenVerification,
+    reqParamsValidator(accountSchemas.accountId),
+    reqBodyValidator(accountSchemas.updateName),
+    accountAuthentication,
   ],
   accountsController.updateName,
 );
 
-accountsRouter.post(
-  '/updateEmail',
+accountsRouter.put(
+  '/:accountId/update-password',
   [
-    middleware.accessTokenVerification,
-    validatorMiddleware.validate(schemas.updateEmail),
+    accessTokenVerification,
+    reqParamsValidator(accountSchemas.accountId),
+    reqBodyValidator(accountSchemas.updatePassword),
+    accountAuthentication,
+  ],
+  accountsController.updatePassword,
+);
+
+accountsRouter.post(
+  '/:accountId/update-email',
+  [
+    accessTokenVerification,
+    reqParamsValidator(accountSchemas.accountId),
+    reqBodyValidator(accountSchemas.updateEmail),
+    accountAuthentication,
   ],
   accountsController.updateEmail,
 );
 
 accountsRouter.post(
-  '/verifyEmail',
-  validatorMiddleware.validate(schemas.verificationToken),
+  '/verify-email/:accountId/:verificationToken',
+  [
+    reqParamsValidator(accountSchemas.verificationToken),
+    verificationTokenVerification('email'),
+  ],
   accountsController.verifyEmail,
 );
 
-accountsRouter.put(
-  '/updatePassword',
+accountsRouter.delete(
+  '/:accountId',
   [
-    middleware.accessTokenVerification,
-    validatorMiddleware.validate(schemas.updatePassword),
+    accessTokenVerification,
+    reqParamsValidator(accountSchemas.accountId),
+    reqBodyValidator(accountSchemas.remove),
+    accountAuthentication,
   ],
-  accountsController.updatePassword,
+  accountsController.remove,
+);
+
+accountsRouter.post(
+  '/recover-password',
+  reqBodyValidator(accountSchemas.email),
+  accountsController.recoverPassword,
+);
+
+accountsRouter.post(
+  '/reset-password/:accountId/:verificationToken',
+  [
+    reqParamsValidator(accountSchemas.verificationToken),
+    reqBodyValidator(accountSchemas.resetPassword),
+    verificationTokenVerification('password'),
+  ],
+  accountsController.resetPassword,
 );
 
 module.exports = accountsRouter;

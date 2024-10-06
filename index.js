@@ -1,13 +1,15 @@
 const app = require('./app');
-const client = require('./utils/mqttHelper');
-const pool = require('./utils/databaseHelper');
-const schedule = require('./utils/scheduler');
-const config = require('./utils/config');
+const config = require('./config/config');
 const logger = require('./utils/logger');
 
+const client = require('./utils/mqttHelper');
+const schedule = require('./utils/scheduler');
+const pool = require('./config/db');
+
 const server = app.listen(config.PORT, () => {
+  logger.divider();
   logger.info(`Server running on port ${config.PORT}`);
-  logger.info('---');
+  logger.divider();
 });
 
 function handle(signal) {

@@ -1,4 +1,4 @@
-const logger = require('../logger');
+const config = require('../../config/config');
 const tokenHelper = require('../tokenHelper');
 const workspacesService = require('../../services/workspaces');
 const variablesService = require('../../services/variables');
@@ -7,36 +7,13 @@ const locationsService = require('../../services/locations');
 const nodesService = require('../../services/nodes');
 const readingsService = require('../../services/readings');
 
-const requestLogger = (request, response, next) => {
-  logger.info('Method:', request.method);
-  logger.info('Path:  ', request.path);
-  logger.info('Body:  ', request.body);
-  logger.info('---');
-  next();
-};
-
-const tokenExtractor = (request, response, next) => {
-  const authorization = request.get('authorization');
-  if (authorization && authorization.startsWith('Bearer ')) {
-    request.authToken = authorization.replace('Bearer ', '');
-  }
-
-  next();
-};
-
-// eslint-disable-next-line consistent-return
 const accessTokenVerification = (request, response, next) => {
-  try {
-    request.accountId = tokenHelper.getAccountId(request.authToken);
-    next();
-  } catch (error) {
-    if (error.name === 'JsonWebTokenError') {
-      return response.status(403).json({ error: 'Acceso denegado.' });
-    }
-    if (error.name === 'TokenExpiredError') {
-      return response.status(403).json({ error: error.name });
-    }
-  }
+  request.accountId = tokenHelper.verify(
+    request.accessToken,
+    config.ACCESS_TOKEN_SECRET,
+  );
+
+  next();
 };
 
 // eslint-disable-next-line consistent-return
@@ -182,7 +159,6 @@ const nodeComponentsAndVariablesVerification = async (request, response, next) =
   const workspaceComponentsIds = workspaceComponents.map((wc) => wc.component_id);
 
   for (let i = 0; i < nodeComponents.length; i += 1) {
-    // eslint-disable-next-line no-await-in-loop
     if (!workspaceComponentsIds.includes(nodeComponents[i])) {
       return response.status(404).json({ error: 'Uno de los componentes no se encuentra registrado.' });
     }
@@ -286,25 +262,9 @@ const nodeAccessVerification = async (request, response, next) => {
   next();
 };
 
-const unknownEndpoint = (request, response) => {
-  response.status(404).send({ error: 'unknown endpoint' });
-};
-
-const errorHandler = (error, request, response, next) => {
-  if (error.name) logger.error(error.name);
-  if (error.message) logger.error(error.message);
-  if (error.code) logger.error(error.code);
-
-  if (error.name === 'error') {
-    return response.status(400).json({ error: error.message });
-  }
-  return next(error);
-};
-
 module.exports = {
-  requestLogger,
-  tokenExtractor,
   accessTokenVerification,
+
   workspaceVerification,
   workspaceAdminVerification,
   workspaceMemberVerification,
@@ -321,6 +281,4 @@ module.exports = {
   nodeLocationVerification,
   publicVerification,
   nodeAccessVerification,
-  unknownEndpoint,
-  errorHandler,
 };

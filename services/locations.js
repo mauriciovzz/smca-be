@@ -1,4 +1,4 @@
-const pool = require('../utils/databaseHelper');
+const pool = require('../config/db');
 
 const getAll = async (workspaceId) => {
   const sql = ` SELECT 
@@ -27,7 +27,7 @@ const getOne = async (workspaceId, locationId) => {
 
 const checkCoordinates = async (lat, long) => {
   const sql = ` SELECT 
-                 *
+                  1
                 FROM
                   location
                 WHERE
@@ -49,16 +49,17 @@ const checkColumn = async (workspaceId, column, value) => {
   return response.rows[0];
 };
 
-const create = async (workspaceId, name, location, lat, long) => {
+const create = async (workspaceId, lat, long, name, location, isVisible) => {
   const sql = ` INSERT INTO location (
                   workspace_id,
+                  lat,
+                  long,
                   name,
                   location,
-                  lat,
-                  long
+                  is_visible
                 )
-                VALUES ($1, $2, $3, $4, $5)`;
-  await pool.query(sql, [workspaceId, name, location, lat, long]);
+                VALUES ($1, $2, $3, $4, $5, $6)`;
+  await pool.query(sql, [workspaceId, lat, long, name, location, isVisible]);
 };
 
 const update = async (workspaceId, componentId, name, location) => {

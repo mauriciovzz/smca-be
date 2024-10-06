@@ -1,6 +1,7 @@
 const tokenHelper = require('../utils/tokenHelper');
 const workspacesService = require('../services/workspaces');
 const accountsService = require('../services/accounts');
+const config = require('../config/config');
 
 const create = async (req, res) => {
   const {
@@ -8,7 +9,7 @@ const create = async (req, res) => {
   } = req.body;
 
   const workspace = await workspacesService.create(
-    tokenHelper.getAccountId(req.authToken),
+    tokenHelper.verify(req.accessToken, config.ACCESS_TOKEN_SECRET),
     name,
     color.toUpperCase(),
   );

@@ -1,7 +1,0 @@
-POST http://localhost:3001/api/nodes
-Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Im1hdXZlbGF6cXVlekBnbWFpbC5jb20iLCJpZCI6MSwiaWF0IjoxNjk1MTU3ODg3LCJleHAiOjE2OTUxNTc5NDd9.9CFZA79C3sxte-XnBCK74sTf3EAsp4aHHZErxbEMstk
-
-{
-  "nodeType": "INDOOR"
-}

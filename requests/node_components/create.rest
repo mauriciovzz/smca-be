@@ -1,8 +1,0 @@
-POST http://localhost:3001/api/node_components
-Content-Type: application/json
-
-{
-     "nodeType": "INDOOR",
-     "nodeId": 1,
-     "componentId": 4
-}

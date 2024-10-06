@@ -1,1 +1,0 @@
-GET http://localhost:3001/api/node_locations/8.2945/-62.7199/INDOOR/1

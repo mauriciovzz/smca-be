@@ -10,7 +10,7 @@ const getAll = async (req, res) => {
 const create = async (req, res) => {
   const { workspaceId } = req.params;
   const {
-    name, location, lat, long,
+    lat, long, name, location, isVisible,
   } = req.body;
 
   if (await locationsService.checkCoordinates(lat, long)) {
@@ -27,10 +27,11 @@ const create = async (req, res) => {
 
   await locationsService.create(
     workspaceId,
-    name.toLowerCase(),
-    location.toLowerCase(),
     lat,
     long,
+    name.toLowerCase(),
+    location.toLowerCase(),
+    isVisible,
   );
   return res.status(201).send('Ubicación creada exitosamente.');
 };

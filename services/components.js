@@ -1,4 +1,4 @@
-const pool = require('../utils/databaseHelper');
+const pool = require('../config/db');
 
 const getTypes = async () => {
   const sql = ` SELECT 

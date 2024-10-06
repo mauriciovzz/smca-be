@@ -1,7 +1,0 @@
-POST http://localhost:3001/api/component_variables
-Content-Type: application/json
-
-{
-    "componentId": 1, 
-    "variableId": 8
-}

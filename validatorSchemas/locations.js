@@ -10,6 +10,7 @@ const create = Joi.object({
   location: schemaVariables.location,
   lat: schemaVariables.coordinate,
   long: schemaVariables.coordinate,
+  isVisible: schemaVariables.booleanType('isVisible'),
 });
 
 const idParams = Joi.object({

@@ -1,5 +1,5 @@
 const mqtt = require('mqtt');
-const config = require('./config');
+const config = require('../config/config');
 const readingsController = require('../controllers/readings');
 const photosController = require('../controllers/photos');
 

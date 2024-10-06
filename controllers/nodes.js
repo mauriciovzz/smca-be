@@ -1,6 +1,6 @@
 const crypto = require('node:crypto');
 const fs = require('node:fs');
-const config = require('../utils/config');
+const config = require('../config/config');
 const nodesService = require('../services/nodes');
 const locationsService = require('../services/locations');
 
