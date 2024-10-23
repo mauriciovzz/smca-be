@@ -104,6 +104,7 @@ const updateEmail = Joi.object({
 });
 
 const remove = Joi.object({
+  email: emailValidator,
   password: passwordValidator,
 });
 

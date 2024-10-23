@@ -38,12 +38,19 @@ const login = async (req, res) => {
     .status(200).send({
       accessToken,
       accountId: accountData.account_id,
-      firstName: accountData.first_name,
     });
 };
 
 const logout = async (req, res) => (
-  res.clearCookie('connect.sid').redirect('/')
+  res
+    .clearCookie(
+      'smcaRefreshToken',
+      {
+        httpOnly: true,
+        path: '/api/auth/refresh-access-token',
+      },
+    )
+    .sendStatus(204)
 );
 
 const refreshAccessToken = async (req, res) => {
@@ -55,7 +62,10 @@ const refreshAccessToken = async (req, res) => {
   try {
     const { accountId } = tokenHelper.verify(cookies.smcaRefreshToken, config.REFRESH_TOKEN_SECRET);
 
-    return res.status(200).send({ accessToken: tokenHelper.createAccessToken(accountId) });
+    return res.status(200).send({
+      accessToken: tokenHelper.createAccessToken(accountId),
+      accountId,
+    });
   } catch {
     throw new CustomError('La sesión ha expirado.', 403);
   }

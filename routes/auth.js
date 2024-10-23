@@ -15,7 +15,7 @@ authRouter.post(
   authController.logout,
 );
 
-authRouter.post(
+authRouter.get(
   '/refresh-access-token',
   authController.refreshAccessToken,
 );

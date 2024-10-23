@@ -23,9 +23,9 @@ accountsRouter.post(
 );
 
 accountsRouter.post(
-  '/resend-verification-token',
+  '/resend-account-verification-email',
   reqBodyValidator(accountSchemas.email),
-  accountsController.resendVerificationToken,
+  accountsController.resendAccountVerificationEmail,
 );
 
 accountsRouter.get(
@@ -72,12 +72,12 @@ accountsRouter.post(
 );
 
 accountsRouter.post(
-  '/verify-email/:accountId/:verificationToken',
+  '/verify-new-email/:accountId/:verificationToken',
   [
     reqParamsValidator(accountSchemas.verificationToken),
     verificationTokenVerification('email'),
   ],
-  accountsController.verifyEmail,
+  accountsController.verifyNewEmail,
 );
 
 accountsRouter.delete(

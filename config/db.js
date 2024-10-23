@@ -14,9 +14,6 @@ const query = async (text, params) => {
   return response;
 };
 
-const end = async () => pool.end();
-
 module.exports = {
   query,
-  end,
 };

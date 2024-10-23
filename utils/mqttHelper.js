@@ -25,9 +25,3 @@ client.on('message', async (topic, message) => {
     await photosController.create(message);
   }
 });
-
-const end = async () => client.end();
-
-module.exports = {
-  end,
-};

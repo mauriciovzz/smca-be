@@ -34,14 +34,18 @@ const create = async (req, res) => {
     verificationTokenExpiration,
   );
 
-  // const { origin } = req.headers;
-  const origin = 'http://localhost:3001';
-  const path = `/verificar-cuenta/${createdAccountData.account_id}/${verificationToken}`;
+  const { origin } = req.headers;
+  const path = `/verificar/cuenta/${createdAccountData.account_id}/${verificationToken}`;
 
   try {
     await mailSender.accountVerification(createdAccountData, origin, path);
 
-    return res.status(200).send('Se ha enviado un enlace para la verificación de su cuenta a su correo electrónico.');
+    return res.status(200).send({
+      linkType: 'emailVerification',
+      message: 'Se ha enviado un enlace para la verificación de su cuenta al correo electrónico:',
+      email: email.toLowerCase(),
+      linkExpiration: `Este enlace expirará en ${config.VERIFICATION_TOKEN_LONG_EXPIRY}.`,
+    });
   } catch {
     await accountsService.remove(createdAccountData.account_id);
 
@@ -58,7 +62,7 @@ const verify = async (req, res) => {
   return res.status(201).send('Su cuenta fue verificada exitosamente.');
 };
 
-const resendVerificationToken = async (req, res) => {
+const resendAccountVerificationEmail = async (req, res) => {
   const { email } = req.body;
 
   const accountData = await accountsService.findByEmail(email.toLowerCase());
@@ -81,14 +85,18 @@ const resendVerificationToken = async (req, res) => {
     verificationTokenExpiration,
   );
 
-  // const { origin } = req.headers;
-  const origin = 'http://localhost:3001';
-  const path = `/verificar-cuenta/${accountData.account_id}/${verificationToken}`;
+  const { origin } = req.headers;
+  const path = `/verificar/cuenta/${accountData.account_id}/${verificationToken}`;
 
   try {
     await mailSender.accountVerification(accountData, origin, path);
 
-    return res.status(200).send('Se ha enviado un nuevo enlace para la verificación de su cuenta a su correo electrónico.');
+    return res.status(200).send({
+      linkType: 'emailVerification',
+      message: 'Se ha enviado un nuevo enlace para la verificación de su cuenta al correo electrónico:',
+      email: email.toLowerCase(),
+      linkExpiration: `Este enlace expirará en ${config.VERIFICATION_TOKEN_LONG_EXPIRY}.`,
+    });
   } catch {
     throw new CustomError('Ha ocurrido un error al momento de reenviar un nuevo enlace de verificacion a su cuenta. Intente de nuevo más tarde.', 500);
   }
@@ -121,11 +129,11 @@ const updatePassword = async (req, res) => {
   const { accountData } = req;
   const { currentPassword, newPassword, repeatNewPassword } = req.body;
 
-  if (newPassword !== repeatNewPassword)
-    throw new CustomError('Los campos \'Nueva contraseña\' y \'Repetir nueva contraseña\' deben de coincidir.', 400);
-
   if (!await passwordProtector.checkPassword(currentPassword, accountData.password_hash))
     throw new CustomError('Contraseña incorrecta.', 401);
+
+  if (newPassword !== repeatNewPassword)
+    throw new CustomError('Los campos \'Nueva contraseña\' y \'Repetir nueva contraseña\' deben de coincidir.', 400);
 
   await accountsService.updatePassword(
     accountData.account_id,
@@ -157,9 +165,8 @@ const updateEmail = async (req, res) => {
     verificationTokenExpiration,
   );
 
-  // const { origin } = req.headers;
-  const origin = 'http://localhost:3001';
-  const path = `/verificar-correo-electronico/${accountData.account_id}/${verificationToken}`;
+  const { origin } = req.headers;
+  const path = `/verificar/correo-electronico/${accountData.account_id}/${verificationToken}`;
 
   try {
     await mailSender.newEmailVerification(accountData, newEmail, origin, path);
@@ -170,7 +177,7 @@ const updateEmail = async (req, res) => {
   }
 };
 
-const verifyEmail = async (req, res) => {
+const verifyNewEmail = async (req, res) => {
   const { tokenData } = req;
 
   if (await accountsService.findByEmail(tokenData.email))
@@ -184,14 +191,17 @@ const verifyEmail = async (req, res) => {
 
 const remove = async (req, res) => {
   const { accountData } = req;
-  const { password } = req.body;
+  const { email, password } = req.body;
+
+  if (email !== accountData.email)
+    throw new CustomError('Correo electrónico incorrecto.', 401);
 
   if (!await passwordProtector.checkPassword(password, accountData.password_hash))
     throw new CustomError('Contraseña incorrecta.', 401);
 
   // future checks ?
 
-  await accountsService.remove(accountData.accountId);
+  await accountsService.remove(accountData.account_id);
 
   return res.status(200).send('Su cuenta fue eliminada exitosamente.');
 };
@@ -205,7 +215,7 @@ const recoverPassword = async (req, res) => {
     throw new CustomError('El correo electrónico ingresado no se encuentra registrado.', 404);
 
   if (!accountData.is_verified)
-    throw new CustomError('Su cuenta no se encuentra verificada. Inicie sesión para solicitar un nuevo enlace de verificación.', 401);
+    throw new CustomError('Su cuenta no se encuentra verificada.', 401);
 
   const {
     verificationToken, verificationTokenExpiration,
@@ -219,14 +229,18 @@ const recoverPassword = async (req, res) => {
     verificationTokenExpiration,
   );
 
-  // const { origin } = req.headers;
-  const origin = 'http://localhost:3001';
-  const path = `/restablecer-contrasena/${accountData.account_id}/${verificationToken}`;
+  const { origin } = req.headers;
+  const path = `/restablecer-contraseña/${accountData.account_id}/${verificationToken}`;
 
   try {
     await mailSender.passwordReset(accountData, origin, path);
 
-    return res.status(200).send('Se ha enviado un enlace para el restablecimiento de su contraseña a su correo electrónico.');
+    return res.status(200).send({
+      linkType: 'passwordReset',
+      message: 'Se ha enviado un enlace para el restablecimiento de su contraseña al correo electrónico:',
+      email: email.toLowerCase(),
+      linkExpiration: `Este enlace expirará en ${config.VERIFICATION_TOKEN_SHORT_EXPIRY}.`,
+    });
   } catch {
     throw new CustomError('Ha ocurrido un error al momento de enviar un enlace para el restablecimiento de su contraseña a su correo electrónico. Intente de nuevo más tarde.', 500);
   }
@@ -250,12 +264,12 @@ const resetPassword = async (req, res) => {
 module.exports = {
   create,
   verify,
-  resendVerificationToken,
+  resendAccountVerificationEmail,
   get,
   updateName,
   updatePassword,
   updateEmail,
-  verifyEmail,
+  verifyNewEmail,
   remove,
   recoverPassword,
   resetPassword,

@@ -1,50 +1,8 @@
-const config = require('../../config/config');
-const tokenHelper = require('../tokenHelper');
-const workspacesService = require('../../services/workspaces');
-const variablesService = require('../../services/variables');
-const componentsService = require('../../services/components');
-const locationsService = require('../../services/locations');
-const nodesService = require('../../services/nodes');
-const readingsService = require('../../services/readings');
-
-const accessTokenVerification = (request, response, next) => {
-  request.accountId = tokenHelper.verify(
-    request.accessToken,
-    config.ACCESS_TOKEN_SECRET,
-  );
-
-  next();
-};
-
-// eslint-disable-next-line consistent-return
-const workspaceVerification = async (request, response, next) => {
-  const { workspaceId } = request.params;
-
-  if (!await workspacesService.getOne(workspaceId)) {
-    return response.status(404).json({ error: 'El espacio de trabajo no se encuentra registrado.' });
-  }
-  next();
-};
-
-// eslint-disable-next-line consistent-return
-const workspaceAdminVerification = async (request, response, next) => {
-  const { workspaceId } = request.params;
-
-  if (!await workspacesService.isWorkspaceAdmin(workspaceId, request.accountId)) {
-    return response.status(401).json({ error: 'No tienes los permisos necesarios para realizar esta acción.' });
-  }
-  next();
-};
-
-// eslint-disable-next-line consistent-return
-const workspaceMemberVerification = async (request, response, next) => {
-  const { workspaceId } = request.params;
-
-  if (!await workspacesService.isInWorkspace(workspaceId, request.accountId)) {
-    return response.status(401).json({ error: 'No tienes los permisos necesarios para realizar esta acción.' });
-  }
-  next();
-};
+const variablesService = require('../services/variables');
+const componentsService = require('../services/components');
+const locationsService = require('../services/locations');
+const nodesService = require('../services/nodes');
+const readingsService = require('../services/readings');
 
 // eslint-disable-next-line consistent-return
 const variableVerification = async (request, response, next) => {
@@ -263,11 +221,6 @@ const nodeAccessVerification = async (request, response, next) => {
 };
 
 module.exports = {
-  accessTokenVerification,
-
-  workspaceVerification,
-  workspaceAdminVerification,
-  workspaceMemberVerification,
   variableVerification,
   componentVerification,
   locationVerification,
