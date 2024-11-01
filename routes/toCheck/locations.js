@@ -1,18 +1,10 @@
-const componentsRouter = require('express').Router();
-const componentsController = require('../controllers/components');
+const locationsRouter = require('express').Router();
+const locationsController = require('../controllers/locations');
 const middleware = require('../utils/middlewares/middleware');
 const validatorMiddleware = require('../utils/middlewares/validator');
-const schemas = require('../validatorSchemas/components');
+const schemas = require('../../schemas/toCheck/locations');
 
-componentsRouter.get(
-  '/getTypes',
-  [
-    middleware.accessTokenVerification,
-  ],
-  componentsController.getTypes,
-);
-
-componentsRouter.get(
+locationsRouter.get(
   '/:workspaceId',
   [
     middleware.accessTokenVerification,
@@ -20,10 +12,10 @@ componentsRouter.get(
     middleware.workspaceVerification,
     middleware.workspaceMemberVerification,
   ],
-  componentsController.getAll,
+  locationsController.getAll,
 );
 
-componentsRouter.post(
+locationsRouter.post(
   '/:workspaceId',
   [
     middleware.accessTokenVerification,
@@ -32,32 +24,32 @@ componentsRouter.post(
     middleware.workspaceVerification,
     middleware.workspaceAdminVerification,
   ],
-  componentsController.create,
+  locationsController.create,
 );
 
-componentsRouter.put(
-  '/:workspaceId/:componentId',
+locationsRouter.put(
+  '/:workspaceId/:locationId',
   [
     middleware.accessTokenVerification,
     validatorMiddleware.validateParams(schemas.idParams),
     validatorMiddleware.validate(schemas.update),
     middleware.workspaceVerification,
     middleware.workspaceAdminVerification,
-    middleware.componentVerification,
+    middleware.locationVerification,
   ],
-  componentsController.update,
+  locationsController.update,
 );
 
-componentsRouter.delete(
-  '/:workspaceId/:componentId',
+locationsRouter.delete(
+  '/:workspaceId/:locationId',
   [
     middleware.accessTokenVerification,
     validatorMiddleware.validateParams(schemas.idParams),
     middleware.workspaceVerification,
     middleware.workspaceAdminVerification,
-    middleware.componentVerification,
+    middleware.locationVerification,
   ],
-  componentsController.remove,
+  locationsController.remove,
 );
 
-module.exports = componentsRouter;
+module.exports = locationsRouter;

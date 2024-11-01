@@ -1,11 +1,6 @@
-/* eslint max-len: 0 */
-
 const spacesService = require('../services/spaces');
 const accountsService = require('../services/accounts');
-
 const CustomError = require('../utils/CustomError');
-// const config = require('../config/config');
-// const tokenHelper = require('../utils/tokenHelper');
 
 const create = async (req, res) => {
   const { accountId } = req;
@@ -35,6 +30,17 @@ const getAll = async (req, res) => {
   return res.status(200).send(spaces);
 };
 
+const getOne = async (req, res) => {
+  const { spaceId, accountId } = req;
+
+  const space = await spacesService.getOne(
+    spaceId,
+    accountId,
+  );
+
+  return res.status(200).send(space);
+};
+
 const updateName = async (req, res) => {
   const { spaceId } = req;
   const { newName } = req.body;
@@ -52,7 +58,7 @@ const updateColor = async (req, res) => {
   const { newColor } = req.body;
 
   await spacesService.updateColor(
-    spaceId.space_id,
+    spaceId,
     newColor,
   );
 
@@ -62,9 +68,10 @@ const updateColor = async (req, res) => {
 const leave = async (req, res, next) => {
   const { spaceId, accountId } = req;
 
+  const isAdmin = await spacesService.isAdmin(spaceId, accountId);
   const admins = await spacesService.getAdminCount(spaceId);
 
-  if (admins === 1)
+  if (admins === 1 && isAdmin)
     return next(new CustomError('No se puede abandonar un espacio si se es el unico administrador.', 404));
 
   await spacesService.removeMember(
@@ -72,7 +79,7 @@ const leave = async (req, res, next) => {
     accountId,
   );
 
-  return res.status(202).send('Abandonó el espacio exitosamente.');
+  return res.status(202).send('Espacio abandonado exitosamente.');
 };
 
 const remove = async (req, res) => {
@@ -112,7 +119,7 @@ const invite = async (req, res, next) => {
   return res.status(201).send('Invitación enviada exitosamente.');
 };
 
-const getInvites = async (req, res) => {
+const getInvitations = async (req, res) => {
   const { accountId } = req;
 
   const invitations = await spacesService.getInvitations(accountId);
@@ -120,7 +127,7 @@ const getInvites = async (req, res) => {
   return res.status(200).send(invitations);
 };
 
-const inviteResponse = async (req, res) => {
+const invitationResponse = async (req, res) => {
   const { accountId, spaceId } = req;
   const { wasAccepted } = req.body;
 
@@ -169,19 +176,20 @@ const removeMember = async (req, res) => {
     accountId,
   );
 
-  return res.status(202).send('Cuenta removida exitosamente del espacio de trabajo.');
+  return res.status(202).send('Cuenta removida exitosamente.');
 };
 
 module.exports = {
   create,
   getAll,
+  getOne,
   updateName,
   updateColor,
   leave,
   remove,
   invite,
-  getInvites,
-  inviteResponse,
+  getInvitations,
+  invitationResponse,
   getMembers,
   updateMemberRole,
   removeMember,

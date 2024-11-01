@@ -1,4 +1,4 @@
-const variablesService = require('../services/variables');
+const variablesService = require('../../services/toCheck/variables');
 
 const getTypes = async (req, res) => {
   const variableTypes = await variablesService.getTypes();

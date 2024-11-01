@@ -1,6 +1,6 @@
-const readingsService = require('../services/readings');
-const nodesService = require('../services/nodes');
-const logger = require('../utils/logger');
+const readingsService = require('../../services/toCheck/readings');
+const nodesService = require('../../services/toCheck/nodes');
+const logger = require('../../utils/logger');
 
 const create = async (reading) => {
   try {

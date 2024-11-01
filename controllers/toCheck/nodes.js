@@ -1,8 +1,8 @@
 const crypto = require('node:crypto');
 const fs = require('node:fs');
-const config = require('../config/config');
-const nodesService = require('../services/nodes');
-const locationsService = require('../services/locations');
+const config = require('../../config/config');
+const nodesService = require('../../services/toCheck/nodes');
+const locationsService = require('../../services/toCheck/locations');
 
 const getTypes = async (req, res) => {
   const nodeTypes = await nodesService.getTypes();

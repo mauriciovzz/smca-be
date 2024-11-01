@@ -1,5 +1,5 @@
-const componentsService = require('../services/components');
-const variablesService = require('../services/variables');
+const componentsService = require('../../services/toCheck/components');
+const variablesService = require('../../services/toCheck/variables');
 
 const getTypes = async (req, res) => {
   const componentTypes = await componentsService.getTypes();

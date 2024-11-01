@@ -2,7 +2,7 @@ const photosRouter = require('express').Router();
 const photosController = require('../controllers/photos');
 const middleware = require('../utils/middlewares/middleware');
 const validatorMiddleware = require('../utils/middlewares/validator');
-const schemas = require('../validatorSchemas/readings');
+const schemas = require('../../schemas/toCheck/readings');
 
 photosRouter.get(
   '/getPublicNodephotos/:nodeId/:locationId/:date',

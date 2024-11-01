@@ -24,7 +24,7 @@ const prodErrors = (res, error) => {
   }
 };
 
-const jsonWebTokenErrorHandler = () => new CustomError('Acceso denegado.', 403);
+const jsonWebTokenErrorHandler = () => new CustomError('Acceso denegado (No AT).', 403);
 
 const tokenExpiredErrorHandler = (error) => new CustomError(error.name, 403);
 

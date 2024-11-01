@@ -1,10 +1,26 @@
-const locationsRouter = require('express').Router();
-const locationsController = require('../controllers/locations');
+const variablesRouter = require('express').Router();
+const variablesController = require('../controllers/variables');
 const middleware = require('../utils/middlewares/middleware');
 const validatorMiddleware = require('../utils/middlewares/validator');
-const schemas = require('../validatorSchemas/locations');
+const schemas = require('../../schemas/toCheck/variables');
 
-locationsRouter.get(
+variablesRouter.get(
+  '/getTypes',
+  [
+    middleware.accessTokenVerification,
+  ],
+  variablesController.getTypes,
+);
+
+variablesRouter.get(
+  '/getValueTypes',
+  [
+    middleware.accessTokenVerification,
+  ],
+  variablesController.getValueTypes,
+);
+
+variablesRouter.get(
   '/:workspaceId',
   [
     middleware.accessTokenVerification,
@@ -12,10 +28,10 @@ locationsRouter.get(
     middleware.workspaceVerification,
     middleware.workspaceMemberVerification,
   ],
-  locationsController.getAll,
+  variablesController.getAll,
 );
 
-locationsRouter.post(
+variablesRouter.post(
   '/:workspaceId',
   [
     middleware.accessTokenVerification,
@@ -24,32 +40,32 @@ locationsRouter.post(
     middleware.workspaceVerification,
     middleware.workspaceAdminVerification,
   ],
-  locationsController.create,
+  variablesController.create,
 );
 
-locationsRouter.put(
-  '/:workspaceId/:locationId',
+variablesRouter.put(
+  '/:workspaceId/:variableId',
   [
     middleware.accessTokenVerification,
     validatorMiddleware.validateParams(schemas.idParams),
     validatorMiddleware.validate(schemas.update),
     middleware.workspaceVerification,
     middleware.workspaceAdminVerification,
-    middleware.locationVerification,
+    middleware.variableVerification,
   ],
-  locationsController.update,
+  variablesController.update,
 );
 
-locationsRouter.delete(
-  '/:workspaceId/:locationId',
+variablesRouter.delete(
+  '/:workspaceId/:variableId',
   [
     middleware.accessTokenVerification,
     validatorMiddleware.validateParams(schemas.idParams),
     middleware.workspaceVerification,
     middleware.workspaceAdminVerification,
-    middleware.locationVerification,
+    middleware.variableVerification,
   ],
-  locationsController.remove,
+  variablesController.remove,
 );
 
-module.exports = locationsRouter;
+module.exports = variablesRouter;

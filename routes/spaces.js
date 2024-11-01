@@ -4,8 +4,9 @@ const spacesSchemas = require('../schemas/spaces');
 
 const accessTokenVerification = require('../middlewares/accessTokenVerification');
 const existVerification = require('../middlewares/spaces/existVerification');
-const isAdminVerification = require('../middlewares/spaces/isAdminVerification');
-const isMemberVerification = require('../middlewares/spaces/isMemberVerification');
+const amIAdminVerification = require('../middlewares/spaces/amIAdminVerification');
+const amIMemberVerification = require('../middlewares/spaces/amIMemberVerification');
+const areTheyMemberVerification = require('../middlewares/spaces/areTheyMemberVerification');
 const isNotSelfVerification = require('../middlewares/spaces/isNotSelfVerification');
 
 const accountAuthentication = require('../middlewares/accountAuthentication');
@@ -28,13 +29,24 @@ spacesRouter.get(
   spacesController.getAll,
 );
 
+spacesRouter.get(
+  '/:spaceId',
+  [
+    accessTokenVerification,
+    reqParamsValidator(spacesSchemas.spaceId),
+    existVerification,
+    amIMemberVerification,
+  ],
+  spacesController.getOne,
+);
+
 spacesRouter.put(
   '/:spaceId/update-name',
   [
     accessTokenVerification,
     reqParamsValidator(spacesSchemas.spaceId),
     existVerification,
-    isAdminVerification,
+    amIAdminVerification,
     reqBodyValidator(spacesSchemas.updateName),
   ],
   spacesController.updateName,
@@ -46,7 +58,7 @@ spacesRouter.put(
     accessTokenVerification,
     reqParamsValidator(spacesSchemas.spaceId),
     existVerification,
-    isAdminVerification,
+    amIAdminVerification,
     reqBodyValidator(spacesSchemas.updateColor),
   ],
   spacesController.updateColor,
@@ -59,7 +71,7 @@ spacesRouter.delete(
     reqParamsValidator(spacesSchemas.ids),
     existVerification,
     accountAuthentication,
-    isMemberVerification(),
+    amIMemberVerification,
   ],
   spacesController.leave,
 );
@@ -70,7 +82,7 @@ spacesRouter.delete(
     accessTokenVerification,
     reqParamsValidator(spacesSchemas.spaceId),
     existVerification,
-    isAdminVerification,
+    amIAdminVerification,
   ],
   spacesController.remove,
 );
@@ -81,7 +93,7 @@ spacesRouter.post(
     accessTokenVerification,
     reqParamsValidator(spacesSchemas.spaceId),
     existVerification,
-    isAdminVerification,
+    amIAdminVerification,
     reqBodyValidator(spacesSchemas.invite),
   ],
   spacesController.invite,
@@ -94,18 +106,18 @@ spacesRouter.get(
     reqParamsValidator(spacesSchemas.accountId),
     accountAuthentication,
   ],
-  spacesController.getInvites,
+  spacesController.getInvitations,
 );
 
 spacesRouter.post(
-  '/:spaceId/invite-response',
+  '/:spaceId/invitation-response',
   [
     accessTokenVerification,
     reqParamsValidator(spacesSchemas.spaceId),
     existVerification,
-    reqBodyValidator(spacesSchemas.inviteResponse),
+    reqBodyValidator(spacesSchemas.invitationResponse),
   ],
-  spacesController.inviteResponse,
+  spacesController.invitationResponse,
 );
 
 spacesRouter.get(
@@ -114,7 +126,7 @@ spacesRouter.get(
     accessTokenVerification,
     reqParamsValidator(spacesSchemas.spaceId),
     existVerification,
-    isMemberVerification(true),
+    amIMemberVerification,
   ],
   spacesController.getMembers,
 );
@@ -125,8 +137,8 @@ spacesRouter.put(
     accessTokenVerification,
     reqParamsValidator(spacesSchemas.ids),
     existVerification,
-    isAdminVerification,
-    isMemberVerification(),
+    amIAdminVerification,
+    areTheyMemberVerification,
     isNotSelfVerification,
   ],
   spacesController.updateMemberRole,
@@ -138,8 +150,8 @@ spacesRouter.delete(
     accessTokenVerification,
     reqParamsValidator(spacesSchemas.ids),
     existVerification,
-    isAdminVerification,
-    isMemberVerification(),
+    amIAdminVerification,
+    areTheyMemberVerification,
     isNotSelfVerification,
   ],
   spacesController.removeMember,

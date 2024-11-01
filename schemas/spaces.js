@@ -84,7 +84,7 @@ const accountId = Joi.object({
   accountId: idValidator,
 });
 
-const inviteResponse = Joi.object({
+const invitationResponse = Joi.object({
   wasAccepted: booleanValidator,
 });
 
@@ -96,5 +96,5 @@ module.exports = {
   ids,
   invite,
   accountId,
-  inviteResponse,
+  invitationResponse,
 };

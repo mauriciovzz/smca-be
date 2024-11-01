@@ -1,7 +1,7 @@
 const fs = require('fs');
-const logger = require('../utils/logger');
-const nodesService = require('../services/nodes');
-const photosService = require('../services/photos');
+const logger = require('../../utils/logger');
+const nodesService = require('../../services/toCheck/nodes');
+const photosService = require('../../services/toCheck/photos');
 
 const create = async (newPhoto) => {
   try {

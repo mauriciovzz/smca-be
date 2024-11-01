@@ -23,13 +23,14 @@ const addMember = async (spaceId, accountId, isAdmin) => {
   await pool.query(sql, [spaceId, accountId, isAdmin]);
 };
 
+// (SELECT count(*) FROM node WHERE space_id = s.space_id) AS nodes,
+
 const getAll = async (accountId) => {
   const sql = ` SELECT 
                   s.space_id,
                   s.name,
                   s.color,
                   (SELECT count(*) FROM space_member WHERE space_id = s.space_id) AS members,
-                  (SELECT count(*) FROM node WHERE space_id = s.space_id) AS nodes,
                   sm.is_admin
                 FROM
                   space s,
@@ -37,10 +38,28 @@ const getAll = async (accountId) => {
                 WHERE
                   s.space_id = sm.space_id
                   AND sm.account_id = $1
-                ORDER BY space_id`;
+                ORDER BY s.space_id`;
 
   const response = await pool.query(sql, [accountId]);
   return response.rows;
+};
+
+const getOne = async (spaceId, accountId) => {
+  const sql = ` SELECT 
+                  s.space_id,
+                  s.name,
+                  s.color,
+                  sm.is_admin
+                FROM
+                  space s,
+                  space_member sm
+                WHERE
+                  s.space_id = $1
+                  AND s.space_id = sm.space_id
+                  AND sm.account_id = $2`;
+
+  const response = await pool.query(sql, [spaceId, accountId]);
+  return response.rows[0];
 };
 
 const find = async (spaceId) => {
@@ -202,6 +221,7 @@ const getMembers = async (spaceId) => {
                   ac.account_id,
                   ac.first_name,
                   ac.last_name,
+                  ac.email,
                   sa.is_admin
                 FROM
                   space s,
@@ -233,6 +253,7 @@ module.exports = {
   create,
   addMember,
   getAll,
+  getOne,
   find,
   isAdmin,
   updateName,

@@ -2,7 +2,7 @@ const readingsRuter = require('express').Router();
 const averageReadingsController = require('../controllers/readings');
 const middleware = require('../utils/middlewares/middleware');
 const validatorMiddleware = require('../utils/middlewares/validator');
-const schemas = require('../validatorSchemas/readings');
+const schemas = require('../../schemas/toCheck/readings');
 
 readingsRuter.get(
   '/getPublicNodeReadings/:nodeId/:locationId/:date',

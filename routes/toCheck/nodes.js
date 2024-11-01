@@ -2,7 +2,7 @@ const nodesRouter = require('express').Router();
 const nodesController = require('../controllers/nodes');
 const middleware = require('../utils/middlewares/middleware');
 const validatorMiddleware = require('../utils/middlewares/validator');
-const schemas = require('../validatorSchemas/nodes');
+const schemas = require('../../schemas/toCheck/nodes');
 
 nodesRouter.get(
   '/getTypes',
