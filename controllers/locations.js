@@ -1,4 +1,4 @@
-const locationsService = require('../../services/toCheck/locations');
+const locationsService = require('../services/locations');
 
 const getAll = async (req, res) => {
   const { workspaceId } = req.params;

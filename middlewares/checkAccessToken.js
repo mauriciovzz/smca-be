@@ -2,11 +2,11 @@ const CustomError = require('../utils/CustomError');
 const tokenHelper = require('../utils/tokenHelper');
 const config = require('../config/config');
 
-const accessTokenVerification = (req, res, next) => {
+const checkAccessToken = (req, res, next) => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader)
-    return next(new CustomError('Acceso no autorizado.', 401));
+    return next(new CustomError('Acceso no autorizado (No AT).', 401));
 
   const accessToken = authHeader.replace('Bearer ', '');
 
@@ -19,4 +19,4 @@ const accessTokenVerification = (req, res, next) => {
   return next();
 };
 
-module.exports = accessTokenVerification;
+module.exports = checkAccessToken;

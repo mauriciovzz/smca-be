@@ -1,7 +1,7 @@
 const accountsService = require('../services/accounts');
 const CustomError = require('../utils/CustomError');
 
-const accountAuthentication = async (req, res, next) => {
+const checkAccountId = async (req, res, next) => {
   const { accountId } = req.params;
 
   const accountData = await accountsService.findById(accountId);
@@ -16,4 +16,4 @@ const accountAuthentication = async (req, res, next) => {
   return next();
 };
 
-module.exports = accountAuthentication;
+module.exports = checkAccountId;

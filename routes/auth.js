@@ -2,11 +2,11 @@ const authRouter = require('express').Router();
 const authController = require('../controllers/auth');
 const authSchemas = require('../schemas/auth');
 
-const { reqBodyValidator } = require('../middlewares/requestDataValidator');
+const { checkReqBody } = require('../middlewares');
 
 authRouter.post(
   '/login',
-  reqBodyValidator(authSchemas.login),
+  checkReqBody(authSchemas.login),
   authController.login,
 );
 

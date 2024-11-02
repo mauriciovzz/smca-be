@@ -1,8 +1,7 @@
-const CustomError = require('../../utils/CustomError');
+const spacesService = require('../services/spaces');
+const CustomError = require('../utils/CustomError');
 
-const spacesService = require('../../services/spaces');
-
-const amIAdminVerification = async (req, res, next) => {
+const isRequesterSpaceAdmin = async (req, res, next) => {
   const { spaceId, accountId } = req;
 
   if (!await spacesService.isAdmin(spaceId, accountId))
@@ -11,4 +10,4 @@ const amIAdminVerification = async (req, res, next) => {
   return next();
 };
 
-module.exports = amIAdminVerification;
+module.exports = isRequesterSpaceAdmin;

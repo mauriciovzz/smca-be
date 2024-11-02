@@ -2,38 +2,38 @@ const accountsRouter = require('express').Router();
 const accountsController = require('../controllers/accounts');
 const accountSchemas = require('../schemas/accounts');
 
-const accessTokenVerification = require('../middlewares/accessTokenVerification');
-const { reqBodyValidator, reqParamsValidator } = require('../middlewares/requestDataValidator');
-const accountAuthentication = require('../middlewares/accountAuthentication');
-const verificationTokenVerification = require('../middlewares/verificationTokenVerification');
+const {
+  checkAccessToken, checkReqParams, checkReqBody,
+  checkAccountId, checkVerificationToken,
+} = require('../middlewares');
 
 accountsRouter.post(
   '/',
-  reqBodyValidator(accountSchemas.create),
+  checkReqBody(accountSchemas.create),
   accountsController.create,
 );
 
 accountsRouter.post(
   '/verify/:accountId/:verificationToken',
   [
-    reqParamsValidator(accountSchemas.verificationToken),
-    verificationTokenVerification('account'),
+    checkReqParams(accountSchemas.verificationToken),
+    checkVerificationToken('account'),
   ],
   accountsController.verify,
 );
 
 accountsRouter.post(
   '/resend-account-verification-email',
-  reqBodyValidator(accountSchemas.email),
+  checkReqBody(accountSchemas.email),
   accountsController.resendAccountVerificationEmail,
 );
 
 accountsRouter.get(
   '/:accountId',
   [
-    accessTokenVerification,
-    reqParamsValidator(accountSchemas.accountId),
-    accountAuthentication,
+    checkAccessToken,
+    checkReqParams(accountSchemas.accountId),
+    checkAccountId,
   ],
   accountsController.get,
 );
@@ -41,10 +41,10 @@ accountsRouter.get(
 accountsRouter.put(
   '/:accountId/update-name',
   [
-    accessTokenVerification,
-    reqParamsValidator(accountSchemas.accountId),
-    reqBodyValidator(accountSchemas.updateName),
-    accountAuthentication,
+    checkAccessToken,
+    checkReqParams(accountSchemas.accountId),
+    checkReqBody(accountSchemas.updateName),
+    checkAccountId,
   ],
   accountsController.updateName,
 );
@@ -52,10 +52,10 @@ accountsRouter.put(
 accountsRouter.put(
   '/:accountId/update-password',
   [
-    accessTokenVerification,
-    reqParamsValidator(accountSchemas.accountId),
-    reqBodyValidator(accountSchemas.updatePassword),
-    accountAuthentication,
+    checkAccessToken,
+    checkReqParams(accountSchemas.accountId),
+    checkReqBody(accountSchemas.updatePassword),
+    checkAccountId,
   ],
   accountsController.updatePassword,
 );
@@ -63,10 +63,10 @@ accountsRouter.put(
 accountsRouter.post(
   '/:accountId/update-email',
   [
-    accessTokenVerification,
-    reqParamsValidator(accountSchemas.accountId),
-    reqBodyValidator(accountSchemas.updateEmail),
-    accountAuthentication,
+    checkAccessToken,
+    checkReqParams(accountSchemas.accountId),
+    checkReqBody(accountSchemas.updateEmail),
+    checkAccountId,
   ],
   accountsController.updateEmail,
 );
@@ -74,8 +74,8 @@ accountsRouter.post(
 accountsRouter.post(
   '/verify-new-email/:accountId/:verificationToken',
   [
-    reqParamsValidator(accountSchemas.verificationToken),
-    verificationTokenVerification('email'),
+    checkReqParams(accountSchemas.verificationToken),
+    checkVerificationToken('email'),
   ],
   accountsController.verifyNewEmail,
 );
@@ -83,26 +83,26 @@ accountsRouter.post(
 accountsRouter.delete(
   '/:accountId',
   [
-    accessTokenVerification,
-    reqParamsValidator(accountSchemas.accountId),
-    reqBodyValidator(accountSchemas.remove),
-    accountAuthentication,
+    checkAccessToken,
+    checkReqParams(accountSchemas.accountId),
+    checkReqBody(accountSchemas.remove),
+    checkAccountId,
   ],
   accountsController.remove,
 );
 
 accountsRouter.post(
   '/recover-password',
-  reqBodyValidator(accountSchemas.email),
+  checkReqBody(accountSchemas.email),
   accountsController.recoverPassword,
 );
 
 accountsRouter.post(
   '/reset-password/:accountId/:verificationToken',
   [
-    reqParamsValidator(accountSchemas.verificationToken),
-    reqBodyValidator(accountSchemas.resetPassword),
-    verificationTokenVerification('password'),
+    checkReqParams(accountSchemas.verificationToken),
+    checkReqBody(accountSchemas.resetPassword),
+    checkVerificationToken('password'),
   ],
   accountsController.resetPassword,
 );

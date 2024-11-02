@@ -1,6 +1,6 @@
 const allowedOrigins = require('../config/allowedOrigins');
 
-const originVerification = (req, res, next) => {
+const checkRequestOrigin = (req, res, next) => {
   const { origin } = req.headers;
 
   if (allowedOrigins.includes(origin)) {
@@ -10,4 +10,4 @@ const originVerification = (req, res, next) => {
   next();
 };
 
-module.exports = originVerification;
+module.exports = checkRequestOrigin;

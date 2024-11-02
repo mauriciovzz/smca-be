@@ -21,7 +21,7 @@ readingsRuter.get(
     validatorMiddleware.validateParams(schemas.readingsParams),
     middleware.nodeVerification,
     middleware.nodeStateVerification,
-    middleware.accessTokenVerification,
+    middleware.checkAccessToken,
     middleware.nodeAccessVerification,
   ],
   averageReadingsController.getNodeReadings,

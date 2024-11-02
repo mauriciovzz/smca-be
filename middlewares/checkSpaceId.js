@@ -1,8 +1,7 @@
-const CustomError = require('../../utils/CustomError');
+const spacesService = require('../services/spaces');
+const CustomError = require('../utils/CustomError');
 
-const spacesService = require('../../services/spaces');
-
-const existVerification = async (req, res, next) => {
+const checkSpaceId = async (req, res, next) => {
   const { spaceId } = req.params;
 
   const spaceData = await spacesService.find(spaceId);
@@ -14,4 +13,4 @@ const existVerification = async (req, res, next) => {
   return next();
 };
 
-module.exports = existVerification;
+module.exports = checkSpaceId;

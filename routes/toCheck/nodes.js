@@ -7,7 +7,7 @@ const schemas = require('../../schemas/toCheck/nodes');
 nodesRouter.get(
   '/getTypes',
   [
-    middleware.accessTokenVerification,
+    middleware.checkAccessToken,
   ],
   nodesController.getTypes,
 );
@@ -15,7 +15,7 @@ nodesRouter.get(
 nodesRouter.get(
   '/getStates',
   [
-    middleware.accessTokenVerification,
+    middleware.checkAccessToken,
   ],
   nodesController.getStates,
 );
@@ -28,7 +28,7 @@ nodesRouter.get(
 nodesRouter.get(
   '/accountNodes',
   [
-    middleware.accessTokenVerification,
+    middleware.checkAccessToken,
   ],
   nodesController.getAccountNodes,
 );
@@ -36,7 +36,7 @@ nodesRouter.get(
 nodesRouter.get(
   '/workspaceNodes/:workspaceId',
   [
-    middleware.accessTokenVerification,
+    middleware.checkAccessToken,
     validatorMiddleware.validateParams(schemas.workspaceId),
     middleware.workspaceVerification,
     middleware.workspaceMemberVerification,
@@ -47,7 +47,7 @@ nodesRouter.get(
 nodesRouter.get(
   '/:workspaceId',
   [
-    middleware.accessTokenVerification,
+    middleware.checkAccessToken,
     validatorMiddleware.validateParams(schemas.workspaceId),
     middleware.workspaceVerification,
     middleware.workspaceMemberVerification,
@@ -58,7 +58,7 @@ nodesRouter.get(
 nodesRouter.get(
   '/privateNodeComponents/:workspaceId/:nodeId',
   [
-    middleware.accessTokenVerification,
+    middleware.checkAccessToken,
     validatorMiddleware.validateParams(schemas.idParams),
     middleware.workspaceVerification,
     middleware.workspaceMemberVerification,
@@ -82,7 +82,7 @@ nodesRouter.get(
 nodesRouter.get(
   '/getConfigFile/:workspaceId/:nodeId',
   [
-    middleware.accessTokenVerification,
+    middleware.checkAccessToken,
     validatorMiddleware.validateParams(schemas.idParams),
     middleware.workspaceVerification,
     middleware.workspaceAdminVerification,
@@ -96,7 +96,7 @@ nodesRouter.get(
 nodesRouter.post(
   '/:workspaceId',
   [
-    middleware.accessTokenVerification,
+    middleware.checkAccessToken,
     validatorMiddleware.validateParams(schemas.workspaceId),
     validatorMiddleware.validate(schemas.create),
     middleware.workspaceVerification,
@@ -113,7 +113,7 @@ nodesRouter.post(
 nodesRouter.put(
   '/updateName/:workspaceId/:nodeId',
   [
-    middleware.accessTokenVerification,
+    middleware.checkAccessToken,
     validatorMiddleware.validateParams(schemas.idParams),
     validatorMiddleware.validate(schemas.updateName),
     middleware.workspaceVerification,
@@ -129,7 +129,7 @@ nodesRouter.put(
 nodesRouter.put(
   '/updateState/:workspaceId/:nodeId',
   [
-    middleware.accessTokenVerification,
+    middleware.checkAccessToken,
     validatorMiddleware.validateParams(schemas.idParams),
     validatorMiddleware.validate(schemas.updateState),
     middleware.workspaceVerification,
@@ -144,7 +144,7 @@ nodesRouter.put(
 nodesRouter.put(
   '/updateType/:workspaceId/:nodeId',
   [
-    middleware.accessTokenVerification,
+    middleware.checkAccessToken,
     validatorMiddleware.validateParams(schemas.idParams),
     validatorMiddleware.validate(schemas.updateType),
     middleware.workspaceVerification,
@@ -160,7 +160,7 @@ nodesRouter.put(
 nodesRouter.put(
   '/updateVisibility/:workspaceId/:nodeId',
   [
-    middleware.accessTokenVerification,
+    middleware.checkAccessToken,
     validatorMiddleware.validateParams(schemas.idParams),
     validatorMiddleware.validate(schemas.updateVisibility),
     middleware.workspaceVerification,
@@ -175,7 +175,7 @@ nodesRouter.put(
 nodesRouter.put(
   '/updateLocation/:workspaceId/:nodeId',
   [
-    middleware.accessTokenVerification,
+    middleware.checkAccessToken,
     validatorMiddleware.validateParams(schemas.idParams),
     validatorMiddleware.validate(schemas.updateLocation),
     middleware.workspaceVerification,
@@ -191,7 +191,7 @@ nodesRouter.put(
 nodesRouter.put(
   '/updateComponents/:workspaceId/:nodeId',
   [
-    middleware.accessTokenVerification,
+    middleware.checkAccessToken,
     validatorMiddleware.validateParams(schemas.idParams),
     validatorMiddleware.validate(schemas.updateComponents),
     middleware.workspaceVerification,
@@ -205,7 +205,7 @@ nodesRouter.put(
 nodesRouter.delete(
   '/:workspaceId/:nodeId',
   [
-    middleware.accessTokenVerification,
+    middleware.checkAccessToken,
     validatorMiddleware.validateParams(schemas.idParams),
     middleware.workspaceVerification,
     middleware.workspaceAdminVerification,

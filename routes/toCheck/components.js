@@ -7,7 +7,7 @@ const schemas = require('../../validatorSchemas/components');
 componentsRouter.get(
   '/getTypes',
   [
-    middleware.accessTokenVerification,
+    middleware.checkAccessToken,
   ],
   componentsController.getTypes,
 );
@@ -15,7 +15,7 @@ componentsRouter.get(
 componentsRouter.get(
   '/:workspaceId',
   [
-    middleware.accessTokenVerification,
+    middleware.checkAccessToken,
     validatorMiddleware.validateParams(schemas.workspaceId),
     middleware.workspaceVerification,
     middleware.workspaceMemberVerification,
@@ -26,7 +26,7 @@ componentsRouter.get(
 componentsRouter.post(
   '/:workspaceId',
   [
-    middleware.accessTokenVerification,
+    middleware.checkAccessToken,
     validatorMiddleware.validateParams(schemas.workspaceId),
     validatorMiddleware.validate(schemas.create),
     middleware.workspaceVerification,
@@ -38,7 +38,7 @@ componentsRouter.post(
 componentsRouter.put(
   '/:workspaceId/:componentId',
   [
-    middleware.accessTokenVerification,
+    middleware.checkAccessToken,
     validatorMiddleware.validateParams(schemas.idParams),
     validatorMiddleware.validate(schemas.update),
     middleware.workspaceVerification,
@@ -51,7 +51,7 @@ componentsRouter.put(
 componentsRouter.delete(
   '/:workspaceId/:componentId',
   [
-    middleware.accessTokenVerification,
+    middleware.checkAccessToken,
     validatorMiddleware.validateParams(schemas.idParams),
     middleware.workspaceVerification,
     middleware.workspaceAdminVerification,

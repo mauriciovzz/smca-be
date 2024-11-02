@@ -7,7 +7,7 @@ const schemas = require('../../schemas/toCheck/variables');
 variablesRouter.get(
   '/getTypes',
   [
-    middleware.accessTokenVerification,
+    middleware.checkAccessToken,
   ],
   variablesController.getTypes,
 );
@@ -15,7 +15,7 @@ variablesRouter.get(
 variablesRouter.get(
   '/getValueTypes',
   [
-    middleware.accessTokenVerification,
+    middleware.checkAccessToken,
   ],
   variablesController.getValueTypes,
 );
@@ -23,7 +23,7 @@ variablesRouter.get(
 variablesRouter.get(
   '/:workspaceId',
   [
-    middleware.accessTokenVerification,
+    middleware.checkAccessToken,
     validatorMiddleware.validateParams(schemas.workspaceId),
     middleware.workspaceVerification,
     middleware.workspaceMemberVerification,
@@ -34,7 +34,7 @@ variablesRouter.get(
 variablesRouter.post(
   '/:workspaceId',
   [
-    middleware.accessTokenVerification,
+    middleware.checkAccessToken,
     validatorMiddleware.validateParams(schemas.workspaceId),
     validatorMiddleware.validate(schemas.create),
     middleware.workspaceVerification,
@@ -46,7 +46,7 @@ variablesRouter.post(
 variablesRouter.put(
   '/:workspaceId/:variableId',
   [
-    middleware.accessTokenVerification,
+    middleware.checkAccessToken,
     validatorMiddleware.validateParams(schemas.idParams),
     validatorMiddleware.validate(schemas.update),
     middleware.workspaceVerification,
@@ -59,7 +59,7 @@ variablesRouter.put(
 variablesRouter.delete(
   '/:workspaceId/:variableId',
   [
-    middleware.accessTokenVerification,
+    middleware.checkAccessToken,
     validatorMiddleware.validateParams(schemas.idParams),
     middleware.workspaceVerification,
     middleware.workspaceAdminVerification,

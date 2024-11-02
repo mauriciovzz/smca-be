@@ -2,7 +2,7 @@ const accountsService = require('../services/accounts');
 const verificationTokensService = require('../services/verificationTokens');
 const CustomError = require('../utils/CustomError');
 
-const verificationTokenVerification = (tokenType) => (
+const checkVerificationToken = (tokenType) => (
   async (req, res, next) => {
     const { accountId, verificationToken } = req.params;
 
@@ -27,4 +27,4 @@ const verificationTokenVerification = (tokenType) => (
   }
 );
 
-module.exports = verificationTokenVerification;
+module.exports = checkVerificationToken;

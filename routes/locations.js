@@ -1,24 +1,18 @@
 const locationsRouter = require('express').Router();
 const locationsController = require('../controllers/locations');
-const middleware = require('../utils/middlewares/middleware');
-const validatorMiddleware = require('../utils/middlewares/validator');
-const schemas = require('../../schemas/toCheck/locations');
+const locationsSchemas = require('../schemas/locations');
 
-locationsRouter.get(
-  '/:workspaceId',
-  [
-    middleware.accessTokenVerification,
-    validatorMiddleware.validateParams(schemas.workspaceId),
-    middleware.workspaceVerification,
-    middleware.workspaceMemberVerification,
-  ],
-  locationsController.getAll,
-);
+const checkAccessToken = require('../middlewares/checkAccessToken');
+const checkSpaceId = require('../middlewares/spaces/checkSpaceId');
+const isRequesterSpaceAdmin = require('../middlewares/spaces/isRequesterSpaceAdmin');
+const isRequesterSpaceMember = require('../middlewares/spaces/isRequesterSpaceMember');
+const isSpaceMember = require('../middlewares/spaces/isSpaceMember');
+const isNotSelf = require('../middlewares/spaces/isNotSelf');
 
 locationsRouter.post(
-  '/:workspaceId',
+  '/',
   [
-    middleware.accessTokenVerification,
+    checkAccessToken,
     validatorMiddleware.validateParams(schemas.workspaceId),
     validatorMiddleware.validate(schemas.create),
     middleware.workspaceVerification,
@@ -27,10 +21,21 @@ locationsRouter.post(
   locationsController.create,
 );
 
+locationsRouter.get(
+  '/:spaceId',
+  [
+    middleware.checkAccessToken,
+    validatorMiddleware.validateParams(schemas.workspaceId),
+    middleware.workspaceVerification,
+    middleware.workspaceMemberVerification,
+  ],
+  locationsController.getAll,
+);
+
 locationsRouter.put(
   '/:workspaceId/:locationId',
   [
-    middleware.accessTokenVerification,
+    middleware.checkAccessToken,
     validatorMiddleware.validateParams(schemas.idParams),
     validatorMiddleware.validate(schemas.update),
     middleware.workspaceVerification,
@@ -43,7 +48,7 @@ locationsRouter.put(
 locationsRouter.delete(
   '/:workspaceId/:locationId',
   [
-    middleware.accessTokenVerification,
+    middleware.checkAccessToken,
     validatorMiddleware.validateParams(schemas.idParams),
     middleware.workspaceVerification,
     middleware.workspaceAdminVerification,
