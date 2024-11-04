@@ -1,86 +1,78 @@
 const pool = require('../config/db');
 
-const getAll = async (workspaceId) => {
-  const sql = ` SELECT 
-                  *
-                FROM
-                  location
-                WHERE
-                  workspace_id = $1
-                ORDER BY name ASC `;
+const areCoordinatesTaken = async (lat, long) => {
+  const sql = ` SELECT EXISTS (
+    SELECT 
+      true
+    FROM
+      location
+    WHERE 
+      lat = $1
+      AND long = $2
+  )`;
 
-  const response = await pool.query(sql, [workspaceId]);
-  return response.rows;
-};
-
-const getOne = async (workspaceId, locationId) => {
-  const sql = ` SELECT 
-                  *
-                FROM
-                  location
-                WHERE 
-                  workspace_id = $1
-                  AND location_id = $2`;
-  const response = await pool.query(sql, [workspaceId, locationId]);
-  return response.rows[0];
-};
-
-const checkCoordinates = async (lat, long) => {
-  const sql = ` SELECT 
-                  1
-                FROM
-                  location
-                WHERE
-                  lat = $1
-                  AND long = $2`;
   const response = await pool.query(sql, [lat, long]);
-  return response.rows[0];
+  return response.rows[0].exists;
 };
 
-const checkColumn = async (workspaceId, column, value) => {
-  const sql = ` SELECT 
-                 *
-                FROM
-                  location
-                WHERE
-                  workspace_id = $1
-                  AND ${column} = $2`;
-  const response = await pool.query(sql, [workspaceId, value]);
-  return response.rows[0];
-};
-
-const create = async (workspaceId, lat, long, name, location, isVisible) => {
+const create = async (spaceId, lat, long, name, location) => {
   const sql = ` INSERT INTO location (
-                  workspace_id,
+                  space_id,
                   lat,
                   long,
                   name,
-                  location,
-                  is_visible
+                  location
                 )
-                VALUES ($1, $2, $3, $4, $5, $6)`;
-  await pool.query(sql, [workspaceId, lat, long, name, location, isVisible]);
+                VALUES ($1, $2, $3, $4, $5)`;
+
+  await pool.query(sql, [spaceId, lat, long, name, location]);
 };
 
-const update = async (workspaceId, componentId, name, location) => {
+const getAll = async (spaceId) => {
+  const sql = ` SELECT 
+                  location_id, lat, long, name, location, is_taken, is_visible
+                FROM
+                  location
+                WHERE
+                  space_id = $1
+                ORDER BY space_id ASC`;
+
+  const response = await pool.query(sql, [spaceId]);
+  return response.rows;
+};
+
+const find = async (locationId) => {
+  const sql = ` SELECT 
+                  location_id, space_id, is_taken
+                FROM
+                  location
+                WHERE
+                  location_id = $1`;
+
+  const response = await pool.query(sql, [locationId]);
+  return response.rows[0];
+};
+
+const update = async (locationId, name, location, isVisible) => {
   const sql = ` UPDATE 
                   location
                 SET 
-                  name = $1,
-                  location = $2
+                  name = $2,
+                  location = $3,
+                  is_visible = $4
                 WHERE
-                  workspace_id = $3
-                  AND location_id = $4`;
-  await pool.query(sql, [name, location, workspaceId, componentId]);
+                  location_id = $1`;
+
+  await pool.query(sql, [locationId, name, location, isVisible]);
 };
 
-const remove = async (workspaceId, locationId) => {
+const remove = async (locationId) => {
   const sql = ` DELETE FROM 
                   location                
                 WHERE 
-                  workspace_id = $1
-                  AND location_id = $2`;
-  await pool.query(sql, [workspaceId, locationId]);
+                  location_id = $1`;
+
+  await pool.query(sql, [locationId]);
 };
 
 const updateTakenField = async (worskapceId, locationId, isTaken) => {
@@ -95,12 +87,12 @@ const updateTakenField = async (worskapceId, locationId, isTaken) => {
 };
 
 module.exports = {
-  getAll,
-  getOne,
-  checkCoordinates,
-  checkColumn,
+  areCoordinatesTaken,
   create,
+  getAll,
+  find,
   update,
   remove,
+
   updateTakenField,
 };

@@ -1,76 +1,66 @@
 const locationsService = require('../services/locations');
+const CustomError = require('../utils/CustomError');
 
-const getAll = async (req, res) => {
-  const { workspaceId } = req.params;
-
-  const response = await locationsService.getAll(workspaceId);
-  return res.status(200).send(response);
-};
-
-const create = async (req, res) => {
-  const { workspaceId } = req.params;
+const create = async (req, res, next) => {
+  const { spaceId } = req;
   const {
-    lat, long, name, location, isVisible,
+    lat, long, name, location,
   } = req.body;
 
-  if (await locationsService.checkCoordinates(lat, long)) {
-    return res.status(409).json({ error: 'Las coordenadas ingresadas ya se encuentran registradas.' });
-  }
-
-  if (await locationsService.checkColumn(workspaceId, 'name', name.toLowerCase())) {
-    return res.status(409).json({ error: 'El nombre de ubicación ingresado ya se encuentra registrado.' });
-  }
-
-  if (await locationsService.checkColumn(workspaceId, 'location', location.toLowerCase())) {
-    return res.status(409).json({ error: 'La ubicación ingresada ya se encuentra registrada.' });
-  }
+  if (await locationsService.areCoordinatesTaken(lat, long))
+    return next(new CustomError('Las coordenadas ingresadas ya se encuentran registradas.', 409));
 
   await locationsService.create(
-    workspaceId,
+    spaceId,
     lat,
     long,
     name.toLowerCase(),
     location.toLowerCase(),
-    isVisible,
   );
+
   return res.status(201).send('Ubicación creada exitosamente.');
 };
 
+const getAll = async (req, res) => {
+  const { spaceId } = req;
+
+  const response = await locationsService.getAll(
+    spaceId,
+  );
+
+  return res.status(200).send(response);
+};
+
 const update = async (req, res) => {
-  const { workspaceId, locationId } = req.params;
-  const { name, location } = req.body;
-
-  const originalLocation = await locationsService.getOne(workspaceId, locationId);
-  if (!(originalLocation.name === name.toLowerCase())) {
-    if (await locationsService.checkColumn(workspaceId, 'name', name.toLowerCase())) {
-      return res.status(409).json({ error: 'El nombre de ubicación ingresado ya se encuentra registrado.' });
-    }
-  }
-
-  if (!(originalLocation.location === location.toLowerCase())) {
-    if (await locationsService.checkColumn(workspaceId, 'location', location.toLowerCase())) {
-      return res.status(409).json({ error: 'La ubicación ingresada ya se encuentra registrada.' });
-    }
-  }
+  const { locationData } = req;
+  const { name, location, isVisible } = req.body;
 
   await locationsService.update(
-    workspaceId,
-    locationId,
+    locationData.location_id,
     name.toLowerCase(),
     location.toLowerCase(),
+    isVisible,
   );
+
   return res.status(201).send('Ubicación actualizada exitosamente.');
 };
 
-const remove = async (req, res) => {
-  const { workspaceId, locationId } = req.params;
+const removeReadings = async (req, res) => {
+  const { locationData } = req;
 
-  const location = await locationsService.getOne(workspaceId, locationId);
-  if (location.is_taken) {
-    return res.status(401).json({ error: 'La ubicación se encuentra en uso.' });
-  }
+  return res.status(200).send(`To do: ${locationData.location_id}`);
+};
 
-  await locationsService.remove(workspaceId, locationId);
+const remove = async (req, res, next) => {
+  const { locationData } = req;
+
+  if (locationData.is_taken)
+    return next(new CustomError('La ubicación se encuentra en uso.', 401));
+
+  await locationsService.remove(
+    locationData.location_id,
+  );
+
   return res.status(200).send('Ubicación eliminada exitosamente.');
 };
 
@@ -78,5 +68,6 @@ module.exports = {
   getAll,
   create,
   update,
+  removeReadings,
   remove,
 };

@@ -1,29 +1,5 @@
 const Joi = require('joi');
 
-// const nameValidator = Joi.string()
-//   .trim()
-//   .min(1)
-//   .max(30)
-//   .required()
-//   .messages({
-//     'string.base': 'La entrada "Nombre" ser de tipo cadena.',
-//     'string.empty': 'La entrada "Nombre" no puede estar vacía.',
-//     'string.min': 'La entrada "Nombre" debe contar con al menos 1 caracter.',
-//     'string.max': 'La entrada "Nombre" puede contar con máximo 30 caracteres.',
-//     'any.required': 'Se requiere la entrada "Nombre".',
-//   });
-
-// const colorValidator = Joi.string()
-//   .trim()
-//   .pattern(/^#[0-9a-fA-F]{6}$/i)
-//   .required()
-//   .messages({
-//     'string.base': 'La entrada "Color" debe ser de tipo cadena.',
-//     'string.empty': 'La entrada "Color" no puede estar vacía.',
-//     'string.pattern.base': 'El formato de la entrada "Color" no es el correcto.',
-//     'any.required': 'Se requiere la entrada "Color".',
-//   });
-
 const idValidator = Joi.string()
   .trim()
   .min(1)
@@ -37,63 +13,75 @@ const idValidator = Joi.string()
     'any.required': 'Link inválido.',
   });
 
-// const emailValidator = Joi.string()
-//   .email()
-//   .required()
-//   .messages({
-//     'string.base': 'La entrada "correo electrónico" debe ser de tipo cadena.',
-//     'string.email': 'El formato de la entrada "correo electrónico" no es válido.',
-//     'string.empty': 'La entrada "correo electrónico" no puede estar vacía.',
-//     'any.required': 'Se requiere la entrada "Correo electrónico".',
-//   });
+const coordinateValidator = Joi.string()
+  .min(8)
+  .max(10)
+  .required()
+  .messages({
+    'string.base': 'Las coordenadas deben ser de tipo cadena.',
+    'string.empty': 'Las coordenadas no pueden estar vacía.',
+    'string.min': 'Coordenadas invalidas',
+    'string.max': 'Coordenadas invalidas',
+    'any.required': 'Se requiere la entrada "Coordenadas".',
+  });
 
-// const booleanValidator = Joi.boolean()
-//   .required()
-//   .messages({
-//     'boolean.base': 'La entrada "wasAccepted" debe ser de tipo booleano.',
-//     'any.required': 'Se requiere la entrada "wasAccepted".',
-//   });
+const nameValidator = Joi.string()
+  .trim()
+  .min(1)
+  .max(30)
+  .required()
+  .messages({
+    'string.base': 'La entrada "Nombre" debe ser de tipo cadena.',
+    'string.empty': 'La entrada "Nombre" no puede estar vacía.',
+    'string.max': 'La entrada "Nombre" puede contar con máximo 30 caracteres.',
+    'any.required': 'Se requiere la entrada "Nombre".',
+  });
 
-// const create = Joi.object({
-//   name: nameValidator,
-//   color: colorValidator,
-// });
+const locationValidator = Joi.string()
+  .trim()
+  .min(1)
+  .max(120)
+  .required()
+  .messages({
+    'string.base': 'La entrada "Ubicacion" ser de tipo cadena.',
+    'string.empty': 'La entrada "Ubicacion" no puede estar vacía.',
+    'string.min': 'La entrada "Ubicacion" debe contar con al menos 1 caracter.',
+    'string.max': 'La entrada "Ubicacion" puede contar con máximo 120 caracteres.',
+    'any.required': 'Se requiere la entrada "Ubicacion".',
+  });
+
+const booleanValidator = Joi.boolean()
+  .required()
+  .messages({
+    'boolean.base': 'La entrada "Visibilidad de la ubicacion" debe ser de tipo booleano.',
+    'any.required': 'Se requiere la entrada "Visibilidad de la ubicacion".',
+  });
 
 const spaceId = Joi.object({
   spaceId: idValidator,
 });
 
-// const updateName = Joi.object({
-//   newName: nameValidator,
-// });
+const ids = Joi.object({
+  spaceId: idValidator,
+  locationId: idValidator,
+});
 
-// const updateColor = Joi.object({
-//   newColor: colorValidator,
-// });
+const create = Joi.object({
+  lat: coordinateValidator,
+  long: coordinateValidator,
+  name: nameValidator,
+  location: locationValidator,
+});
 
-// const ids = Joi.object({
-//   spaceId: idValidator,
-//   accountId: idValidator,
-// });
-
-// const invite = Joi.object({
-//   email: emailValidator,
-// });
-
-// const accountId = Joi.object({
-//   accountId: idValidator,
-// });
-
-// const invitationResponse = Joi.object({
-//   wasAccepted: booleanValidator,
-// });
+const update = Joi.object({
+  name: nameValidator,
+  location: locationValidator,
+  isVisible: booleanValidator,
+});
 
 module.exports = {
   spaceId,
-  // updateName,
-  // updateColor,
-  // ids,
-  // invite,
-  // accountId,
-  // invitationResponse,
+  ids,
+  create,
+  update,
 };

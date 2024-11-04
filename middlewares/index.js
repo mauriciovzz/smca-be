@@ -1,12 +1,12 @@
 const checkAccessToken = require('./checkAccessToken');
 const { checkReqParams, checkReqBody } = require('./checkRequestData');
-const checkAccountId = require('./checkAccessToken');
+const checkAccountId = require('./checkAccountId');
 const checkVerificationToken = require('./checkVerificationToken');
 const checkSpaceId = require('./checkSpaceId');
 const isRequesterSpaceAdmin = require('./isRequesterSpaceAdmin');
 const isRequesterSpaceMember = require('./isRequesterSpaceMember');
-const isSpaceMember = require('./isSpaceMember');
-const isNotSelf = require('./isNotSelf');
+const checkMemberId = require('./checkMemberId');
+const checkLocationId = require('./checkLocationId');
 
 module.exports = {
   checkAccessToken,
@@ -17,6 +17,6 @@ module.exports = {
   checkSpaceId,
   isRequesterSpaceAdmin,
   isRequesterSpaceMember,
-  isSpaceMember,
-  isNotSelf,
+  checkMemberId,
+  checkLocationId,
 };

@@ -2,57 +2,68 @@ const locationsRouter = require('express').Router();
 const locationsController = require('../controllers/locations');
 const locationsSchemas = require('../schemas/locations');
 
-const checkAccessToken = require('../middlewares/checkAccessToken');
-const checkSpaceId = require('../middlewares/spaces/checkSpaceId');
-const isRequesterSpaceAdmin = require('../middlewares/spaces/isRequesterSpaceAdmin');
-const isRequesterSpaceMember = require('../middlewares/spaces/isRequesterSpaceMember');
-const isSpaceMember = require('../middlewares/spaces/isSpaceMember');
-const isNotSelf = require('../middlewares/spaces/isNotSelf');
+const {
+  checkAccessToken, checkReqParams, checkReqBody, checkSpaceId,
+  checkLocationId, isRequesterSpaceAdmin,
+  isRequesterSpaceMember,
+} = require('../middlewares');
 
 locationsRouter.post(
-  '/',
+  '/:spaceId/locations',
   [
     checkAccessToken,
-    validatorMiddleware.validateParams(schemas.workspaceId),
-    validatorMiddleware.validate(schemas.create),
-    middleware.workspaceVerification,
-    middleware.workspaceAdminVerification,
+    checkReqParams(locationsSchemas.spaceId),
+    checkSpaceId,
+    isRequesterSpaceAdmin,
+    checkReqBody(locationsSchemas.create),
   ],
   locationsController.create,
 );
 
 locationsRouter.get(
-  '/:spaceId',
+  '/:spaceId/locations',
   [
-    middleware.checkAccessToken,
-    validatorMiddleware.validateParams(schemas.workspaceId),
-    middleware.workspaceVerification,
-    middleware.workspaceMemberVerification,
+    checkAccessToken,
+    checkReqParams(locationsSchemas.spaceId),
+    checkSpaceId,
+    isRequesterSpaceMember,
   ],
   locationsController.getAll,
 );
 
 locationsRouter.put(
-  '/:workspaceId/:locationId',
+  '/:spaceId/locations/:locationId',
   [
-    middleware.checkAccessToken,
-    validatorMiddleware.validateParams(schemas.idParams),
-    validatorMiddleware.validate(schemas.update),
-    middleware.workspaceVerification,
-    middleware.workspaceAdminVerification,
-    middleware.locationVerification,
+    checkAccessToken,
+    checkReqParams(locationsSchemas.ids),
+    checkSpaceId,
+    checkLocationId,
+    isRequesterSpaceAdmin,
+    checkReqBody(locationsSchemas.update),
   ],
   locationsController.update,
 );
 
 locationsRouter.delete(
-  '/:workspaceId/:locationId',
+  '/:spaceId/locations/:locationId/remove-readings',
   [
-    middleware.checkAccessToken,
-    validatorMiddleware.validateParams(schemas.idParams),
-    middleware.workspaceVerification,
-    middleware.workspaceAdminVerification,
-    middleware.locationVerification,
+    checkAccessToken,
+    checkReqParams(locationsSchemas.ids),
+    checkSpaceId,
+    checkLocationId,
+    isRequesterSpaceAdmin,
+  ],
+  locationsController.removeReadings,
+);
+
+locationsRouter.delete(
+  '/:spaceId/locations/:locationId',
+  [
+    checkAccessToken,
+    checkReqParams(locationsSchemas.ids),
+    checkSpaceId,
+    checkLocationId,
+    isRequesterSpaceAdmin,
   ],
   locationsController.remove,
 );

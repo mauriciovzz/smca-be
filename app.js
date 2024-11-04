@@ -10,7 +10,9 @@ const accountsRouter = require('./routes/accounts');
 const authRouter = require('./routes/auth');
 
 const spacesRouter = require('./routes/spaces');
-// const locationsRouter = require('./routes/locations');
+const invitationsRouter = require('./routes/invitations');
+const membersRouter = require('./routes/members');
+const locationsRouter = require('./routes/locations');
 
 // const nodesRouter = require('./routes/nodes');
 // const componentsRouter = require('./routes/components');
@@ -34,7 +36,10 @@ app.use('/api/accounts', accountsRouter);
 app.use('/api/auth/', authRouter);
 
 app.use('/api/spaces', spacesRouter);
-// app.use('/api/spaces', locationsRouter);
+app.use('/api/invitations', invitationsRouter);
+
+app.use('/api/spaces/', membersRouter);
+app.use('/api/spaces/', locationsRouter);
 
 // app.use('/api/nodes', nodesRouter);
 // app.use('/api/components', componentsRouter);
