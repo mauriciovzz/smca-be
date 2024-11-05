@@ -5,13 +5,10 @@ const checkLocationId = async (req, res, next) => {
   const { spaceId } = req;
   const { locationId } = req.params;
 
-  const locationData = await locationsService.find(locationId);
+  const locationData = await locationsService.find(locationId, spaceId);
 
   if (!locationData)
     return next(new CustomError('La ubicación indicada no se encuentra registrada.', 404));
-
-  if (locationData.space_id !== parseInt(spaceId, 10))
-    return next(new CustomError('Acceso no autorizado.', 401));
 
   req.locationData = locationData;
   return next();

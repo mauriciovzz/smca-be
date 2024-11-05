@@ -1,6 +1,6 @@
 const locationsRouter = require('express').Router();
-const locationsController = require('../controllers/locations');
 const locationsSchemas = require('../schemas/locations');
+const locationsController = require('../controllers/locations');
 
 const {
   checkAccessToken, checkReqParams, checkReqBody, checkSpaceId,

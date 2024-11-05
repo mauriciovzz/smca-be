@@ -7,6 +7,7 @@ const isRequesterSpaceAdmin = require('./isRequesterSpaceAdmin');
 const isRequesterSpaceMember = require('./isRequesterSpaceMember');
 const checkMemberId = require('./checkMemberId');
 const checkLocationId = require('./checkLocationId');
+const checkVariableId = require('./checkVariableId');
 
 module.exports = {
   checkAccessToken,
@@ -19,4 +20,5 @@ module.exports = {
   isRequesterSpaceMember,
   checkMemberId,
   checkLocationId,
+  checkVariableId,
 };

@@ -41,15 +41,16 @@ const getAll = async (spaceId) => {
   return response.rows;
 };
 
-const find = async (locationId) => {
+const find = async (locationId, spaceId) => {
   const sql = ` SELECT 
                   location_id, space_id, is_taken
                 FROM
                   location
                 WHERE
-                  location_id = $1`;
+                  location_id = $1
+                  AND space_id = $2`;
 
-  const response = await pool.query(sql, [locationId]);
+  const response = await pool.query(sql, [locationId, spaceId]);
   return response.rows[0];
 };
 
@@ -75,6 +76,7 @@ const remove = async (locationId) => {
   await pool.query(sql, [locationId]);
 };
 
+// to check
 const updateTakenField = async (worskapceId, locationId, isTaken) => {
   const sql = ` UPDATE
                   location
