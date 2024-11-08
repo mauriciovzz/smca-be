@@ -4,8 +4,7 @@ const variablesController = require('../controllers/variables');
 
 const {
   checkAccessToken, checkReqParams, checkReqBody, checkSpaceId,
-  checkVariableId, isRequesterSpaceAdmin,
-  isRequesterSpaceMember,
+  checkVariableId, isRequesterSpaceAdmin, isRequesterSpaceMember,
 } = require('../middlewares');
 
 variablesRouter.post(

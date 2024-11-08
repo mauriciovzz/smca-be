@@ -8,7 +8,7 @@ const {
 } = require('../middlewares');
 
 invitationsRouter.post(
-  '/:spaceid',
+  '/:spaceId',
   [
     checkAccessToken,
     checkReqParams(invitationsSchemas.spaceId),

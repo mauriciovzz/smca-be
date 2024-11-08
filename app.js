@@ -14,9 +14,9 @@ const invitationsRouter = require('./routes/invitations');
 const membersRouter = require('./routes/members');
 const locationsRouter = require('./routes/locations');
 const variablesRouter = require('./routes/variables');
+const componentsRouter = require('./routes/components');
 
 // const nodesRouter = require('./routes/nodes');
-// const componentsRouter = require('./routes/components');
 // const readingsRouter = require('./routes/readings');
 // const photosRouter = require('./routes/photos');
 
@@ -38,12 +38,12 @@ app.use('/api/auth/', authRouter);
 app.use('/api/spaces', spacesRouter);
 app.use('/api/invitations', invitationsRouter);
 
-app.use('/api/spaces/', membersRouter);
-app.use('/api/spaces/', locationsRouter);
+app.use('/api/spaces', membersRouter);
+app.use('/api/spaces', locationsRouter);
 app.use('/api/spaces', variablesRouter);
+app.use('/api/spaces', componentsRouter);
 
 // app.use('/api/nodes', nodesRouter);
-// app.use('/api/components', componentsRouter);
 // app.use('/api/readings', readingsRouter);
 // app.use('/api/photos', photosRouter);
 // app.use('/api/images', express.static(path.join(__dirname, 'images')));

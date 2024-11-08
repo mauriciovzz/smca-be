@@ -51,7 +51,8 @@ const getAll = async (spaceId) => {
                   variable
                 WHERE
                   space_id = $1
-                ORDER BY variable_id`;
+                  AND name != 'lluvia'
+                ORDER BY variable_type, value_type, name`;
 
   const response = await pool.query(sql, [spaceId]);
   return response.rows;
@@ -83,7 +84,6 @@ const update = async (variableId, name, unit, color) => {
   await pool.query(sql, [variableId, name, unit, color]);
 };
 
-// to check
 const isBeingUsed = async (variableId) => {
   const sql = ` SELECT EXISTS (
                   SELECT
@@ -93,8 +93,9 @@ const isBeingUsed = async (variableId) => {
                   WHERE 
                     variable_id = $1
                 ) AS "exists"`;
-  const variableFound = await pool.query(sql, [variableId]);
-  return variableFound.rows[0].exists;
+
+  const response = await pool.query(sql, [variableId]);
+  return response.rows[0].exists;
 };
 
 const remove = async (variableId) => {
@@ -106,6 +107,19 @@ const remove = async (variableId) => {
   await pool.query(sql, [variableId]);
 };
 
+const getRainVariable = async (spaceId) => {
+  const sql = ` SELECT 
+                  variable_id, variable_type, value_type, name, unit, color
+                FROM
+                  variable
+                WHERE
+                  space_id = $1
+                  AND name = 'lluvia'`;
+
+  const response = await pool.query(sql, [spaceId]);
+  return response.rows;
+};
+
 module.exports = {
   isNameTaken,
   create,
@@ -114,4 +128,5 @@ module.exports = {
   update,
   isBeingUsed,
   remove,
+  getRainVariable,
 };

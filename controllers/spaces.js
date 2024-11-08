@@ -1,5 +1,6 @@
 const spacesService = require('../services/spaces');
 const membersService = require('../services/members');
+const variablesService = require('../services/variables');
 
 const create = async (req, res) => {
   const { accountId } = req;
@@ -14,6 +15,15 @@ const create = async (req, res) => {
     space.space_id,
     accountId,
     true,
+  );
+
+  await variablesService.create(
+    space.space_id,
+    'meteorological',
+    'presential',
+    'lluvia',
+    null,
+    '#869FD1',
   );
 
   return res.status(201).send('Espacio creado exitosamente.');

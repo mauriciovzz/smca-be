@@ -55,12 +55,11 @@ const update = async (req, res, next) => {
   return res.status(201).send('Variable actualizada exitosamente.');
 };
 
-// to check
-const remove = async (req, res) => {
+const remove = async (req, res, next) => {
   const { variableData } = req;
 
-  // if (await variablesService.isBeingUsed(variableId))
-  //   return next(new CustomError('La variable se encuentra en uso.', 401));
+  if (await variablesService.isBeingUsed(variableData.variable_id))
+    return next(new CustomError('La variable se encuentra en uso.', 401));
 
   await variablesService.remove(
     variableData.variable_id,

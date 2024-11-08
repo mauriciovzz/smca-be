@@ -23,6 +23,7 @@ export default [
     rules: {
       curly: 'off',
       'nonblock-statement-body-position': 'off',
+      'no-await-in-loop': 'off',
       'no-param-reassign': 'off',
       'import/no-extraneous-dependencies': ['error', { devDependencies: true }],
       'no-underscore-dangle': 'off',
