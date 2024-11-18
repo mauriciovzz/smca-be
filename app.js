@@ -4,7 +4,7 @@ require('express-async-errors');
 const app = express();
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
-// const path = require('path');
+const path = require('path');
 
 const accountsRouter = require('./routes/accounts');
 const authRouter = require('./routes/auth');
@@ -15,8 +15,8 @@ const membersRouter = require('./routes/members');
 const locationsRouter = require('./routes/locations');
 const variablesRouter = require('./routes/variables');
 const componentsRouter = require('./routes/components');
+const nodesRouter = require('./routes/nodes');
 
-// const nodesRouter = require('./routes/nodes');
 // const readingsRouter = require('./routes/readings');
 // const photosRouter = require('./routes/photos');
 
@@ -31,6 +31,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(requestLogger);
 app.use(checkRequestOrigin);
+app.use(express.static(path.join(__dirname, 'images')));
 
 app.use('/api/accounts', accountsRouter);
 app.use('/api/auth/', authRouter);
@@ -42,8 +43,8 @@ app.use('/api/spaces', membersRouter);
 app.use('/api/spaces', locationsRouter);
 app.use('/api/spaces', variablesRouter);
 app.use('/api/spaces', componentsRouter);
+app.use('/api/spaces', nodesRouter);
 
-// app.use('/api/nodes', nodesRouter);
 // app.use('/api/readings', readingsRouter);
 // app.use('/api/photos', photosRouter);
 // app.use('/api/images', express.static(path.join(__dirname, 'images')));

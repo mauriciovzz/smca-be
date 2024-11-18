@@ -15,7 +15,7 @@ const idValidator = Joi.string()
 
 const typeValidator = Joi.any()
   .required()
-  .valid('board', 'sensor', 'rain_detector', 'camera', 'screen', 'other')
+  .valid('board', 'sensor', 'rain_detector', 'camera', 'other')
   .messages({
     'any.required': 'Se requiere la entrada "Tipo de Componente".',
     'any.only': 'La entrada "Tipo de Componente" es invalida.',
@@ -66,7 +66,7 @@ const idsUpdateArrayValidator = Joi.array()
       .greater(0)
       .messages({
         'any.required': 'Se requiere la entrada "VariableId", en variables.',
-        'number.base': 'Las entradas de "variableId" deben de ser de tipo entero.',
+        'number.base': 'Las entradas de "variableId", en variables, deben de ser de tipo entero.',
       }),
     action: Joi.any()
       .required()

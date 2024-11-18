@@ -55,18 +55,15 @@ const getAll = async (req, res) => {
 
   const components = await componentsService.getAll(spaceId);
 
-  const componentsInfo = [];
+  const componentsData = [];
 
   for (let i = 0; i < components.length; i += 1) {
-    let variables = null;
+    let variables = [];
 
     if (components[i].type === 'sensor')
       variables = await componentsService.getVariables(components[i].component_id);
 
-    if (components[i].type === 'rain_detector')
-      variables = await variablesService.getRainVariable(spaceId);
-
-    componentsInfo.push({
+    componentsData.push({
       component_id: components[i].component_id,
       type: components[i].type,
       name: components[i].name,
@@ -75,7 +72,7 @@ const getAll = async (req, res) => {
     });
   }
 
-  return res.status(200).send(componentsInfo);
+  return res.status(200).send(componentsData);
 };
 
 // to check

@@ -12,14 +12,13 @@ const create = async (name, color) => {
   return response.rows[0];
 };
 
-// (SELECT count(*) FROM node WHERE space_id = s.space_id) AS nodes,
-
 const getAll = async (accountId) => {
   const sql = ` SELECT 
                   s.space_id,
                   s.name,
                   s.color,
                   (SELECT count(*) FROM space_member WHERE space_id = s.space_id) AS members,
+                  (SELECT count(*) FROM node WHERE space_id = s.space_id) AS nodes,
                   sm.is_admin
                 FROM
                   space s,

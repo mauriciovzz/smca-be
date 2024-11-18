@@ -27,6 +27,7 @@ export default [
       'no-param-reassign': 'off',
       'import/no-extraneous-dependencies': ['error', { devDependencies: true }],
       'no-underscore-dangle': 'off',
+      'object-curly-newline': ['error', { ExportDeclaration: { multiline: true, minProperties: 5 } }],
     },
   }),
 ];

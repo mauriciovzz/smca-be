@@ -76,16 +76,26 @@ const remove = async (locationId) => {
   await pool.query(sql, [locationId]);
 };
 
-// to check
-const updateTakenField = async (worskapceId, locationId, isTaken) => {
+const updateIsTaken = async (locationId, isTaken) => {
   const sql = ` UPDATE
                   location
                 SET
-                  is_taken = $1
+                  is_taken = $2
                 WHERE
-                  workspace_id = $2
-                  AND location_id = $3`;
-  await pool.query(sql, [isTaken, worskapceId, locationId]);
+                  location_id = $1`;
+
+  await pool.query(sql, [locationId, isTaken]);
+};
+
+const updateIsVisible = async (locationId) => {
+  const sql = ` UPDATE
+                  location
+                SET
+                  is_visible = NOT is_visible
+                WHERE
+                  location_id = $1`;
+
+  await pool.query(sql, [locationId]);
 };
 
 module.exports = {
@@ -95,6 +105,6 @@ module.exports = {
   find,
   update,
   remove,
-
-  updateTakenField,
+  updateIsTaken,
+  updateIsVisible,
 };

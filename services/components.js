@@ -113,6 +113,41 @@ const removeVariable = async (componentId, variableId) => {
   await pool.query(sql, [componentId, variableId]);
 };
 
+const update = async (componentId, name, datasheetLink) => {
+  const sql = ` UPDATE 
+                  component
+                SET 
+                  name = $2,
+                  datasheet_link = $3
+                WHERE
+                  component_id = $1`;
+
+  await pool.query(sql, [componentId, name, datasheetLink]);
+};
+
+const remove = async (componentId) => {
+  const sql = ` DELETE FROM 
+                  component                
+                WHERE 
+                  component_id = $1`;
+
+  await pool.query(sql, [componentId]);
+};
+
+// to check
+const isBeingUsed = async (componentId) => {
+  const sql = ` SELECT EXISTS (
+                  SELECT
+                    *
+                  FROM 
+                    node_component 
+                  WHERE 
+                    component_id = $1
+                ) AS "exists"`;
+  const componentFound = await pool.query(sql, [componentId]);
+  return componentFound.rows[0].exists;
+};
+
 const isComponentVariableBeingUsed = async (componentId, variableId) => {
   const sql = ` SELECT EXISTS (
                   SELECT
@@ -127,40 +162,6 @@ const isComponentVariableBeingUsed = async (componentId, variableId) => {
   return variableFound.rows[0].exists;
 };
 
-const update = async (componentId, name, datasheetLink) => {
-  const sql = ` UPDATE 
-                  component
-                SET 
-                  name = $2,
-                  datasheet_link = $3
-                WHERE
-                  component_id = $1`;
-
-  await pool.query(sql, [componentId, name, datasheetLink]);
-};
-
-const isBeingUsed = async (componentId) => {
-  const sql = ` SELECT EXISTS (
-                  SELECT
-                    *
-                  FROM 
-                    node_component 
-                  WHERE 
-                    component_id = $1
-                ) AS "exists"`;
-  const componentFound = await pool.query(sql, [componentId]);
-  return componentFound.rows[0].exists;
-};
-
-const remove = async (componentId) => {
-  const sql = ` DELETE FROM 
-                  component                
-                WHERE 
-                  component_id = $1`;
-
-  await pool.query(sql, [componentId]);
-};
-
 module.exports = {
   isNameTaken,
   create,
@@ -169,8 +170,10 @@ module.exports = {
   getVariables,
   addVariable,
   removeVariable,
-  isComponentVariableBeingUsed,
   update,
-  isBeingUsed,
   remove,
+
+  // to check
+  isBeingUsed,
+  isComponentVariableBeingUsed,
 };

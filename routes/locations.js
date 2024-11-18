@@ -44,6 +44,18 @@ locationsRouter.put(
   locationsController.update,
 );
 
+locationsRouter.put(
+  '/:spaceId/locations/:locationId/visibility',
+  [
+    checkAccessToken,
+    checkReqParams(locationsSchemas.ids),
+    checkSpaceId,
+    checkLocationId,
+    isRequesterSpaceAdmin,
+  ],
+  locationsController.updateVisibility,
+);
+
 locationsRouter.delete(
   '/:spaceId/locations/:locationId/remove-readings',
   [

@@ -9,6 +9,7 @@ const checkMemberId = require('./checkMemberId');
 const checkLocationId = require('./checkLocationId');
 const checkVariableId = require('./checkVariableId');
 const checkComponentId = require('./checkComponentId');
+const checkNodeId = require('./checkNodeId');
 
 module.exports = {
   checkAccessToken,
@@ -23,4 +24,5 @@ module.exports = {
   checkLocationId,
   checkVariableId,
   checkComponentId,
+  checkNodeId,
 };
