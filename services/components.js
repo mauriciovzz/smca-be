@@ -125,17 +125,7 @@ const update = async (componentId, name, datasheetLink) => {
   await pool.query(sql, [componentId, name, datasheetLink]);
 };
 
-const remove = async (componentId) => {
-  const sql = ` DELETE FROM 
-                  component                
-                WHERE 
-                  component_id = $1`;
-
-  await pool.query(sql, [componentId]);
-};
-
-// to check
-const isBeingUsed = async (componentId) => {
+const isComponentBeingUsed = async (componentId) => {
   const sql = ` SELECT EXISTS (
                   SELECT
                     *
@@ -144,22 +134,30 @@ const isBeingUsed = async (componentId) => {
                   WHERE 
                     component_id = $1
                 ) AS "exists"`;
-  const componentFound = await pool.query(sql, [componentId]);
-  return componentFound.rows[0].exists;
+
+  const response = await pool.query(sql, [componentId]);
+  return response.rows[0].exists;
 };
 
-const isComponentVariableBeingUsed = async (componentId, variableId) => {
-  const sql = ` SELECT EXISTS (
-                  SELECT
-                    *
-                  FROM 
-                    node_variable 
-                  WHERE 
-                    component_id = $1
-                    AND variable_id = $2
-                ) AS "exists"`;
-  const variableFound = await pool.query(sql, [componentId, variableId]);
-  return variableFound.rows[0].exists;
+const getVarsBeingUsed = async (componentId) => {
+  const sql = ` SELECT
+                  variable_id
+                FROM 
+                  node_variable 
+                WHERE 
+                  component_id = $1`;
+
+  const response = await pool.query(sql, [componentId]);
+  return response.rows.map((v) => v.variable_id);
+};
+
+const remove = async (componentId) => {
+  const sql = ` DELETE FROM 
+                  component                
+                WHERE 
+                  component_id = $1`;
+
+  await pool.query(sql, [componentId]);
 };
 
 module.exports = {
@@ -171,9 +169,7 @@ module.exports = {
   addVariable,
   removeVariable,
   update,
+  isComponentBeingUsed,
+  getVarsBeingUsed,
   remove,
-
-  // to check
-  isBeingUsed,
-  isComponentVariableBeingUsed,
 };

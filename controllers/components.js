@@ -75,40 +75,45 @@ const getAll = async (req, res) => {
   return res.status(200).send(componentsData);
 };
 
-// to check
 const update = async (req, res, next) => {
   const { spaceId, componentData } = req;
   const { name, datasheetLink, variables } = req.body;
 
-  const variablesToUpdate = [];
+  const varsToUpdate = [];
 
   if (componentData.type === 'sensor') {
     const spaceVariables = await variablesService.getAll(spaceId);
     const spaceVariablesIds = spaceVariables.map((v) => v.variable_id);
 
-    const componentVariables = await componentsService.getVariables(componentData.component_id);
-    const componentVariablesIds = componentVariables.map((v) => v.variable_id);
+    const compVars = await componentsService.getVariables(componentData.component_id);
+    const compVarsIds = compVars.map((v) => v.variable_id);
+
+    const compVarsBeingUsed = await componentsService.getVarsBeingUsed(componentData.component_id);
 
     // check / filter variables to add
-    const variablesToAdd = variables.filter((v) => v.action === 'add');
+    const varsToAdd = variables.filter((v) => v.action === 'add');
 
-    if (!variablesToAdd.every((v) => spaceVariablesIds.includes(v.variableId)))
+    if (!varsToAdd.every((v) => spaceVariablesIds.includes(v.variableId)))
       return next(new CustomError('Una de las variables agregadas no se encuentra registrada.', 404));
 
-    variablesToAdd.forEach((v) => {
-      if (!componentVariablesIds.includes(v.variableId))
-        variablesToUpdate.push(v);
+    varsToAdd.forEach((v) => {
+      if (!compVarsIds.includes(v.variableId))
+        varsToUpdate.push(v);
     });
 
     // check / filter variables to remove
-    const variablesToRemove = variables.filter((v) => v.action === 'remove');
+    const varsToRemove = variables.filter((v) => v.action === 'remove');
 
-    variablesToRemove.forEach((v) => {
-      if (componentVariablesIds.includes(v.variableId))
-        variablesToUpdate.push(v);
+    const isVarBeingUsed = varsToRemove.filter((v) => compVarsBeingUsed.includes(v.variableId));
+    if (isVarBeingUsed.length > 0) {
+      const errorVar = spaceVariables.find((v) => v.variable_id === isVarBeingUsed[0].variableId);
+      return next(new CustomError(`La variable "${errorVar.name}" se encuentra en uso en un nodo, por lo que no puede ser eliminada.`, 404));
+    }
+
+    varsToRemove.forEach((v) => {
+      if (compVarsIds.includes(v.variableId))
+        varsToUpdate.push(v);
     });
-
-    // chequear que no esten en uso
   }
 
   if (await componentsService.isNameTaken(spaceId, componentData.component_id, name.toUpperCase()))
@@ -121,16 +126,16 @@ const update = async (req, res, next) => {
   );
 
   if (componentData.type === 'sensor') {
-    for (let i = 0; i < variablesToUpdate.length; i += 1) {
-      if (variablesToUpdate[i].action === 'add')
+    for (let i = 0; i < varsToUpdate.length; i += 1) {
+      if (varsToUpdate[i].action === 'add')
         await componentsService.addVariable(
           componentData.component_id,
-          variablesToUpdate[i].variableId,
+          varsToUpdate[i].variableId,
         );
       else
         await componentsService.removeVariable(
           componentData.component_id,
-          variablesToUpdate[i].variableId,
+          varsToUpdate[i].variableId,
         );
     }
   }
@@ -138,16 +143,14 @@ const update = async (req, res, next) => {
   return res.status(201).send('Componente actualizado exitosamente.');
 };
 
-// to check
-const remove = async (req, res) => {
-  const { componentId } = req.params;
+const remove = async (req, res, next) => {
+  const { componentData } = req;
 
-  // if (await componentsService.isBeingUsed(componentId)) {
-  //   return res.status(401).json({ error: 'El componente se encuentra en uso.' });
-  // }
+  if (await componentsService.isComponentBeingUsed(componentData.component_id))
+    return next(new CustomError('El componente esta siendo uitilizado por un nodo.', 409));
 
   await componentsService.remove(
-    componentId,
+    componentData.component_id,
   );
 
   return res.status(200).send('Componente eliminado exitosamente.');

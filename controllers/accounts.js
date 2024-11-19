@@ -34,11 +34,10 @@ const create = async (req, res) => {
     verificationTokenExpiration,
   );
 
-  const { origin } = req.headers;
   const path = `/verificar/cuenta/${createdAccountData.account_id}/${verificationToken}`;
 
   try {
-    await mailSender.accountVerification(createdAccountData, origin, path);
+    await mailSender.accountVerification(createdAccountData, config.ORIGIN, path);
 
     return res.status(200).send({
       linkType: 'emailVerification',
@@ -85,11 +84,10 @@ const resendAccountVerificationEmail = async (req, res) => {
     verificationTokenExpiration,
   );
 
-  const { origin } = req.headers;
   const path = `/verificar/cuenta/${accountData.account_id}/${verificationToken}`;
 
   try {
-    await mailSender.accountVerification(accountData, origin, path);
+    await mailSender.accountVerification(accountData, config.ORIGIN, path);
 
     return res.status(200).send({
       linkType: 'emailVerification',
@@ -165,11 +163,10 @@ const updateEmail = async (req, res) => {
     verificationTokenExpiration,
   );
 
-  const { origin } = req.headers;
   const path = `/verificar/correo-electronico/${accountData.account_id}/${verificationToken}`;
 
   try {
-    await mailSender.newEmailVerification(accountData, newEmail, origin, path);
+    await mailSender.newEmailVerification(accountData, newEmail, config.ORIGIN, path);
 
     return res.status(200).send('Se ha enviado un enlace al correo electrónico ingresado, para la verificacion del mismo.');
   } catch {
@@ -229,11 +226,10 @@ const recoverPassword = async (req, res) => {
     verificationTokenExpiration,
   );
 
-  const { origin } = req.headers;
   const path = `/restablecer-contraseña/${accountData.account_id}/${verificationToken}`;
 
   try {
-    await mailSender.passwordReset(accountData, origin, path);
+    await mailSender.passwordReset(accountData, config.ORIGIN, path);
 
     return res.status(200).send({
       linkType: 'passwordReset',

@@ -18,7 +18,7 @@ const helperGetComponents = async (nodeId) => {
     let variables = [];
 
     if (components[i].type === 'sensor')
-      variables = await componentsService.getVariables(components[i].component_id);
+      variables = await nodesService.getVariables(nodeId, components[i].component_id);
 
     componentsData.push({
       component_id: components[i].component_id,
@@ -246,9 +246,11 @@ const updateInfo = async (req, res, next) => {
   const { spaceId, nodeData } = req;
   const { name, isIndoor, readingInterval, isActive } = req.body;
 
-  if (name.toLowerCase() !== nodeData.name) {
+  if (name.toLowerCase() !== nodeData.name)
     await helperCheckNameUniqueness(spaceId, name, next);
-  }
+
+  if (isActive && !nodeData.location_id)
+    return next(new CustomError('No se puede activar un nodo que no posea ubicación.', 409));
 
   await nodesService.updateInfo(
     nodeData.node_id,
@@ -299,12 +301,9 @@ const updateComponents = async (req, res, next) => {
   const { components } = req.body;
 
   await helperCheckComponents(components, spaceId, next);
-
   await nodesService.removeComponents(nodeData.node_id);
-
   await helperAddComponents(components, nodeData.node_id, spaceId);
-
-  await nodesService.inactivate(nodeData.node_d);
+  await nodesService.inactivate(nodeData.node_id);
 
   return res.status(201).send('Componentes actualizados exitosamente.');
 };

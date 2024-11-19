@@ -55,12 +55,6 @@ const updateVisibility = async (req, res) => {
   return res.status(201).send('Visibilidad actualizada exitosamente.');
 };
 
-const removeReadings = async (req, res) => {
-  const { locationData } = req;
-
-  return res.status(200).send(`To do: ${locationData.location_id}`);
-};
-
 const remove = async (req, res, next) => {
   const { locationData } = req;
 
@@ -79,6 +73,5 @@ module.exports = {
   create,
   update,
   updateVisibility,
-  removeReadings,
   remove,
 };

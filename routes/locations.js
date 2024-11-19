@@ -57,18 +57,6 @@ locationsRouter.put(
 );
 
 locationsRouter.delete(
-  '/:spaceId/locations/:locationId/remove-readings',
-  [
-    checkAccessToken,
-    checkReqParams(locationsSchemas.ids),
-    checkSpaceId,
-    checkLocationId,
-    isRequesterSpaceAdmin,
-  ],
-  locationsController.removeReadings,
-);
-
-locationsRouter.delete(
   '/:spaceId/locations/:locationId',
   [
     checkAccessToken,
