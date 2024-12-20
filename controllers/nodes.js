@@ -78,14 +78,14 @@ const helperCheckComponents = async (components, spaceId, next) => {
 
   for (let i = 0; i < components.length; i += 1) {
     if (!spaceComponentsIds.includes(components[i].componentId))
-      return next(new CustomError('Uno de los componentes agregados no se encuentra registrado.', 404));
+      return next(new CustomError('ComponentDoesNotExists', 404));
 
     if (components[i].type === 'sensor') {
       const componentVariables = await componentsService.getVariables(components[i].componentId);
       const componentVariablesIds = componentVariables.map((v) => v.variable_id);
 
       if (!components[i].variables.every((v) => componentVariablesIds.includes(v)))
-        return next(new CustomError('Una de las variables agregadas no se encuentra registrada.', 404));
+        return next(new CustomError('VariableDoesNotExist', 404));
     }
   }
 
@@ -128,6 +128,20 @@ const helperCheckNameUniqueness = async (spaceId, name, next) => {
   return null;
 };
 
+const getHomePageNodes = async (req, res) => {
+  const { accountId } = req;
+
+  const response = await nodesService.getHomePageNodes(accountId);
+  return res.status(200).send(response);
+};
+
+const getSpaceNodes = async (req, res) => {
+  const { spaceId } = req.params;
+
+  const response = await nodesService.getSpaceNodes(spaceId);
+  return res.status(200).send(response);
+};
+
 const create = async (req, res, next) => {
   const { spaceId } = req;
   const { name, readingInterval, isIndoor, locationId, components } = req.body;
@@ -140,10 +154,10 @@ const create = async (req, res, next) => {
     const locationData = await locationsService.find(locationId, spaceId);
 
     if (!locationData)
-      return next(new CustomError('La ubicación indicada no se encuentra registrada.', 404));
+      return next(new CustomError('LocationDoesNotExist', 404));
 
     if (locationData.is_taken)
-      return next(new CustomError('La ubicación seleccionada se encuentra en uso.', 409));
+      return next(new CustomError('LocationInUse', 409));
   }
 
   // check components
@@ -179,13 +193,6 @@ const create = async (req, res, next) => {
   await helperAddComponents(components, newNode.node_id, spaceId);
 
   return res.sendStatus(201);
-};
-
-const getSpaceNodes = async (req, res) => {
-  const { spaceId } = req.params;
-
-  const response = await nodesService.getSpaceNodes(spaceId);
-  return res.status(200).send(response);
 };
 
 const getComponents = async (req, res) => {
@@ -320,8 +327,9 @@ const remove = async (req, res) => {
 };
 
 module.exports = {
-  create,
+  getHomePageNodes,
   getSpaceNodes,
+  create,
   getComponents,
   getConfigFile,
   updateInfo,

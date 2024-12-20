@@ -57,7 +57,7 @@ const refreshAccessToken = async (req, res) => {
   const { cookies } = req;
 
   if (!cookies?.smcaRefreshToken)
-    throw new CustomError('La sesión ha expirado.', 403);
+    throw new CustomError('RefreshTokenExpiredError', 403);
 
   try {
     const { accountId } = tokenHelper.verify(cookies.smcaRefreshToken, config.REFRESH_TOKEN_SECRET);
@@ -67,7 +67,7 @@ const refreshAccessToken = async (req, res) => {
       accountId,
     });
   } catch {
-    throw new CustomError('La sesión ha expirado.', 403);
+    throw new CustomError('RefreshTokenExpiredError', 403);
   }
 };
 

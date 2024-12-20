@@ -19,7 +19,7 @@ const create = async (req, res, next) => {
     const spaceVariablesIds = spaceVariables.map((variable) => variable.variable_id);
 
     if (!variables.every((variable) => spaceVariablesIds.includes(variable)))
-      return next(new CustomError('Una de las variables agregadas no se encuentra registrada.', 404));
+      return next(new CustomError('NewComponentVariableDoesNotExist', 404));
   }
 
   const newComponent = await componentsService.create(
@@ -94,7 +94,7 @@ const update = async (req, res, next) => {
     const varsToAdd = variables.filter((v) => v.action === 'add');
 
     if (!varsToAdd.every((v) => spaceVariablesIds.includes(v.variableId)))
-      return next(new CustomError('Una de las variables agregadas no se encuentra registrada.', 404));
+      return next(new CustomError('NewComponentVariableDoesNotExist', 404));
 
     varsToAdd.forEach((v) => {
       if (!compVarsIds.includes(v.variableId))
@@ -107,7 +107,7 @@ const update = async (req, res, next) => {
     const isVarBeingUsed = varsToRemove.filter((v) => compVarsBeingUsed.includes(v.variableId));
     if (isVarBeingUsed.length > 0) {
       const errorVar = spaceVariables.find((v) => v.variable_id === isVarBeingUsed[0].variableId);
-      return next(new CustomError(`La variable "${errorVar.name}" se encuentra en uso en un nodo, por lo que no puede ser eliminada.`, 404));
+      return next(new CustomError(`La variable "${errorVar.name}" se encuentra en uso en un nodo, por lo que no puede ser eliminada.`, 409));
     }
 
     varsToRemove.forEach((v) => {

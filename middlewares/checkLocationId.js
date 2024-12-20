@@ -8,7 +8,7 @@ const checkLocationId = async (req, res, next) => {
   const locationData = await locationsService.find(locationId, spaceId);
 
   if (!locationData)
-    return next(new CustomError('La ubicación indicada no se encuentra registrada.', 404));
+    return next(new CustomError('LocationDoesNotExist', 404));
 
   req.locationData = locationData;
   return next();

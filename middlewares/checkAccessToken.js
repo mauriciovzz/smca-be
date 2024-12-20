@@ -6,7 +6,7 @@ const checkAccessToken = (req, res, next) => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader)
-    return next(new CustomError('Acceso no autorizado (No AT).', 401));
+    return next(new CustomError('NoAccessToken', 401));
 
   const accessToken = authHeader.replace('Bearer ', '');
 

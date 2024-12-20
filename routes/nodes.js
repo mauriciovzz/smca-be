@@ -3,20 +3,18 @@ const nodesSchema = require('../schemas/nodes');
 const nodesController = require('../controllers/nodes');
 
 const {
-  checkAccessToken, checkReqParams, checkReqBody, checkSpaceId,
-  checkNodeId, isRequesterSpaceAdmin, isRequesterSpaceMember,
+  checkAccessToken, checkUserCredentials, checkNodeVisibility,
+  checkReqParams, checkReqBody,
+  checkSpaceId, checkNodeId,
+  isRequesterSpaceAdmin, isRequesterSpaceMember,
 } = require('../middlewares');
 
-nodesRouter.post(
-  '/:spaceId/nodes',
+nodesRouter.get(
+  '/home-page-nodes',
   [
-    checkAccessToken,
-    checkReqParams(nodesSchema.spaceId),
-    checkSpaceId,
-    isRequesterSpaceAdmin,
-    checkReqBody(nodesSchema.create),
+    checkUserCredentials,
   ],
-  nodesController.create,
+  nodesController.getHomePageNodes,
 );
 
 nodesRouter.get(
@@ -30,13 +28,36 @@ nodesRouter.get(
   nodesController.getSpaceNodes,
 );
 
+nodesRouter.post(
+  '/:spaceId/nodes',
+  [
+    checkAccessToken,
+    checkReqParams(nodesSchema.spaceId),
+    checkSpaceId,
+    isRequesterSpaceAdmin,
+    checkReqBody(nodesSchema.create),
+  ],
+  nodesController.create,
+);
+
+// Route for visible nodes
+nodesRouter.get(
+  '/:spaceId/nodes/:nodeId/components',
+  [
+    checkReqParams(nodesSchema.ids),
+    checkSpaceId,
+    checkNodeId,
+    checkNodeVisibility,
+  ],
+  nodesController.getComponents,
+);
+
+// Route for private nodes
+// will jump here from past route if checkNodeVisibility says so
 nodesRouter.get(
   '/:spaceId/nodes/:nodeId/components',
   [
     checkAccessToken,
-    checkReqParams(nodesSchema.ids),
-    checkSpaceId,
-    checkNodeId,
     isRequesterSpaceMember,
   ],
   nodesController.getComponents,

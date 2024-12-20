@@ -42,15 +42,27 @@ const getAll = async (spaceId) => {
 };
 
 const find = async (locationId, spaceId) => {
+  if (spaceId) {
+    const sql = ` SELECT 
+                    location_id, space_id, is_taken
+                  FROM
+                    location
+                  WHERE
+                    location_id = $1
+                    AND space_id = $2`;
+
+    const response = await pool.query(sql, [locationId, spaceId]);
+    return response.rows[0];
+  }
+
   const sql = ` SELECT 
-                  location_id, space_id, is_taken
+                  location_id, is_visible
                 FROM
                   location
                 WHERE
-                  location_id = $1
-                  AND space_id = $2`;
+                  location_id = $1`;
 
-  const response = await pool.query(sql, [locationId, spaceId]);
+  const response = await pool.query(sql, [locationId]);
   return response.rows[0];
 };
 

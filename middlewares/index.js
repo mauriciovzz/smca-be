@@ -10,6 +10,10 @@ const checkLocationId = require('./checkLocationId');
 const checkVariableId = require('./checkVariableId');
 const checkComponentId = require('./checkComponentId');
 const checkNodeId = require('./checkNodeId');
+const checkUserCredentials = require('./checkUserCredentials');
+const checkVisibility = require('./checkVisibility');
+const checkNodeVisibility = require('./checkNodeVisibility');
+const checkNodeReadingsSpaceId = require('./checkNodeReadingsSpaceId');
 
 module.exports = {
   checkAccessToken,
@@ -25,4 +29,8 @@ module.exports = {
   checkVariableId,
   checkComponentId,
   checkNodeId,
+  checkUserCredentials,
+  checkVisibility,
+  checkNodeVisibility,
+  checkNodeReadingsSpaceId,
 };

@@ -8,10 +8,10 @@ const checkAccountId = async (req, res, next) => {
   const accountData = await accountsService.findById(accountId);
 
   if (!accountData)
-    return next(new CustomError('La cuenta indicada no se encuentra registrada.', 404));
+    return next(new CustomError('AccountDoesNotExist', 404));
 
   if (accountData.account_id !== parseInt(accountIdParam, 10))
-    return next(new CustomError('Acceso no autorizado.', 401));
+    return next(new CustomError('UnauthorizedAccess', 401));
 
   req.accountData = accountData;
   return next();

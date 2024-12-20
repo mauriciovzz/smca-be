@@ -8,7 +8,7 @@ const checkNodeId = async (req, res, next) => {
   const nodeData = await nodesService.find(nodeId, spaceId);
 
   if (!nodeData)
-    return next(new CustomError('El nodo indicado no se encuentra registrado.', 404));
+    return next(new CustomError('NodeDoesNotExist', 404));
 
   req.nodeData = nodeData;
   return next();

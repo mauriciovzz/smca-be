@@ -52,7 +52,7 @@ const create = async (req, res) => {
   }
 };
 
-const verify = async (req, res) => {
+const verifyAccount = async (req, res) => {
   const { tokenData } = req;
 
   await accountsService.verify(tokenData.account_id);
@@ -170,6 +170,11 @@ const updateEmail = async (req, res) => {
 
     return res.status(200).send('Se ha enviado un enlace al correo electrónico ingresado, para la verificacion del mismo.');
   } catch {
+    await verificationTokensService.remove(
+      accountData.account_id,
+      'email',
+    );
+
     throw new CustomError('Ha ocurrido un error al momento de enviar un enlace de verificacion a su nuevo correo electrónico. Intente de nuevo más tarde.', 500);
   }
 };
@@ -259,7 +264,7 @@ const resetPassword = async (req, res) => {
 
 module.exports = {
   create,
-  verify,
+  verifyAccount,
   resendAccountVerificationEmail,
   get,
   updateName,

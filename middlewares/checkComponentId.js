@@ -8,7 +8,7 @@ const checkLocationId = async (req, res, next) => {
   const componentData = await componentsService.find(componentId, spaceId);
 
   if (!componentData)
-    return next(new CustomError('El componente indicado no se encuentra registrado.', 404));
+    return next(new CustomError('ComponentDoesNotExists', 404));
 
   req.componentData = componentData;
   return next();

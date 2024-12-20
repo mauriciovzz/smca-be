@@ -11,7 +11,7 @@ const invite = async (req, res, next) => {
   const accountData = await accountsService.findByEmail(email.toLowerCase());
 
   if (!accountData)
-    return next(new CustomError('El correo electrónico ingresado no se encuentra registrado en el sistema.', 404));
+    return next(new CustomError('EmailNotFound', 404));
 
   if (!accountData.is_verified)
     return next(new CustomError('La cuenta ingresada no se encuentra verificada.', 409));
@@ -42,7 +42,7 @@ const getInvitations = async (req, res) => {
 };
 
 const invitationResponse = async (req, res) => {
-  const { accountId, spaceId } = req;
+  const { spaceId, accountId } = req;
   const { wasAccepted } = req.body;
 
   if (wasAccepted) {

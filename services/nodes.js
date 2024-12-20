@@ -78,13 +78,16 @@ const getSpaceNodes = async (spaceId) => {
                   no.reading_interval,
                   no.is_indoor,
                   no.is_active,
+                  no.space_id,
+
                   no.location_id,
+
                   (select lo.lat from location lo where lo.location_id = no.location_id),
                   (select lo.long from location lo where lo.location_id = no.location_id), 
                   (select lo.name from location lo where lo.location_id = no.location_id) AS location_name,
                   (select lo.location from location lo where lo.location_id = no.location_id),
-                  (select lo.is_visible from location lo where lo.location_id = no.location_id) AS is_location_visible,
-                  no.start_time_stamp
+                  (select lo.is_visible from location lo where lo.location_id = no.location_id),
+                   no.start_time_stamp
                 FROM
                   node no
                 WHERE
@@ -95,16 +98,68 @@ const getSpaceNodes = async (spaceId) => {
   return response.rows;
 };
 
-const find = async (nodeId, spaceId) => {
+const getHomePageNodes = async (accountId) => {
   const sql = ` SELECT 
-                  node_id, node_code, space_id, name, location_id
+                  no.node_id,
+                  no.name AS node_name,
+                  no.is_indoor,
+                  no.is_active,
+                  sp.space_id,
+
+                  sp.name AS space_name,
+                  sp.color,
+
+                  lo.lat,
+                  lo.long,
+                  lo.name AS location_name,
+                  lo.location,
+                  lo.is_visible,
+                  no.start_time_stamp
+                FROM 
+                  node no, 
+                  space sp,
+                  location lo
+                WHERE
+                  no.location_id IS NOT null
+                  AND no.space_id = sp.space_id
+                  AND no.location_id = lo.location_id
+                  AND (lo.is_visible = TRUE OR  EXISTS (
+                                                  SELECT 
+                                                    true 
+                                                  FROM 
+                                                    space_member spm 
+                                                  WHERE sp.space_id = spm.space_id 
+                                                  AND spm.account_id = $1
+                                                ))
+                ORDER BY no.node_id`;
+
+  const response = await pool.query(sql, [accountId]);
+  return response.rows;
+};
+
+const find = async (nodeId, spaceId) => {
+  if (spaceId) {
+    const sql = ` SELECT 
+                    no.node_id, no.node_code, no.space_id, no.name, no.location_id,
+                    (select lo.is_visible from location lo where lo.location_id = no.location_id) AS is_visible
+                  FROM
+                    node no
+                  WHERE
+                    node_id = $1
+                    AND space_id = $2`;
+
+    const response = await pool.query(sql, [nodeId, spaceId]);
+    return response.rows[0];
+  }
+
+  const sql = ` SELECT 
+                  node_id, location_id, space_id
                 FROM
                   node
                 WHERE
-                  node_id = $1
-                  AND space_id = $2`;
+                  node_id = $1`;
 
-  const response = await pool.query(sql, [nodeId, spaceId]);
+  const response = await pool.query(sql, [nodeId]);
   return response.rows[0];
 };
 
@@ -201,6 +256,23 @@ const remove = async (nodeId) => {
   await pool.query(sql, [nodeId]);
 };
 
+const checkNodeAndVariable = async (nodeCode, variableId) => {
+  const sql = ` SELECT 
+                  no.node_id,
+                  no.location_id
+                FROM 
+                  node no,
+                  node_variable nv
+                WHERE
+                  no.node_code = $1
+                  AND no.is_active = true
+                  AND no.node_id = nv.node_id
+                  AND nv.variable_id = $2`;
+
+  const response = await pool.query(sql, [nodeCode, variableId]);
+  return response.rows[0];
+};
+
 module.exports = {
   isNameTaken,
   isNodeCodeTaken,
@@ -208,6 +280,7 @@ module.exports = {
   addComponent,
   addVariable,
   getSpaceNodes,
+  getHomePageNodes,
   find,
   getComponents,
   getVariables,
@@ -216,4 +289,5 @@ module.exports = {
   inactivate,
   removeComponents,
   remove,
+  checkNodeAndVariable,
 };

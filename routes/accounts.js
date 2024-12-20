@@ -14,12 +14,12 @@ accountsRouter.post(
 );
 
 accountsRouter.post(
-  '/verify/:accountId/:verificationToken',
+  '/verify-account/:accountId/:verificationToken',
   [
     checkReqParams(accountSchemas.verificationToken),
     checkVerificationToken('account'),
   ],
-  accountsController.verify,
+  accountsController.verifyAccount,
 );
 
 accountsRouter.post(
@@ -60,7 +60,7 @@ accountsRouter.put(
   accountsController.updatePassword,
 );
 
-accountsRouter.post(
+accountsRouter.put(
   '/:accountId/update-email',
   [
     checkAccessToken,

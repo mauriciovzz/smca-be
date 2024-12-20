@@ -30,7 +30,7 @@ const leaveSpace = async (req, res, next) => {
   const admins = await spacesService.getAdminCount(spaceId);
 
   if (admins === 1 && isAdmin)
-    return next(new CustomError('No se puede abandonar un espacio si se es el unico administrador.', 404));
+    return next(new CustomError('No se puede abandonar un espacio si se es el unico administrador.', 409));
 
   await membersService.removeMember(
     spaceId,

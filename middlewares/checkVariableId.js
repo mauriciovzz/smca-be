@@ -8,7 +8,7 @@ const checkLocationId = async (req, res, next) => {
   const variableData = await variablesService.find(variableId, spaceId);
 
   if (!variableData)
-    return next(new CustomError('La variable indicada no se encuentra registrada.', 404));
+    return next(new CustomError('VariableDoesNotExist', 404));
 
   req.variableData = variableData;
   return next();

@@ -24,11 +24,11 @@ const prodErrors = (res, error) => {
   }
 };
 
-const jsonWebTokenErrorHandler = () => new CustomError('Acceso denegado (No AT).', 403);
+const jsonWebTokenErrorHandler = () => new CustomError('NoAccessToken', 401);
 
 const tokenExpiredErrorHandler = (error) => new CustomError(error.name, 403);
 
-const validationErrorHandler = (error) => new CustomError(error.details[0].message, 422);
+const validationErrorHandler = (error) => new CustomError(error.details[0].message, 400);
 
 const errorHandler = (error, req, res, next) => {
   error.statusCode = error.statusCode || 500;

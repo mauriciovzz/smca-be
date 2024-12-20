@@ -59,10 +59,7 @@ const remove = async (req, res, next) => {
   const { variableData } = req;
 
   if (await variablesService.isBeingUsed(variableData.variable_id))
-    return next(new CustomError('La variable se encuentra en uso.', 401));
-
-  if (await variablesService.isBeingUsed(variableData.variable_id))
-    return next(new CustomError('La variable se encuentra en uso.', 401));
+    return next(new CustomError('La variable se encuentra en uso.', 409));
 
   await variablesService.remove(
     variableData.variable_id,

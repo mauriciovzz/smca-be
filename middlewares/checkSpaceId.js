@@ -7,7 +7,7 @@ const checkSpaceId = async (req, res, next) => {
   const spaceData = await spacesService.find(spaceId);
 
   if (!spaceData)
-    return next(new CustomError('El espacio indicado no se encuentra registrado.', 404));
+    return next(new CustomError('SpaceDoesNotExist', 404));
 
   req.spaceId = spaceData.space_id;
   return next();
