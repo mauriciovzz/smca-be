@@ -3,33 +3,34 @@ const readingsSchema = require('../schemas/readings');
 const readingsController = require('../controllers/readings');
 
 const {
-  checkAccessToken,
+  checkAccessToken, checkNodeVisibility,
   checkReqParams,
-  checkNodeReadingsSpaceId,
-  checkVisibility,
+  checkSpaceId, checkLocationId, checkNodeId,
   isRequesterSpaceMember,
 } = require('../middlewares');
 
 // Route for visible nodes
 readingsRuter.get(
-  '/node-readings/:nodeId/:date',
+  '/:spaceId/:nodeId/:locationId/:date',
   [
-    checkReqParams(readingsSchema.nodeReadings),
-    checkVisibility,
+    checkReqParams(readingsSchema.getDateReadings),
+    checkSpaceId,
+    checkNodeId,
+    checkLocationId,
+    checkNodeVisibility,
   ],
-  readingsController.getNodeReadings,
+  readingsController.getDateReadings,
 );
 
 // Route for private nodes
-// will jump here from past route if checkVisibility says so
+// will jump here from past route if checkNodeVisibility says so
 readingsRuter.get(
-  '/node-readings/:nodeId/:date',
+  '/:spaceId/:nodeId/:locationId/:date',
   [
     checkAccessToken,
-    checkNodeReadingsSpaceId,
     isRequesterSpaceMember,
   ],
-  readingsController.getNodeReadings,
+  readingsController.getDateReadings,
 );
 
 module.exports = readingsRuter;

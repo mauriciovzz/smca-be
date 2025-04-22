@@ -23,14 +23,20 @@ const hourFormt = new Intl.DateTimeFormat(
   },
 );
 
-schedule.scheduleJob('00 * * * *', (fireDate) => {
-  const currentHour = hourFormt.format(fireDate);
+schedule.scheduleJob('00 * * * *', async () => {
+  let currentDate = new Date();
 
-  const date = (currentHour !== '00')
-    ? dateFormat.format(fireDate)
-    : dateFormat.format(fireDate.setDate(fireDate.getDate() - 1));
+  const hour = hourFormt.format(currentDate);
 
-  logger.info(`calculating averages - ${date} - ${currentHour}:00`);
-  readingsController.calculateAverages(date, currentHour);
+  currentDate = (hour !== '00')
+    ? dateFormat.format(currentDate)
+    : dateFormat.format(currentDate.setDate(currentDate.getDate() - 1));
+
+  // Calculate hourly averages
+  await readingsController.calculateAverages(currentDate, hour);
+
+  // Calculate hourly AQIs
+  await readingsController.calculateAQIs(currentDate, hour);
+
   logger.divider();
 });

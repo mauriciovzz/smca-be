@@ -51,7 +51,6 @@ const getAll = async (spaceId) => {
                   variable
                 WHERE
                   space_id = $1
-                  AND name != 'lluvia'
                 ORDER BY variable_type, value_type, name`;
 
   const response = await pool.query(sql, [spaceId]);
@@ -60,7 +59,7 @@ const getAll = async (spaceId) => {
 
 const find = async (variableId, spaceId) => {
   const sql = ` SELECT 
-                 variable_id, space_id, value_type
+                 variable_id, space_id, value_type, name
                 FROM
                   variable
                 WHERE
@@ -114,10 +113,10 @@ const getRainVariable = async (spaceId) => {
                   variable
                 WHERE
                   space_id = $1
-                  AND name = 'lluvia'`;
+                  AND name = 'precipitación'`;
 
   const response = await pool.query(sql, [spaceId]);
-  return response.rows;
+  return response.rows[0];
 };
 
 module.exports = {

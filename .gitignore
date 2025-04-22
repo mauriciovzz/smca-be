@@ -1,5 +1,8 @@
 /node_modules
-/temp
-/images
-/requests
 .env
+/temp
+/photos
+/requests
+node-37-readings-log.txt
+node-38-readings-log.txt
+node-38-photos-log.txt

@@ -1,4 +1,5 @@
 /* eslint no-console: 0 */
+const fs = require('fs');
 
 const divider = () => {
   console.log('--------------------------------------------------------------------------------');
@@ -6,6 +7,20 @@ const divider = () => {
 
 const info = (...params) => {
   console.log(...params);
+};
+
+const logReading = (nodeId, locationId, variableId, readingDate, readingTime, readingValue) => {
+  const logStream = fs.createWriteStream(`node-${nodeId}-readings-log.txt`, { flags: 'a' });
+
+  logStream.write(`${nodeId},${locationId},${variableId},${readingDate},${readingTime},${readingValue}\n`);
+  logStream.end();
+};
+
+const logPhoto = (nodeId, locationId, photoDate, photoTime, photoHour, photoPath) => {
+  const logStream = fs.createWriteStream(`node-${nodeId}-photos-log.txt`, { flags: 'a' });
+
+  logStream.write(`${nodeId},${locationId},${photoDate},${photoTime},${photoHour},${photoPath}\n`);
+  logStream.end();
 };
 
 const error = (err) => {
@@ -18,5 +33,7 @@ const error = (err) => {
 module.exports = {
   divider,
   info,
+  logReading,
+  logPhoto,
   error,
 };

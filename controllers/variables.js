@@ -1,10 +1,13 @@
+const { criteriaPollutants, meteorologyVariables } = require('../config/systemVariables');
 const variablesService = require('../services/variables');
 const CustomError = require('../utils/CustomError');
+
+const systemVariables = [...criteriaPollutants, ...meteorologyVariables].map((v) => v.name);
 
 const create = async (req, res, next) => {
   const { spaceId } = req;
   const {
-    variableType, valueType, name, unit, color,
+    valueType, name, unit, color,
   } = req.body;
 
   if ((valueType === 'numerical') && !(unit))
@@ -15,7 +18,7 @@ const create = async (req, res, next) => {
 
   await variablesService.create(
     spaceId,
-    variableType,
+    'enviromental',
     valueType,
     name.toLowerCase(),
     (valueType === 'numerical') ? unit.toLowerCase() : null,
@@ -28,9 +31,7 @@ const create = async (req, res, next) => {
 const getAll = async (req, res) => {
   const { spaceId } = req.params;
 
-  const response = await variablesService.getAll(
-    spaceId,
-  );
+  const response = await variablesService.getAll(spaceId);
 
   return res.status(200).send(response);
 };
@@ -38,6 +39,9 @@ const getAll = async (req, res) => {
 const update = async (req, res, next) => {
   const { spaceId, variableData } = req;
   const { name, unit, color } = req.body;
+
+  if (systemVariables.includes(variableData.name))
+    return next(new CustomError('Esta variable no se puede modificar.', 409));
 
   if ((variableData.value_type === 'numerical') && !(unit))
     return next(new CustomError('El campo "Unidad" es necesario.', 400));
@@ -57,6 +61,9 @@ const update = async (req, res, next) => {
 
 const remove = async (req, res, next) => {
   const { variableData } = req;
+
+  if (systemVariables.includes(variableData.name))
+    return next(new CustomError('Esta variable no se puede eliminar.', 409));
 
   if (await variablesService.isBeingUsed(variableData.variable_id))
     return next(new CustomError('La variable se encuentra en uso.', 409));

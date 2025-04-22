@@ -73,26 +73,35 @@ const addVariable = async (nodeId, componentId, variableId) => {
 
 const getSpaceNodes = async (spaceId) => {
   const sql = ` SELECT
+                  no.space_id,
                   no.node_id,
                   no.name AS node_name,
                   no.reading_interval,
                   no.is_indoor,
                   no.is_active,
-                  no.space_id,
+
+                  sp.name AS space_name,
+                  sp.color,                 
 
                   no.location_id,
 
-                  (select lo.lat from location lo where lo.location_id = no.location_id),
-                  (select lo.long from location lo where lo.location_id = no.location_id), 
-                  (select lo.name from location lo where lo.location_id = no.location_id) AS location_name,
-                  (select lo.location from location lo where lo.location_id = no.location_id),
-                  (select lo.is_visible from location lo where lo.location_id = no.location_id),
-                   no.start_time_stamp
+                  lo.location_id,
+                  lo.lat,
+                  lo.long,
+                  lo.name AS location_name,
+                  lo.location,
+                  lo.is_visible,
+                  no.start_time_stamp
                 FROM
-                  node no
+                  node no,
+                  space sp,
+                  location lo
                 WHERE
-                  space_id = $1
-                ORDER BY no.is_indoor DESC, no.is_active DESC, no.name`;
+                      no.space_id = $1
+                  AND no.location_id IS NOT null
+                  AND no.space_id = sp.space_id
+                  AND no.location_id = lo.location_id
+                ORDER BY no.node_id`;
 
   const response = await pool.query(sql, [spaceId]);
   return response.rows;
@@ -100,15 +109,16 @@ const getSpaceNodes = async (spaceId) => {
 
 const getHomePageNodes = async (accountId) => {
   const sql = ` SELECT 
+                  no.space_id,
                   no.node_id,
                   no.name AS node_name,
                   no.is_indoor,
                   no.is_active,
-                  sp.space_id,
 
                   sp.name AS space_name,
                   sp.color,
 
+                  lo.location_id,
                   lo.lat,
                   lo.long,
                   lo.name AS location_name,
@@ -134,6 +144,18 @@ const getHomePageNodes = async (accountId) => {
                 ORDER BY no.node_id`;
 
   const response = await pool.query(sql, [accountId]);
+  return response.rows;
+};
+
+const getActiveNodes = async () => {
+  const sql = ` SELECT 
+                  node_id, location_id
+                FROM 
+                  node
+                WHERE
+                  is_active = true`;
+
+  const response = await pool.query(sql);
   return response.rows;
 };
 
@@ -181,7 +203,7 @@ const getComponents = async (nodeId) => {
   return response.rows;
 };
 
-const getVariables = async (nodeId, componentId) => {
+const getNodeComponentVariables = async (nodeId, componentId) => {
   const sql = ` SELECT
                   va.variable_id,
                   va.variable_type,
@@ -198,6 +220,25 @@ const getVariables = async (nodeId, componentId) => {
                   AND nv.component_id = $2`;
 
   const response = await pool.query(sql, [nodeId, componentId]);
+  return response.rows;
+};
+
+const getVariables = async (nodeId) => {
+  const sql = ` SELECT
+                  va.variable_id,
+                  va.variable_type,
+                  va.value_type,
+                  va.name,
+                  va.unit,
+                  va.color
+                FROM
+                  variable va,
+                  node_variable nv
+                WHERE
+                  va.variable_id = nv.variable_id
+                  AND nv.node_id = $1`;
+
+  const response = await pool.query(sql, [nodeId]);
   return response.rows;
 };
 
@@ -273,6 +314,26 @@ const checkNodeAndVariable = async (nodeCode, variableId) => {
   return response.rows[0];
 };
 
+const checkNodeAndCamera = async (nodeCode, componentId) => {
+  const sql = ` SELECT 
+                  no.node_id,
+                  no.location_id
+                FROM 
+                  node no,
+                  node_component nc,
+                  component co
+                WHERE
+                  no.node_code = $1
+                  AND no.is_active = true
+                  AND no.node_id = nc.node_id
+                  AND nc.component_id = co.component_id
+                  AND co.type = 'camera'
+                  AND co.component_id = $2`;
+
+  const response = await pool.query(sql, [nodeCode, componentId]);
+  return response.rows[0];
+};
+
 module.exports = {
   isNameTaken,
   isNodeCodeTaken,
@@ -281,8 +342,10 @@ module.exports = {
   addVariable,
   getSpaceNodes,
   getHomePageNodes,
+  getActiveNodes,
   find,
   getComponents,
+  getNodeComponentVariables,
   getVariables,
   updateInfo,
   updateLocation,
@@ -290,4 +353,5 @@ module.exports = {
   removeComponents,
   remove,
   checkNodeAndVariable,
+  checkNodeAndCamera,
 };

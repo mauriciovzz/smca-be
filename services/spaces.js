@@ -129,12 +129,33 @@ const getAdminCount = async (spaceId) => {
 };
 
 const remove = async (spaceId) => {
-  const sql = ` DELETE FROM
-                  space
-                WHERE
-                  space_id = $1`;
+  const removeNodes = ` DELETE FROM
+                          node
+                        WHERE
+                          space_id = $1`;
 
-  await pool.query(sql, [spaceId]);
+  await pool.query(removeNodes, [spaceId]);
+
+  const removeLocations = ` DELETE FROM
+                              location
+                            WHERE
+                              space_id = $1`;
+
+  await pool.query(removeLocations, [spaceId]);
+
+  const removeComponents = ` DELETE FROM
+                                component
+                              WHERE
+                                space_id = $1`;
+
+  await pool.query(removeComponents, [spaceId]);
+
+  const removeSpace = ` DELETE FROM
+                          space
+                        WHERE
+                          space_id = $1`;
+
+  await pool.query(removeSpace, [spaceId]);
 };
 
 module.exports = {

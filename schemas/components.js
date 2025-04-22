@@ -15,7 +15,7 @@ const idValidator = Joi.string()
 
 const typeValidator = Joi.any()
   .required()
-  .valid('board', 'sensor', 'rain_detector', 'camera', 'other')
+  .valid('board', 'sensor', 'camera', 'other')
   .messages({
     'any.required': 'Se requiere la entrada "Tipo de Componente".',
     'any.only': 'La entrada "Tipo de Componente" es invalida.',

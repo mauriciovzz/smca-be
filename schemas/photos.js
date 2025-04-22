@@ -23,13 +23,33 @@ const dateValidator = Joi.string()
     'any.required': 'Link inválido.',
   });
 
-const getDateReadings = Joi.object({
+const hourValidator = Joi.number()
+  .min(1)
+  .max(24)
+  .required()
+  .messages({
+    'any.required': 'Link inválido',
+    'number.base': 'Link inválido',
+    'number.min': 'Link inválido',
+    'number.max': 'Link inválido',
+  });
+
+const checkDateForPhotos = Joi.object({
   spaceId: idValidator,
   nodeId: idValidator,
   locationId: idValidator,
   date: dateValidator,
 });
 
+const getPhoto = Joi.object({
+  spaceId: idValidator,
+  nodeId: idValidator,
+  locationId: idValidator,
+  date: dateValidator,
+  hour: hourValidator,
+});
+
 module.exports = {
-  getDateReadings,
+  checkDateForPhotos,
+  getPhoto,
 };

@@ -1,3 +1,5 @@
+const { criteriaPollutants, meteorologyVariables } = require('../config/systemVariables');
+
 const spacesService = require('../services/spaces');
 const membersService = require('../services/members');
 const variablesService = require('../services/variables');
@@ -17,14 +19,28 @@ const create = async (req, res) => {
     true,
   );
 
-  await variablesService.create(
-    space.space_id,
-    'meteorological',
-    'presential',
-    'lluvia',
-    null,
-    '#869FD1',
-  );
+  // Add default variables
+  for (let i = 0; i < criteriaPollutants.length; i += 1) {
+    await variablesService.create(
+      space.space_id,
+      criteriaPollutants[i].type,
+      criteriaPollutants[i].valueType,
+      criteriaPollutants[i].name,
+      criteriaPollutants[i].unit,
+      criteriaPollutants[i].color,
+    );
+  }
+
+  for (let i = 0; i < meteorologyVariables.length; i += 1) {
+    await variablesService.create(
+      space.space_id,
+      meteorologyVariables[i].type,
+      meteorologyVariables[i].valueType,
+      meteorologyVariables[i].name,
+      meteorologyVariables[i].unit,
+      meteorologyVariables[i].color,
+    );
+  }
 
   return res.status(201).send('Espacio creado exitosamente.');
 };

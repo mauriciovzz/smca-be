@@ -2,10 +2,13 @@ const crypto = require('node:crypto');
 const { once } = require('events');
 const fs = require('node:fs');
 const config = require('../config/config');
+const { criteriaPollutants, meteorologyVariables } = require('../config/systemVariables');
+
 const nodesService = require('../services/nodes');
 const locationsService = require('../services/locations');
 const componentsService = require('../services/components');
 const variablesService = require('../services/variables');
+const readingsService = require('../services/readings');
 
 const CustomError = require('../utils/CustomError');
 
@@ -18,7 +21,7 @@ const helperGetComponents = async (nodeId) => {
     let variables = [];
 
     if (components[i].type === 'sensor')
-      variables = await nodesService.getVariables(nodeId, components[i].component_id);
+      variables = await nodesService.getNodeComponentVariables(nodeId, components[i].component_id);
 
     componentsData.push({
       component_id: components[i].component_id,
@@ -81,7 +84,8 @@ const helperCheckComponents = async (components, spaceId, next) => {
       return next(new CustomError('ComponentDoesNotExists', 404));
 
     if (components[i].type === 'sensor') {
-      const componentVariables = await componentsService.getVariables(components[i].componentId);
+      const componentVariables = await componentsService
+        .getNodeComponentVariables(components[i].componentId);
       const componentVariablesIds = componentVariables.map((v) => v.variable_id);
 
       if (!components[i].variables.every((v) => componentVariablesIds.includes(v)))
@@ -109,7 +113,7 @@ const helperAddComponents = async (components, nodeId, spaceId) => {
       }
     }
 
-    if (components[i].type === 'rain_sensor') {
+    if (components[i].type === 'rain_detector') {
       const rainVariable = await variablesService.getRainVariable(spaceId);
 
       await nodesService.addVariable(
@@ -128,18 +132,123 @@ const helperCheckNameUniqueness = async (spaceId, name, next) => {
   return null;
 };
 
+const getCurrentDateTime = () => {
+  const now = new Date();
+
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  const hour = String(now.getHours()).padStart(2, '0');
+
+  return {
+    date: `${year}-${month}-${day}`,
+    hour,
+  };
+};
+
+const getNodesCurrentReadings = async (nodes) => {
+  const dateTime = getCurrentDateTime();
+
+  const response = [];
+
+  for (let i = 0; i < nodes.length; i += 1) {
+    response.push(nodes[i]);
+
+    response[i].current_readings = {
+      'pm2.5': {
+        con: null,
+        aqi: null,
+      },
+      pm10: {
+        con: null,
+        aqi: null,
+      },
+      o3: {
+        con: null,
+        aqi: null,
+      },
+      no2: {
+        con: null,
+        aqi: null,
+      },
+      so2: {
+        con: null,
+        aqi: null,
+      },
+      co: {
+        con: null,
+        aqi: null,
+      },
+      temperatura: null,
+      humedad: null,
+      presión: null,
+      precipitación: null,
+      'radiación solar': null,
+    };
+
+    const nodeVariables = await nodesService.getVariables(nodes[i].node_id);
+
+    const cp = criteriaPollutants.map((v) => v.name);
+    const mv = meteorologyVariables.map((v) => v.name);
+
+    for (let j = 0; j < nodeVariables.length; j += 1) {
+      if (cp.includes(nodeVariables[j].name)) {
+        const readingValue = await readingsService.getVariableCurrentValue(
+          dateTime.date,
+          dateTime.hour,
+          nodes[i].node_id,
+          nodeVariables[j].variable_id,
+        );
+
+        if (readingValue !== undefined)
+          response[i].current_readings[nodeVariables[j].name].con = readingValue;
+
+        const aqiValue = await readingsService.getVariableCurrentAQI(
+          dateTime.date,
+          dateTime.hour,
+          nodes[i].node_id,
+          nodeVariables[j].variable_id,
+        );
+
+        if (aqiValue !== undefined)
+          response[i].current_readings[nodeVariables[j].name].aqi = aqiValue;
+      }
+
+      if (mv.includes(nodeVariables[j].name)) {
+        const readingValue = await readingsService.getVariableCurrentValue(
+          dateTime.date,
+          dateTime.hour,
+          nodes[i].node_id,
+          nodeVariables[j].variable_id,
+        );
+
+        if (readingValue !== undefined)
+          response[i].current_readings[nodeVariables[j].name] = readingValue;
+      }
+    }
+  }
+
+  return response;
+};
+
+// Endpoint functions
+
 const getHomePageNodes = async (req, res) => {
   const { accountId } = req;
 
-  const response = await nodesService.getHomePageNodes(accountId);
-  return res.status(200).send(response);
+  const nodes = await nodesService.getHomePageNodes(accountId);
+  const homePageNodes = await getNodesCurrentReadings(nodes);
+
+  return res.status(200).send(homePageNodes);
 };
 
 const getSpaceNodes = async (req, res) => {
   const { spaceId } = req.params;
 
-  const response = await nodesService.getSpaceNodes(spaceId);
-  return res.status(200).send(response);
+  const nodes = await nodesService.getSpaceNodes(spaceId);
+  const spaceNodes = await getNodesCurrentReadings(nodes);
+
+  return res.status(200).send(spaceNodes);
 };
 
 const create = async (req, res, next) => {
@@ -218,7 +327,8 @@ const getConfigFile = async (req, res) => {
   writer.write(`#define MQTT_PORT ${config.MQTT_PORT}\n`);
   writer.write(`#define MQTT_USERNAME "${config.MQTT_USERNAME}"\n`);
   writer.write(`#define MQTT_PASSWORD "${config.MQTT_PASSWORD}"\n`);
-  writer.write(`#define MQTT_TOPIC "${config.MQTT_TOPIC}"\n\n`);
+  writer.write(`#define MQTT_READING_TOPIC "${config.MQTT_READING_TOPIC}"\n`);
+  writer.write(`#define MQTT_PHOTO_TOPIC "${config.MQTT_PHOTO_TOPIC}"\n\n`);
 
   writer.write('// NODE INFO\n');
   writer.write(`#define NODE_CODE "${nodeData.node_code}"\n\n`);
@@ -230,7 +340,7 @@ const getConfigFile = async (req, res) => {
     const componentMacro = readerComponents[i].name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\W/g, '_');
     writer.write(`#define ${componentMacro} "${readerComponents[i].component_id}"\n`);
 
-    const variables = await nodesService.getVariables(
+    const variables = await nodesService.getNodeComponentVariables(
       nodeData.node_id,
       readerComponents[i].component_id,
     );

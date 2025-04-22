@@ -13,14 +13,6 @@ const idValidator = Joi.string()
     'any.required': 'Link inválido.',
   });
 
-const variableTypeValidator = Joi.any()
-  .required()
-  .valid('enviromental', 'meteorological')
-  .messages({
-    'any.required': 'Se requiere la entrada "Tipo de Variable".',
-    'any.only': 'La entrada "Tipo de Variable" es invalida.',
-  });
-
 const valueTypeValidator = Joi.any()
   .required()
   .valid('numerical', 'presential')
@@ -70,7 +62,6 @@ const ids = Joi.object({
 });
 
 const create = Joi.object({
-  variableType: variableTypeValidator,
   valueType: valueTypeValidator,
   name: nameValidator,
   unit: unitValidator,

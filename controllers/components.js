@@ -38,15 +38,6 @@ const create = async (req, res, next) => {
     }
   }
 
-  if (type === 'rain_detector') {
-    const rainVariable = await variablesService.getRainVariable(spaceId);
-
-    await componentsService.addVariable(
-      newComponent.component_id,
-      rainVariable[0].variable_id,
-    );
-  }
-
   return res.status(201).send('Componente creado exitosamente.');
 };
 
