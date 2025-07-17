@@ -1,6 +1,7 @@
 const crypto = require('node:crypto');
 const { once } = require('events');
 const fs = require('node:fs');
+const yazl = require('yazl');
 const config = require('../config/config');
 const { criteriaPollutants, meteorologyVariables } = require('../config/systemVariables');
 
@@ -84,8 +85,7 @@ const helperCheckComponents = async (components, spaceId, next) => {
       return next(new CustomError('ComponentDoesNotExists', 404));
 
     if (components[i].type === 'sensor') {
-      const componentVariables = await componentsService
-        .getNodeComponentVariables(components[i].componentId);
+      const componentVariables = await componentsService.getVariables(components[i].componentId);
       const componentVariablesIds = componentVariables.map((v) => v.variable_id);
 
       if (!components[i].variables.every((v) => componentVariablesIds.includes(v)))
@@ -231,6 +231,56 @@ const getNodesCurrentReadings = async (nodes) => {
   return response;
 };
 
+// Config file functions
+const createInoFile = async (newFilePath, nodeData) => {
+  const originalFilePath = 'temp/node_config_file.ino';
+
+  const originalContent = fs.readFileSync(originalFilePath, 'utf-8');
+  const modifiedContent = `#include "node_${nodeData.node_code}_config.h"\n${originalContent}`;
+
+  fs.writeFileSync(newFilePath, modifiedContent);
+};
+
+const createHFile = async (filePath, nodeData) => {
+  const writer = fs.createWriteStream(filePath, { flags: 'w' });
+
+  writer.write('// SMCA NODE CONFIG FILE\n');
+  writer.write(`// NODE: ${nodeData.name}\n`);
+  writer.write(`// DATE: ${new Date().toString()} \n\n`);
+
+  writer.write('// MQTT\n');
+  writer.write(`#define MQTT_HOST "${config.MQTT_HOST}"\n`);
+  writer.write(`#define MQTT_PORT ${config.MQTT_PORT}\n`);
+  writer.write(`#define MQTT_USERNAME "${config.MQTT_USERNAME}"\n`);
+  writer.write(`#define MQTT_PASSWORD "${config.MQTT_PASSWORD}"\n`);
+  writer.write(`#define MQTT_READING_TOPIC "${config.MQTT_READING_TOPIC}"\n`);
+  writer.write(`#define MQTT_PHOTO_TOPIC "${config.MQTT_PHOTO_TOPIC}"\n\n`);
+
+  writer.write('// NODE INFO\n');
+  writer.write(`#define NODE_CODE "${nodeData.node_code}"\n\n`);
+
+  const allComponents = await nodesService.getComponents(nodeData.node_id);
+  const readerComponents = allComponents.filter((c) => !['board', 'other'].includes(c.type));
+
+  for (let i = 0; i < readerComponents.length; i += 1) {
+    const componentMacro = readerComponents[i].name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\W/g, '_');
+    writer.write(`#define ${componentMacro} "${readerComponents[i].component_id}"\n`);
+
+    const variables = await nodesService.getNodeComponentVariables(
+      nodeData.node_id,
+      readerComponents[i].component_id,
+    );
+
+    for (let j = 0; j < variables.length; j += 1) {
+      const variableMacro = `${readerComponents[i].name}_${variables[j].name}`.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\W/g, '_');
+      writer.write(`#define ${variableMacro} "${variables[j].variable_id}"\n`);
+    }
+    writer.write('\n');
+  }
+  writer.end();
+  await once(writer, 'finish');
+};
+
 // Endpoint functions
 
 const getHomePageNodes = async (req, res) => {
@@ -249,6 +299,14 @@ const getSpaceNodes = async (req, res) => {
   const spaceNodes = await getNodesCurrentReadings(nodes);
 
   return res.status(200).send(spaceNodes);
+};
+
+const getSpaceNodesInfo = async (req, res) => {
+  const { spaceId } = req.params;
+
+  const nodes = await nodesService.getSpaceNodesInfo(spaceId);
+
+  return res.status(200).send(nodes);
 };
 
 const create = async (req, res, next) => {
@@ -315,48 +373,28 @@ const getComponents = async (req, res) => {
 const getConfigFile = async (req, res) => {
   const { nodeData } = req;
 
-  const filePath = `temp/node_${nodeData.node_code}_config.h`;
-  const writer = fs.createWriteStream(filePath, { flags: 'w' });
+  const inoFilePath = `temp/node_${nodeData.node_code}.ino`;
+  await createInoFile(inoFilePath, nodeData);
 
-  writer.write('// SMCA NODE CONFIG FILE\n');
-  writer.write(`// NODE: ${nodeData.name}\n`);
-  writer.write(`// DATE: ${new Date().toString()} \n\n`);
+  const hFilePath = `temp/node_${nodeData.node_code}_config.h`;
+  await createHFile(hFilePath, nodeData);
 
-  writer.write('// MQTT\n');
-  writer.write(`#define MQTT_HOST "${config.MQTT_HOST}"\n`);
-  writer.write(`#define MQTT_PORT ${config.MQTT_PORT}\n`);
-  writer.write(`#define MQTT_USERNAME "${config.MQTT_USERNAME}"\n`);
-  writer.write(`#define MQTT_PASSWORD "${config.MQTT_PASSWORD}"\n`);
-  writer.write(`#define MQTT_READING_TOPIC "${config.MQTT_READING_TOPIC}"\n`);
-  writer.write(`#define MQTT_PHOTO_TOPIC "${config.MQTT_PHOTO_TOPIC}"\n\n`);
+  const zipfile = new yazl.ZipFile();
 
-  writer.write('// NODE INFO\n');
-  writer.write(`#define NODE_CODE "${nodeData.node_code}"\n\n`);
+  zipfile.addFile(inoFilePath, `node_${nodeData.node_code}.ino`);
+  zipfile.addFile(hFilePath, `node_${nodeData.node_code}_config.h`);
 
-  const allComponents = await nodesService.getComponents(nodeData.node_id);
-  const readerComponents = allComponents.filter((c) => !['board', 'other'].includes(c.type));
+  res.setHeader('Content-Type', 'application/zip');
+  res.setHeader('Content-Disposition', `attachment; filename=node_${nodeData.node_code}_config_files.zip`);
 
-  for (let i = 0; i < readerComponents.length; i += 1) {
-    const componentMacro = readerComponents[i].name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\W/g, '_');
-    writer.write(`#define ${componentMacro} "${readerComponents[i].component_id}"\n`);
+  zipfile.outputStream.pipe(res);
 
-    const variables = await nodesService.getNodeComponentVariables(
-      nodeData.node_id,
-      readerComponents[i].component_id,
-    );
-
-    for (let j = 0; j < variables.length; j += 1) {
-      const variableMacro = `${readerComponents[i].name}_${variables[j].name}`.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\W/g, '_');
-      writer.write(`#define ${variableMacro} "${variables[j].variable_id}"\n`);
-    }
-    writer.write('\n');
-  }
-  writer.end();
-  await once(writer, 'finish');
-
-  return res.status(200).download(filePath, () => {
-    fs.unlinkSync(filePath);
+  zipfile.outputStream.on('close', () => {
+    fs.unlinkSync(inoFilePath);
+    fs.unlinkSync(hFilePath);
   });
+
+  zipfile.end();
 };
 
 const updateInfo = async (req, res, next) => {
@@ -439,6 +477,7 @@ const remove = async (req, res) => {
 module.exports = {
   getHomePageNodes,
   getSpaceNodes,
+  getSpaceNodesInfo,
   create,
   getComponents,
   getConfigFile,

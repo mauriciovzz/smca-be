@@ -3,11 +3,30 @@ const readingsSchema = require('../schemas/readings');
 const readingsController = require('../controllers/readings');
 
 const {
-  checkAccessToken, checkNodeVisibility,
+  checkAccessToken, checkUserCredentials, checkNodeVisibility,
   checkReqParams,
   checkSpaceId, checkLocationId, checkNodeId,
   isRequesterSpaceMember,
 } = require('../middlewares');
+
+readingsRuter.get(
+  '/locations-with-readings',
+  [
+    checkUserCredentials,
+  ],
+  readingsController.getLocationsWithReadings,
+);
+
+readingsRuter.get(
+  '/space-locations-with-readings/:spaceId',
+  [
+    checkAccessToken,
+    checkReqParams(readingsSchema.spaceId),
+    checkSpaceId,
+    isRequesterSpaceMember,
+  ],
+  readingsController.getSpaceLocationsWithReadings,
+);
 
 // Route for visible nodes
 readingsRuter.get(
@@ -31,6 +50,11 @@ readingsRuter.get(
     isRequesterSpaceMember,
   ],
   readingsController.getDateReadings,
+);
+
+readingsRuter.post(
+  '/generate-report',
+  readingsController.generateReport,
 );
 
 module.exports = readingsRuter;

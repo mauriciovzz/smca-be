@@ -30,7 +30,7 @@ const create = async (spaceId, lat, long, name, location) => {
 
 const getAll = async (spaceId) => {
   const sql = ` SELECT 
-                  location_id, lat, long, name, location, is_taken, is_visible
+                  location_id, lat, long, name AS location_name, location, is_taken, is_visible
                 FROM
                   location
                 WHERE

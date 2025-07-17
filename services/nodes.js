@@ -107,6 +107,31 @@ const getSpaceNodes = async (spaceId) => {
   return response.rows;
 };
 
+const getSpaceNodesInfo = async (spaceId) => {
+  const sql = ` SELECT
+                  no.space_id,
+                  no.node_id,
+                  no.name AS node_name,
+                  no.reading_interval,
+                  no.is_indoor,
+                  no.is_active,
+
+                  no.location_id,
+                  (select lo.name from location lo where lo.location_id = no.location_id) AS location_name,
+                  (select lo.is_visible from location lo where lo.location_id = no.location_id) AS is_visible,
+                  (select lo.lat from location lo where lo.location_id = no.location_id) AS lat,
+                  (select lo.long from location lo where lo.location_id = no.location_id) AS long
+                FROM
+                  node no
+                WHERE
+                  no.space_id = $1
+                ORDER BY
+                  no.node_id`;
+
+  const response = await pool.query(sql, [spaceId]);
+  return response.rows;
+};
+
 const getHomePageNodes = async (accountId) => {
   const sql = ` SELECT 
                   no.space_id,
@@ -341,6 +366,7 @@ module.exports = {
   addComponent,
   addVariable,
   getSpaceNodes,
+  getSpaceNodesInfo,
   getHomePageNodes,
   getActiveNodes,
   find,

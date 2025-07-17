@@ -28,6 +28,17 @@ nodesRouter.get(
   nodesController.getSpaceNodes,
 );
 
+nodesRouter.get(
+  '/:spaceId/nodes-info',
+  [
+    checkAccessToken,
+    checkReqParams(nodesSchema.spaceId),
+    checkSpaceId,
+    isRequesterSpaceMember,
+  ],
+  nodesController.getSpaceNodesInfo,
+);
+
 nodesRouter.post(
   '/:spaceId/nodes',
   [

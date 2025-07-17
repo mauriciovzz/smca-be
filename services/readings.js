@@ -19,28 +19,32 @@ const create = async (nodeId, locationId, variableId, readingDate, readingTime, 
 
 const calculatePastHourAverages = async (date, pastHour) => {
   const sql = ` SELECT 
-                  node_id AS nodeId,
-                  location_id AS locationId,
-                  variable_id AS variableId,             
-                  ROUND(AVG(reading_value)::numeric,3) AS averageValue
+                  re.node_id AS nodeId,
+                  re.location_id AS locationId,
+                  re.variable_id AS variableId,
+                  va.name AS variableName,
+                  va.value_type AS valueType,        
+                  ROUND(AVG(re.reading_value)::numeric,3) AS averageValue
                 FROM 
-                  reading
-                WHERE 
-                  reading_date      = $1
-                  AND reading_time >= $2 
-                  AND reading_time <= $3
+                  reading re,
+                  variable va
+                WHERE
+                  va.variable_id = re.variable_id
+                  AND re.reading_date  = $1
+                  AND re.reading_time >= $2 
+                  AND re.reading_time <= $3
                 GROUP BY 
-                  node_id,
-                  variable_id,
-                  location_id`;
+                  re.node_id,
+                  re.variable_id,
+                  va.name,
+                  va.value_type,
+                  re.location_id`;
 
   const response = await pool.query(sql, [date, `${pastHour}:00:00`, `${pastHour}:59:59`]);
   return response.rows;
 };
 
-const createAverage = async (average, date, currenHour) => {
-  const { nodeid, locationid, variableid, averagevalue } = average;
-
+const createAverage = async (nodeid, locationid, variableid, averagevalue, date, currenHour) => {
   const sql = ` INSERT INTO readings_average (
                   node_id,
                   location_id,
@@ -221,6 +225,122 @@ const getDateAqisRange = async (nodeId, locationId, variableId, date) => {
   return response.rows[0];
 };
 
+const getLocationsWithReadings = async (accountId) => {
+  const sql = ` SELECT 
+                  sp.space_id,
+                  sp.name AS space_name,
+                  sp.color,
+                  
+                  lo.location_id,
+                  lo.lat,
+                  lo.long,
+                  lo.name AS location_name,
+                  lo.location,
+                  lo.is_taken,
+                  lo.is_visible
+                FROM
+                  space sp,
+                  location lo
+                WHERE
+                        sp.space_id = lo.space_id
+                  AND   (lo.is_visible = TRUE OR  EXISTS (
+                                                          SELECT 
+                                                        true 
+                                                          FROM 
+                                                        space_member spm 
+                                                          WHERE sp.space_id = spm.space_id 
+                                                          AND spm.account_id = $1
+                                                        ))
+                  AND   (EXISTS (
+                            SELECT 
+                          true 
+                            FROM 
+                          readings_average ra 
+                            WHERE lo.location_id = ra.location_id
+                          ))
+                ORDER BY space_name, location_name`;
+
+  const response = await pool.query(sql, [accountId]);
+  return response.rows;
+};
+
+const getSpaceLocationsWithReadings = async (spaceId) => {
+  const sql = ` SELECT 
+                  sp.space_id,
+                  sp.name AS space_name,
+                  sp.color,
+                  
+                  lo.location_id,
+                  lo.lat,
+                  lo.long,
+                  lo.name AS location_name,
+                  lo.location,
+                  lo.is_taken,
+                  lo.is_visible
+                FROM
+                  space sp,
+                  location lo
+                WHERE
+                        sp.space_id = lo.space_id
+                  AND   sp.space_id = $1
+                  AND   (EXISTS (
+                            SELECT 
+                          true 
+                            FROM 
+                          readings_average ra 
+                            WHERE lo.location_id = ra.location_id
+                          ))
+                ORDER BY space_name, location_name`;
+
+  const response = await pool.query(sql, [spaceId]);
+  return response.rows;
+};
+
+const getLocationEarliestReadingDate = async (locationId) => {
+  const sql = ` SELECT 
+                  MIN(average_date) AS earliest_date
+                FROM
+                  readings_average
+                WHERE
+                  location_id = $1
+                GROUP BY location_id`;
+
+  const response = await pool.query(sql, [locationId]);
+  return response.rows[0].earliest_date;
+};
+
+const getLocationReadVariables = async (locationId) => {
+  const sql = ` SELECT DISTINCT 
+                  ra.variable_id,
+                  va.name AS variable_name,
+                  va.unit,
+                  va.value_type
+                FROM 
+                  readings_average ra, 
+                  variable va
+                WHERE 
+                  ra.variable_id = va.variable_id
+                  and ra.location_id = $1;`;
+
+  const response = await pool.query(sql, [locationId]);
+  return response.rows;
+};
+
+const getDateReadingsByVariable = async (locationId, variableId, date) => {
+  const sql = ` SELECT 
+                  average_hour, average_value
+                FROM
+                  readings_average
+                WHERE 
+                    location_id = $1
+                  AND variable_id= $2
+                  AND average_date = $3
+                ORDER BY average_hour`;
+
+  const response = await pool.query(sql, [locationId, variableId, date]);
+  return response.rows;
+};
+
 module.exports = {
   create,
   calculatePastHourAverages,
@@ -235,4 +355,9 @@ module.exports = {
   getDateReadingsRange,
   getDateAQIs,
   getDateAqisRange,
+  getLocationsWithReadings,
+  getSpaceLocationsWithReadings,
+  getLocationEarliestReadingDate,
+  getLocationReadVariables,
+  getDateReadingsByVariable,
 };

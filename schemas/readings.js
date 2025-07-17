@@ -30,6 +30,11 @@ const getDateReadings = Joi.object({
   date: dateValidator,
 });
 
+const spaceId = Joi.object({
+  spaceId: idValidator,
+});
+
 module.exports = {
   getDateReadings,
+  spaceId,
 };

@@ -293,5 +293,6 @@ const calculateAqi = async (date, hour, locationId, variableName, variableId) =>
 };
 
 module.exports = {
+  truncateFloat,
   calculateAqi,
 };
